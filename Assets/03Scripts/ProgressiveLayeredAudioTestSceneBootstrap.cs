@@ -3,12 +3,10 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public sealed class ProgressiveLayeredAudioTestSceneBootstrap : MonoBehaviour
 {
-    private const int LayerCount = 9;
+    private const int LayerCount = 3;
     private const int SampleRate = 44100;
     private const float Bpm = 120f;
     private const float LoopSeconds = 8f;
-    private static readonly float[] ArpNotes = { 329.63f, 392f, 493.88f, 659.25f };
-    private static readonly float[] LeadNotes = { 659.25f, 739.99f, 783.99f, 587.33f };
 
     [SerializeField, Range(0, LayerCount)] private int startingLayerCount = 1;
     [SerializeField, Range(0f, 1f)] private float layerVolume = 0.22f;
@@ -43,7 +41,7 @@ public sealed class ProgressiveLayeredAudioTestSceneBootstrap : MonoBehaviour
 
         GUI.Box(new Rect(margin, margin, width, height), GUIContent.none);
         GUI.Label(new Rect(margin + 16f, margin + 14f, width - 32f, 24f), "Progressive Layered Audio Test");
-        GUI.Label(new Rect(margin + 16f, margin + 42f, width - 32f, 22f), "1-9: enable first N layers   0: mute all   R: restart synced");
+        GUI.Label(new Rect(margin + 16f, margin + 42f, width - 32f, 22f), "1-3: enable first N layers   0: mute all   R: restart synced");
         GUI.Label(new Rect(margin + 16f, margin + 68f, width - 32f, 22f), $"Active layers: {controller.ActiveLayerCount}");
 
         Color oldColor = GUI.color;
@@ -126,12 +124,6 @@ public sealed class ProgressiveLayeredAudioTestSceneBootstrap : MonoBehaviour
             1 => Kick(beat, time),
             2 => Hat(beat, sampleIndex),
             3 => Bass(beat, time),
-            4 => Pad(time),
-            5 => Arp(beat, time),
-            6 => Snare(beat, sampleIndex),
-            7 => CounterPulse(beat, time),
-            8 => Lead(beat, time),
-            9 => Shimmer(time),
             _ => 0f
         };
     }
@@ -157,53 +149,6 @@ public sealed class ProgressiveLayeredAudioTestSceneBootstrap : MonoBehaviour
         float envelope = phase < 1.45f ? Mathf.Exp(-phase * 0.45f) : 0f;
         float frequency = Mathf.FloorToInt(beat / 4f) % 2 == 0 ? 82.41f : 98f;
         return Mathf.Sin(Tau * frequency * time) * envelope * 0.7f;
-    }
-
-    private static float Pad(float time)
-    {
-        float swell = 0.55f + 0.45f * Mathf.Sin(Tau * 0.125f * time);
-        return (
-            Mathf.Sin(Tau * 164.81f * time) +
-            Mathf.Sin(Tau * 196f * time) +
-            Mathf.Sin(Tau * 246.94f * time)) * swell * 0.12f;
-    }
-
-    private static float Arp(float beat, float time)
-    {
-        int noteIndex = Mathf.FloorToInt(beat * 2f) % ArpNotes.Length;
-        float phase = Mathf.Repeat(beat, 0.5f);
-        float envelope = phase < 0.42f ? Mathf.Exp(-phase * 4f) : 0f;
-        return Mathf.Sin(Tau * ArpNotes[noteIndex] * time) * envelope * 0.36f;
-    }
-
-    private static float Snare(float beat, int sampleIndex)
-    {
-        float phase = Mathf.Repeat(beat + 1f, 2f);
-        float envelope = phase < 0.22f ? Mathf.Exp(-phase * 18f) : 0f;
-        return Noise(sampleIndex) * envelope * 0.5f;
-    }
-
-    private static float CounterPulse(float beat, float time)
-    {
-        float phase = Mathf.Repeat(beat + 0.5f, 1f);
-        float envelope = phase < 0.32f ? Mathf.Exp(-phase * 7f) : 0f;
-        return Mathf.Sin(Tau * 261.63f * time) * envelope * 0.42f;
-    }
-
-    private static float Lead(float beat, float time)
-    {
-        int noteIndex = Mathf.FloorToInt(beat / 2f) % LeadNotes.Length;
-        float phase = Mathf.Repeat(beat, 2f);
-        float envelope = phase < 1.7f ? 0.45f + 0.55f * Mathf.Exp(-phase * 1.2f) : 0f;
-        return Mathf.Sin(Tau * LeadNotes[noteIndex] * time) * envelope * 0.24f;
-    }
-
-    private static float Shimmer(float time)
-    {
-        float mod = 0.5f + 0.5f * Mathf.Sin(Tau * 0.375f * time);
-        return (
-            Mathf.Sin(Tau * 987.77f * time) +
-            Mathf.Sin(Tau * 1318.51f * time)) * mod * 0.08f;
     }
 
     private static float Noise(int sampleIndex)

@@ -827,7 +827,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100003, guid: 85bcbf3ceb6e42b3b80f46e9a9e999e4, type: 3}
       propertyPath: miniViewSize.x
-      value: 420
+      value: 230
       objectReference: {fileID: 0}
     - target: {fileID: 100003, guid: 85bcbf3ceb6e42b3b80f46e9a9e999e4, type: 3}
       propertyPath: miniViewMargin.x
