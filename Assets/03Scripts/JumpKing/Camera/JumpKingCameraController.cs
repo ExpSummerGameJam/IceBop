@@ -20,26 +20,24 @@ namespace IceBop.JumpKing
         [Tooltip("타일 하나의 월드 유닛 크기. 프로젝트 Grid의 Cell Size와 맞출 것 (현재 1).")]
         [SerializeField] private float tileSize = 1f;
         [Tooltip("방 한 변에 들어가는 타일 수(16이면 16x16). 방과 방 사이의 실제 간격(=카메라 뷰포트 크기)은 " +
-                 "(타일 수 - 1) * 타일 크기다. 예: 16타일이면 간격은 15 — 카메라 Orthographic Size는 이 값의 절반으로 맞출 것.")]
+                 "타일 수 * 타일 크기 그대로다(16타일이면 간격 16, 겹치거나 비는 구간 없이 딱 이어붙음). " +
+                 "카메라 Orthographic Size는 이 값의 절반으로 맞출 것.")]
         [SerializeField] private int roomSizeInTiles = 16;
 
         [Header("방 그리드 기준점")]
-        [Tooltip("X는 카메라가 고정될 좌표, Y는 첫 방의 맨 아래 경계 좌표(월드). 예: (-3,-4)면 카메라는 X=-3에 항상 고정되고 " +
-                 "Y는 -4를 아래쪽 경계로 하는 방부터 시작.")]
+        [Tooltip("X는 카메라가 고정될 좌표, Y는 첫 방의 아래쪽 경계 좌표(월드). 예: (-3,-4)면 카메라는 X=-3에 항상 고정되고 " +
+                 "Y는 -4를 아래쪽 경계로 하는 방(중심 4)부터 시작.")]
         [SerializeField] private Vector2 startRoomReference = new Vector2(-3f, -4f);
 
         [Header("전환 연출")]
         [SerializeField] private float scrollDuration = 0.4f;
         [SerializeField] private AnimationCurve scrollCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
-        /// <summary>방과 방 사이의 실제 간격 = 카메라 뷰포트 세로 크기.</summary>
-        private float RoomSpacing => (roomSizeInTiles - 1) * tileSize;
+        /// <summary>방과 방 사이의 실제 간격 = 카메라 뷰포트 세로 크기. 겹침/빈틈 없이 정확히 타일 수만큼.</summary>
+        private float RoomWorldSize => roomSizeInTiles * tileSize;
 
-        /// <summary>방(0)의 중앙 Y. startRoomReference.y가 "아래쪽 경계"이므로 반 칸(RoomSpacing/2) 위로 보정.</summary>
-        private float FirstRoomCenterY => startRoomReference.y + RoomSpacing * 0.5f;
-
-        /// <summary>방(0)의 아래쪽 경계 Y.</summary>
-        private float GridOriginY => FirstRoomCenterY - RoomSpacing * 0.5f;
+        /// <summary>방(0)의 아래쪽 경계 Y = startRoomReference.y 그대로. 보정 없음.</summary>
+        private float GridOriginY => startRoomReference.y;
 
         private int currentRoomIndexY;
         private Coroutine scrollRoutine;
@@ -69,12 +67,12 @@ namespace IceBop.JumpKing
 
         private int RoomIndexOf(float worldY)
         {
-            return Mathf.FloorToInt((worldY - GridOriginY) / RoomSpacing);
+            return Mathf.FloorToInt((worldY - GridOriginY) / RoomWorldSize);
         }
 
         private Vector3 RoomCenterPosition(int roomIndexY)
         {
-            float y = GridOriginY + (roomIndexY + 0.5f) * RoomSpacing;
+            float y = GridOriginY + (roomIndexY + 0.5f) * RoomWorldSize;
             return new Vector3(startRoomReference.x, y, transform.position.z);
         }
 
