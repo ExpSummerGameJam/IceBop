@@ -4,16 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/CookingIntegrationTestScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/CookingIntegrationTestScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/ProgressiveLayeredAudioTestScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/ProgressiveLayeredAudioTestScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/PhysicalInventory2D.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/PhysicalInventory2D.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sound/BGM/BGM_1.mp3.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sound/BGM/BGM_1.mp3.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sound/BGM/BGM_2.mp3.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sound/BGM/BGM_2.mp3.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sound/BGM/BGM_3.mp3.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sound/BGM/BGM_3.mp3.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/ProgressiveLayeredAudioController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/ProgressiveLayeredAudioController.cs" afterDir="false" />
-    </list>
+    <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -59,7 +50,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Unity 에디터에 연결.Unity 에디터에 연결">
+  <component name="RunManager" selected="Attach to Unity Editor.Unity 에디터에 연결">
     <configuration name="유닛 테스트(배치 모드)" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.3.7f1\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath D:\GitHub\2_UNITIYGAME\IceBop -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />

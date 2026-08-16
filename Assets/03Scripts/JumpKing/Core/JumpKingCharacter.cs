@@ -118,6 +118,28 @@ namespace IceBop.JumpKing
         }
 
         /// <summary>
+        /// L자 코너처럼 여러 발판이 동시에 접촉하는 상황에서는, OnCollisionEnter2D가 호출되는
+        /// 그 순간 하필 이 발판의 접촉 노멀이 코너 때문에 애매하게(옆면처럼) 잡혀 착지가 무산될 수 있다.
+        /// 아직 다른 곳에 착지하지 못한 상태라면, 접촉이 유지되는 동안 매 스텝 재시도해서
+        /// 뒤늦게라도 위쪽 노멀이 확인되면 착지 처리한다.
+        /// </summary>
+        private void OnCollisionStay2D(Collision2D collision)
+        {
+            if (CurrentSurface != null) return; // 이미 다른 곳에 착지해 있으면 재검사 불필요
+
+            var surface = collision.collider.GetComponent<PlatformSurface>();
+            if (surface == null || surface.IsBroken) return;
+            if (!TryGetMostUpwardNormal(collision, out _)) return;
+
+            CurrentSurface = surface;
+            CurrentGround = GroundBehaviourFactory.Get(surface.Type);
+            State = CurrentGround.AllowsJumpControl ? JumpKingMoveState.Idle : JumpKingMoveState.Sliding;
+
+            CurrentGround.OnLand(this, surface);
+            OnLanded?.Invoke(surface);
+        }
+
+        /// <summary>
         /// 접촉점이 여러 개일 수 있으므로(모서리 등) 그중 가장 위쪽에 가까운 노멀을 찾는다.
         /// 그 노멀조차 기준(landingNormalThreshold)을 못 넘으면 착지가 아니라 옆면/아랫면 충돌로 판정한다.
         /// </summary>
