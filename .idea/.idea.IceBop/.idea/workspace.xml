@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="" />
+    <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/Tilemap/pallette/New Tile Palette.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/Tilemap/pallette/New Tile Palette.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/Tilemap/stage1_1.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/Tilemap/stage1_1.png.meta" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
