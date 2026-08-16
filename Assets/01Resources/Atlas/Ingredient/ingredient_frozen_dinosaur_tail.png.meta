@@ -4,7 +4,7 @@ TextureImporter:
   internalIDToNameTable:
   - first:
       213: -7976235228993550745
-    second: icedino_0
+    second: ingredient_frozen_dinosaur_tail
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: icedino_0
+      name: ingredient_frozen_dinosaur_tail
       rect:
         serializedVersion: 2
         x: 17
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      icedino_0: -7976235228993550745
+      ingredient_frozen_dinosaur_tail: -7976235228993550745
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

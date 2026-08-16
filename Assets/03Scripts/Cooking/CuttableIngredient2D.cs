@@ -108,10 +108,10 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
         if (activeKnife == null || !activeKnife.HasPointerMovement)
             return;
 
-        ApplyPointerMovement(activeKnife.PreviousPointerWorldPosition, activeKnife.PointerWorldPosition);
+        ApplyPointerMovement(activeKnife, activeKnife.PreviousPointerWorldPosition, activeKnife.PointerWorldPosition);
     }
 
-    private void ApplyPointerMovement(Vector2 previousPointerPosition, Vector2 currentPointerPosition)
+    private void ApplyPointerMovement(PreparationKnifeTool2D activeKnife, Vector2 previousPointerPosition, Vector2 currentPointerPosition)
     {
         bool changed = false;
         List<CutLine> completedLines = null;
@@ -136,6 +136,7 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
         if (!changed)
             return;
 
+        activeKnife.SetCutting(true);
         UpdateAllGuideColors();
 
         if (completedLines != null)
@@ -381,10 +382,17 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
         Rect sourceRect = sourceSprite.rect;
         float pixelsPerUnit = sourceSprite.pixelsPerUnit;
 
+        // Derived from the sprite's own current rect/bounds rather than trusting the
+        // import-time pixelsPerUnit: atlas packing can rescale the packed pixel footprint
+        // (padding, downscaling), so the pixels-per-unit ratio must be recomputed from the
+        // sprite's actual current rect to avoid cropping the wrong region of the atlas page.
+        float xPixelsPerUnit = sourceRect.width / Mathf.Max(0.0001f, sourceBounds.size.x);
+        float yPixelsPerUnit = sourceRect.height / Mathf.Max(0.0001f, sourceBounds.size.y);
+
         if (verticalCuts)
         {
-            float xMin = sourceRect.x + Mathf.Round((segmentMin - sourceBounds.min.x) * pixelsPerUnit);
-            float xMax = sourceRect.x + Mathf.Round((segmentMax - sourceBounds.min.x) * pixelsPerUnit);
+            float xMin = sourceRect.x + Mathf.Round((segmentMin - sourceBounds.min.x) * xPixelsPerUnit);
+            float xMax = sourceRect.x + Mathf.Round((segmentMax - sourceBounds.min.x) * xPixelsPerUnit);
             xMin = Mathf.Clamp(xMin, sourceRect.x, sourceRect.xMax - 1f);
             xMax = Mathf.Clamp(xMax, xMin + 1f, sourceRect.xMax);
             Vector2 pivot = anchoredToMain
@@ -394,8 +402,8 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
                 pivot, pixelsPerUnit, 0, SpriteMeshType.FullRect);
         }
 
-        float yMin = sourceRect.y + Mathf.Round((segmentMin - sourceBounds.min.y) * pixelsPerUnit);
-        float yMax = sourceRect.y + Mathf.Round((segmentMax - sourceBounds.min.y) * pixelsPerUnit);
+        float yMin = sourceRect.y + Mathf.Round((segmentMin - sourceBounds.min.y) * yPixelsPerUnit);
+        float yMax = sourceRect.y + Mathf.Round((segmentMax - sourceBounds.min.y) * yPixelsPerUnit);
         yMin = Mathf.Clamp(yMin, sourceRect.y, sourceRect.yMax - 1f);
         yMax = Mathf.Clamp(yMax, yMin + 1f, sourceRect.yMax);
         Vector2 horizontalPivot = anchoredToMain

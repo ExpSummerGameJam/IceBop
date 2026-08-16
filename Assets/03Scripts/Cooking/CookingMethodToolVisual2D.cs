@@ -10,6 +10,7 @@ public sealed class CookingMethodToolVisual2D
     public Vector3 preparationBoardScale;
     public GameObject preparationToolPrefab;
     public Sprite preparationToolSprite;
+    public Sprite preparationToolActiveSprite;
     public Vector3 preparationToolScale;
     public GameObject mixingPotPrefab;
     public Sprite mixingPotBodySprite;

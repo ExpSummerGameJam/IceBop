@@ -14,8 +14,6 @@ public static class InventoryScenePlacementBuilder
     private static readonly Vector2 LargeViewSize = new(1920f, 1080f);
     private static readonly Vector2 ViewMargin = new(16f, 16f);
     private const float InventoryCameraMargin = 0.35f;
-    private const float MiniDropPointPadding = 0.25f;
-    private const float MiniBagScale = 1.25f;
     private const float LargeCameraDepthOffset = 1f;
 
     [MenuItem("IceBop/Build Placed Inventory And Cooking Areas")]
@@ -71,12 +69,14 @@ public static class InventoryScenePlacementBuilder
         BoxCollider2D leftWall = ConfigureWall(root.transform, "BagLeftWall", new Vector3(-2.12f, 0f, 0f), new Vector3(0.18f, 3.15f, 1f), blockSprite);
         BoxCollider2D rightWall = ConfigureWall(root.transform, "BagRightWall", new Vector3(2.12f, 0f, 0f), new Vector3(0.18f, 3.15f, 1f), blockSprite);
 
-        Transform dropArea = FindOrCreateChild(root.transform, "CookingDropArea");
-        ConfigureBlock(dropArea, new Vector3(1.38f, -1.00f, 0f), new Vector3(0.95f, 0.72f, 1f), blockSprite, new Color(0.2f, 0.58f, 0.36f, 0.32f), 32);
-        BoxCollider2D dropAreaCollider = GetOrAddComponent<BoxCollider2D>(dropArea.gameObject);
-        dropAreaCollider.isTrigger = true;
-        dropAreaCollider.size = Vector2.one;
-        InventoryCookingArea2D cookingArea = GetOrAddComponent<InventoryCookingArea2D>(dropArea.gameObject);
+        Transform overflowTrigger = FindOrCreateChild(root.transform, "OverflowGroundTrigger");
+        ConfigureTransform(overflowTrigger, new Vector3(0f, -1.95f, 0f), Vector3.one);
+        BoxCollider2D overflowTriggerCollider = GetOrAddComponent<BoxCollider2D>(overflowTrigger.gameObject);
+        overflowTriggerCollider.isTrigger = true;
+        overflowTriggerCollider.size = new Vector2(4.6f, 0.4f);
+        InventoryOverflowTrigger2D overflowTriggerComponent = GetOrAddComponent<InventoryOverflowTrigger2D>(overflowTrigger.gameObject);
+
+        DestroyChildIfExists(root.transform, "CookingDropArea");
 
         Camera miniCamera = ConfigureInventoryCamera(root.transform, "MiniInventoryCamera");
         Camera largeCamera = ConfigureInventoryCamera(root.transform, "LargeInventoryCamera");
@@ -93,7 +93,8 @@ public static class InventoryScenePlacementBuilder
         largeView.raycastTarget = false;
         largeView.gameObject.SetActive(false);
 
-        ConfigureCookingStationVisuals(root.transform, blockSprite);
+        (Transform pot, BoxCollider2D potCollider) = ConfigureCookingStationVisuals(root.transform, blockSprite);
+        InventoryCookingArea2D cookingArea = GetOrAddComponent<InventoryCookingArea2D>(pot.gameObject);
 
         SerializedObject inventoryObject = new(inventory);
         inventoryObject.FindProperty("bagBoundsCollider").objectReferenceValue = panelCollider;
@@ -106,6 +107,10 @@ public static class InventoryScenePlacementBuilder
         inventoryObject.FindProperty("dropPoint").objectReferenceValue = dropPoint;
         inventoryObject.FindProperty("inventoryView").objectReferenceValue = view;
         inventoryObject.ApplyModifiedPropertiesWithoutUndo();
+
+        SerializedObject overflowTriggerObject = new(overflowTriggerComponent);
+        overflowTriggerObject.FindProperty("inventory").objectReferenceValue = inventory;
+        overflowTriggerObject.ApplyModifiedPropertiesWithoutUndo();
 
         SerializedObject viewObject = new(view);
         viewObject.FindProperty("inventory").objectReferenceValue = inventory;
@@ -120,8 +125,6 @@ public static class InventoryScenePlacementBuilder
         viewObject.FindProperty("largeViewSize").vector2Value = LargeViewSize;
         viewObject.FindProperty("miniViewMargin").vector2Value = ViewMargin;
         viewObject.FindProperty("inventoryCameraMargin").floatValue = InventoryCameraMargin;
-        viewObject.FindProperty("miniDropPointPadding").floatValue = MiniDropPointPadding;
-        viewObject.FindProperty("miniBagScale").floatValue = MiniBagScale;
         viewObject.FindProperty("renderLargeViewAsCameraOverlay").boolValue = false;
         viewObject.FindProperty("largeCameraDepthOffset").floatValue = LargeCameraDepthOffset;
         viewObject.ApplyModifiedPropertiesWithoutUndo();
@@ -136,7 +139,7 @@ public static class InventoryScenePlacementBuilder
         SerializedObject stationObject = new(cookingStation);
         stationObject.FindProperty("inventory").objectReferenceValue = inventory;
         stationObject.FindProperty("inventoryView").objectReferenceValue = view;
-        stationObject.FindProperty("cookingAreaCollider").objectReferenceValue = dropAreaCollider;
+        stationObject.FindProperty("cookingAreaCollider").objectReferenceValue = potCollider;
         stationObject.ApplyModifiedPropertiesWithoutUndo();
 
         SerializedObject cookingAreaObject = new(cookingArea);
@@ -360,7 +363,7 @@ public static class InventoryScenePlacementBuilder
         return rawImage;
     }
 
-    private static void ConfigureCookingStationVisuals(Transform parent, Sprite blockSprite)
+    private static (Transform pot, BoxCollider2D potCollider) ConfigureCookingStationVisuals(Transform parent, Sprite blockSprite)
     {
         Transform root = FindOrCreateChild(parent, "InventoryCookingStation");
         ConfigureTransform(root, Vector3.zero, Vector3.one);
@@ -385,10 +388,10 @@ public static class InventoryScenePlacementBuilder
         ConfigureBlock(FindOrCreateChild(button, "ButtonBody"), Vector3.zero, new Vector3(0.86f, 0.28f, 1f), blockSprite, new Color(0.25f, 0.45f, 0.34f, 1f), 38);
         ConfigureText(FindOrCreateChild(button, "ButtonLabel"), "Cook", new Vector3(0f, -0.012f, 0f), 32, 0.032f, new Color(0.92f, 0.96f, 0.92f, 1f), 39);
 
-        Transform queue = FindOrCreateChild(root, "QueuedIngredients");
-        ConfigureTransform(queue, new Vector3(0.905f, -0.42f, 0f), Vector3.one);
+        DestroyChildIfExists(root, "QueuedIngredients");
+        DestroyChildIfExists(root, "CountLabel");
 
-        ConfigureText(FindOrCreateChild(root, "CountLabel"), "0/4", new Vector3(1.38f, -0.42f, 0f), 28, 0.032f, new Color(0.96f, 0.94f, 0.86f, 1f), 40);
+        return (pot, potCollider);
     }
 
     private static void ConfigureText(Transform transform, string text, Vector3 localPosition, int fontSize, float characterSize, Color color, int sortingOrder)

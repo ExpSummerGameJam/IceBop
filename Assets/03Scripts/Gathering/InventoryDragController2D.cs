@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class InventoryDragController2D : MonoBehaviour
@@ -8,6 +7,7 @@ public sealed class InventoryDragController2D : MonoBehaviour
     [SerializeField] private Camera inventoryCamera;
     [SerializeField] private RectTransform viewport;
 
+    private InventoryCookingStation2D cookingStation;
     private InventoryItem2D draggedItem;
     private Vector2 grabOffset;
 
@@ -33,6 +33,15 @@ public sealed class InventoryDragController2D : MonoBehaviour
             return;
         }
 
+        if (cookingStation == null)
+            cookingStation = GetComponent<InventoryCookingStation2D>();
+
+        if (cookingStation != null && cookingStation.IsCooking)
+        {
+            CancelDraggedItem();
+            return;
+        }
+
         if (GatheringInput.WasPrimaryPressed())
             TryBeginDrag();
 
@@ -54,7 +63,6 @@ public sealed class InventoryDragController2D : MonoBehaviour
         InventoryItem2D canceledItem = draggedItem;
         draggedItem = null;
         canceledItem.SetDragging(false);
-        inventory?.DelayOverflowCheck(canceledItem, 0.4f);
     }
 
     private void TryBeginDrag()
@@ -87,7 +95,6 @@ public sealed class InventoryDragController2D : MonoBehaviour
         draggedItem = bestItem;
         grabOffset = (Vector2)draggedItem.transform.position - pointerWorldPosition;
         draggedItem.SetDragging(true);
-        inventory?.DelayOverflowCheck(draggedItem, 0.4f);
     }
 
     private void ReleaseDraggedItem()
@@ -98,36 +105,7 @@ public sealed class InventoryDragController2D : MonoBehaviour
         InventoryItem2D releasedItem = draggedItem;
         draggedItem = null;
 
-        if (TryDropOnReceiver(releasedItem))
-            return;
-
         releasedItem.SetDragging(false);
-        inventory?.DelayOverflowCheck(releasedItem, 0.4f);
-    }
-
-    private bool TryDropOnReceiver(InventoryItem2D item)
-    {
-        if (item == null)
-            return false;
-
-        Vector2 dropPosition = item.Bounds.center;
-        Collider2D[] hits = Physics2D.OverlapPointAll(dropPosition);
-        HashSet<IInventoryItemDropReceiver2D> checkedReceivers = new();
-
-        foreach (Collider2D hit in hits)
-        {
-            if (hit == null || hit.transform.IsChildOf(item.transform))
-                continue;
-
-            IInventoryItemDropReceiver2D receiver = hit.GetComponentInParent<IInventoryItemDropReceiver2D>();
-            if (receiver == null || !checkedReceivers.Add(receiver))
-                continue;
-
-            if (receiver.TryReceiveInventoryItem(item))
-                return true;
-        }
-
-        return false;
     }
 
     private bool TryGetPointerWorldPosition(out Vector2 worldPosition)

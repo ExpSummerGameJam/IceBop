@@ -7,12 +7,43 @@
     <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/00Scenes/CookingIntegrationTestScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/CookingIntegrationTestScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/ProgressiveLayeredAudioTestScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/ProgressiveLayeredAudioTestScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_carrot_icicle.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_carrot_icicle.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_eternal_snow.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_eternal_snow.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_frost_feather.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_frost_feather.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_frozen_dinosaur_tail.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_frozen_dinosaur_tail.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_ice_strawberry.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_ice_strawberry.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_salty_ice.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_salty_ice.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_unicorn_horn_icicle.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_unicorn_horn_icicle.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/IngredientAtlas.spriteatlasv2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/IngredientAtlas.spriteatlasv2.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/icepotin.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/icepotin.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/icepotwall.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/icepotwall.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/knight.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/knight.png.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/PhysicalInventory2D.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/PhysicalInventory2D.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sound/BGM/BGM_1.mp3.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sound/BGM/BGM_1.mp3.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sound/BGM/BGM_2.mp3.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sound/BGM/BGM_2.mp3.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sound/BGM/BGM_3.mp3" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sound/BGM/BGM_3.mp3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sound/BGM/BGM_3.mp3.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sound/BGM/BGM_3.mp3.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/ProgressiveLayeredAudioController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/ProgressiveLayeredAudioController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingFlowController2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingFlowController2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingMethodToolVisual2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingMethodToolVisual2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingMixingPot2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingMixingPot2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingRuntimeVisuals2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingRuntimeVisuals2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CuttableIngredient2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CuttableIngredient2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/InventoryCookingArea2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/InventoryCookingArea2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/InventoryCookingStation2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/InventoryCookingStation2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/PreparationKnifeTool2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/PreparationKnifeTool2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/Editor/GatherablePrefabBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/Editor/GatherablePrefabBuilder.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/Editor/InventoryScenePlacementBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/Editor/InventoryScenePlacementBuilder.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatherableDefinition.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatherableDefinition.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatheringDataLookup.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatheringDataLookup.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/IInventoryItemDropReceiver2D.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/IInventoryItemDropReceiver2D.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/InventoryDragController2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/InventoryDragController2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/InventoryView2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/InventoryView2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/InventoryVisualUtility.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/InventoryVisualUtility.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/PhysicalInventory2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/PhysicalInventory2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JJData/Xlsx/CookingData.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JJData/Xlsx/CookingData.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JJData/Xlsx/GatheringData.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JJData/Xlsx/GatheringData.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/ShaderGraphSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ShaderGraphSettings.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,6 +58,8 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$USER_HOME$/.jetbrains/acp.json" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/03Scripts/Cooking/GuidedPlacementFinishingStage2D.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/03Scripts/Cooking/SkewerAssemblyFinishingStage2D.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/JJData/Xlsx/CookingData.xlsx.meta" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="McpProjectServerCommands">

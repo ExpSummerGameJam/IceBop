@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
-public sealed class InventoryCookingStation2D : MonoBehaviour, IInventoryItemDropReceiver2D
+public sealed class InventoryCookingStation2D : MonoBehaviour
 {
     [SerializeField] private PhysicalInventory2D inventory;
     [SerializeField] private InventoryView2D inventoryView;
@@ -11,22 +11,20 @@ public sealed class InventoryCookingStation2D : MonoBehaviour, IInventoryItemDro
     [SerializeField] private int maxIngredients = 4;
     [SerializeField] private Vector2 buttonSize = new(0.86f, 0.28f);
 
-    private readonly List<CookingIngredientEntry> queuedIngredients = new();
-    private readonly List<GameObject> queueVisuals = new();
+    private readonly HashSet<InventoryItem2D> itemsOnPot = new();
     private readonly HashSet<WorldCookingArea2D> activeCookingAreas = new();
 
     private Transform visualRoot;
     private Transform potRoot;
-    private Transform queueRoot;
     private Transform buttonRoot;
     private BoxCollider2D potCollider;
     private BoxCollider2D cookButtonCollider;
     private SpriteRenderer cookButtonRenderer;
-    private TextMesh countLabel;
     private bool isCooking;
     private bool loggedMissingPlacedVisuals;
 
     public event Action<CookingCraftResult> CookingCompleted;
+    public bool IsCooking => isCooking;
     public bool IsPlayerInCookingArea
     {
         get
@@ -43,10 +41,7 @@ public sealed class InventoryCookingStation2D : MonoBehaviour, IInventoryItemDro
         inventory = newInventory;
         inventoryView = newInventoryView;
         if (EnsureVisuals())
-        {
-            UpdateLayout();
             UpdateVisibility();
-        }
     }
 
     public void BindCookingArea(Collider2D newCookingAreaCollider)
@@ -56,8 +51,7 @@ public sealed class InventoryCookingStation2D : MonoBehaviour, IInventoryItemDro
         if (cookingAreaCollider != null)
             cookingAreaCollider.isTrigger = true;
 
-        if (EnsureVisuals())
-            UpdateLayout();
+        EnsureVisuals();
     }
 
     public void SetCookingAreaPlayerPresence(WorldCookingArea2D cookingArea, bool hasPlayerInside)
@@ -78,6 +72,30 @@ public sealed class InventoryCookingStation2D : MonoBehaviour, IInventoryItemDro
         UpdateVisibility();
     }
 
+    public void SetItemOnPot(InventoryItem2D item, bool isOnPot)
+    {
+        if (item == null || isCooking)
+            return;
+
+        bool changed = isOnPot
+            ? itemsOnPot.Count < Mathf.Max(1, maxIngredients) && itemsOnPot.Add(item)
+            : itemsOnPot.Remove(item);
+
+        if (!changed)
+            return;
+
+        UpdateCookButtonVisual();
+    }
+
+    public void ClearItemsFromArea(InventoryCookingArea2D area)
+    {
+        if (isCooking || itemsOnPot.Count == 0)
+            return;
+
+        itemsOnPot.Clear();
+        UpdateCookButtonVisual();
+    }
+
     private void Awake()
     {
         ResolveReferences();
@@ -92,47 +110,17 @@ public sealed class InventoryCookingStation2D : MonoBehaviour, IInventoryItemDro
             return;
 
         UpdateVisibility();
+        PruneMissingItemsOnPot();
 
         if (visualRoot == null || !visualRoot.gameObject.activeSelf)
             return;
 
-        UpdateLayout();
         TryStartCookingFromClick();
     }
 
-    public bool TryReceiveInventoryItem(InventoryItem2D item)
-    {
-        if (item == null || inventory == null || !CanReceiveDrops)
-            return false;
-
-        if (queuedIngredients.Count >= Mathf.Max(1, maxIngredients))
-            return false;
-
-        IngredientDefinition definition = item.Definition;
-        if (definition == null && !GatheringDataLookup.TryGetIngredient(item.IngredientId, out definition))
-            return false;
-
-        CookingIngredientEntry entry = CookingIngredientEntry.FromInventoryItem(item, definition);
-        queuedIngredients.Add(entry);
-
-        item.SetDragging(false);
-        inventory.RemoveItem(item);
-
-        RebuildQueueVisuals();
-        UpdateCookButtonVisual();
-        return true;
-    }
-
-    private bool CanReceiveDrops =>
-        !isCooking &&
-        inventoryView != null &&
-        inventoryView.IsLargeViewOpen &&
-        CanUseCookingStation &&
-        queuedIngredients.Count < Mathf.Max(1, maxIngredients);
-
     private void TryStartCookingFromClick()
     {
-        if (queuedIngredients.Count == 0 || isCooking || !CanUseCookingStation || !GatheringInput.WasPrimaryPressed())
+        if (itemsOnPot.Count == 0 || isCooking || !CanUseCookingStation || !GatheringInput.WasPrimaryPressed())
             return;
 
         if (!TryGetPointerWorldPosition(out Vector2 worldPosition))
@@ -151,18 +139,29 @@ public sealed class InventoryCookingStation2D : MonoBehaviour, IInventoryItemDro
 
     private void StartCooking()
     {
-        if (queuedIngredients.Count == 0 || isCooking || !CanUseCookingStation)
+        if (itemsOnPot.Count == 0 || isCooking || !CanUseCookingStation)
             return;
 
         isCooking = true;
-        List<CookingIngredientEntry> cookingQueue = new(queuedIngredients);
-        queuedIngredients.Clear();
-        RebuildQueueVisuals();
+
+        List<CookingIngredientEntry> cookingQueue = new();
+        List<InventoryItem2D> consumedItems = new(itemsOnPot);
+        itemsOnPot.Clear();
+
+        foreach (InventoryItem2D item in consumedItems)
+        {
+            if (item == null)
+                continue;
+
+            IngredientDefinition definition = item.Definition;
+            if (definition == null && !GatheringDataLookup.TryGetIngredient(item.IngredientId, out definition))
+                continue;
+
+            cookingQueue.Add(CookingIngredientEntry.FromInventoryItem(item, definition));
+            inventory.RemoveItem(item);
+        }
+
         UpdateCookButtonVisual();
-
-        if (inventoryView != null)
-            inventoryView.SetLargeViewOpen(false);
-
         UpdateVisibility();
         CookingFlowController2D.StartCookingWithResult(cookingQueue, OnCookingCompleted);
     }
@@ -209,12 +208,6 @@ public sealed class InventoryCookingStation2D : MonoBehaviour, IInventoryItemDro
             cookButtonCollider.size = buttonSize;
         }
 
-        if (queueRoot == null)
-            queueRoot = visualRoot.Find("QueuedIngredients");
-
-        if (countLabel == null)
-            countLabel = visualRoot.Find("CountLabel")?.GetComponent<TextMesh>();
-
         EnsurePlacedSpriteRenderers();
 
         if (potRoot == null)
@@ -222,9 +215,6 @@ public sealed class InventoryCookingStation2D : MonoBehaviour, IInventoryItemDro
 
         if (buttonRoot == null)
             return WarnMissingPlacedVisuals("CookButton");
-
-        if (queueRoot == null)
-            return WarnMissingPlacedVisuals("QueuedIngredients");
 
         if (cookButtonCollider == null)
             return WarnMissingPlacedVisuals("CookButton BoxCollider2D");
@@ -256,65 +246,13 @@ public sealed class InventoryCookingStation2D : MonoBehaviour, IInventoryItemDro
         }
     }
 
-    private void RebuildQueueVisuals()
+    private void PruneMissingItemsOnPot()
     {
-        foreach (GameObject visual in queueVisuals)
-        {
-            if (visual != null)
-                Destroy(visual);
-        }
-
-        queueVisuals.Clear();
-
-        if (queueRoot == null)
+        if (itemsOnPot.Count == 0)
             return;
 
-        for (int i = 0; i < queuedIngredients.Count; i++)
-        {
-            CookingIngredientEntry entry = queuedIngredients[i];
-            GameObject token = new($"QueuedIngredient_{i + 1}_{entry.ingredientId}");
-            token.transform.SetParent(queueRoot, false);
-            token.transform.localScale = new Vector3(0.22f, 0.22f, 1f);
-
-            SpriteRenderer renderer = token.AddComponent<SpriteRenderer>();
-            renderer.sprite = CookingRuntimeVisuals2D.GetIngredientSprite(entry);
-            renderer.color = CookingRuntimeVisuals2D.GetIngredientColor(entry);
-            renderer.sortingOrder = 41 + i;
-            queueVisuals.Add(token);
-        }
-
-        UpdateLayout();
-    }
-
-    private void UpdateLayout()
-    {
-        if (inventory == null || visualRoot == null || potRoot == null || buttonRoot == null || queueRoot == null)
-            return;
-
-        Rect bagRect = inventory.BagWorldRect;
-        Vector3 potPosition = GetCookingAreaCenter(bagRect);
-        potRoot.position = potPosition;
-
-        for (int i = 0; i < queueVisuals.Count; i++)
-        {
-            if (queueVisuals[i] != null)
-                queueVisuals[i].transform.localPosition = new Vector3(i * 0.28f, 0f, 0f);
-        }
-
-        if (countLabel != null)
-        {
-            countLabel.text = $"{queuedIngredients.Count}/{Mathf.Max(1, maxIngredients)}";
-        }
-    }
-
-    private Vector3 GetCookingAreaCenter(Rect bagRect)
-    {
-        ResolveCookingArea();
-
-        if (cookingAreaCollider != null && cookingAreaCollider.enabled)
-            return cookingAreaCollider.bounds.center;
-
-        return new Vector3(bagRect.xMax - 0.62f, bagRect.yMin + 0.58f, transform.position.z);
+        if (itemsOnPot.RemoveWhere(item => item == null) > 0)
+            UpdateCookButtonVisual();
     }
 
     private void UpdateVisibility()
@@ -332,10 +270,8 @@ public sealed class InventoryCookingStation2D : MonoBehaviour, IInventoryItemDro
         if (cookButtonRenderer == null)
             return;
 
-        bool canCook = queuedIngredients.Count > 0 && !isCooking && CanUseCookingStation;
-        cookButtonRenderer.color = canCook
-            ? new Color(0.25f, 0.52f, 0.34f, 1f)
-            : new Color(0.24f, 0.27f, 0.25f, 1f);
+        bool canCook = itemsOnPot.Count > 0 && !isCooking && CanUseCookingStation;
+        cookButtonRenderer.gameObject.SetActive(canCook);
     }
 
     private bool TryGetPointerWorldPosition(out Vector2 worldPosition)

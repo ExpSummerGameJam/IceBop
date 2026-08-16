@@ -229,6 +229,7 @@ public static class GatheringDataLookup
                 dishSpriteResourcePath = GetString(row, "dishSpriteResourcePath"),
                 requiredIngredientIds = GetString(row, "requiredIngredientIds"),
                 cookingMethod = GetFirstString(row, "cookingMethod", "cookingMethodKey", "method"),
+                finishingStageKind = GetString(row, "finishingStageKind"),
                 linkedAbilityId = GetFirstInt(row, "linkedAbilityId", "abilityId"),
                 linkedAbilityKey = GetFirstString(row, "linkedAbilityKey", "abilityKey", "ability"),
                 memo = GetString(row, "memo")
@@ -412,6 +413,7 @@ public static class GatheringDataLookup
                 dishSpriteResourcePath = GetRowString(row, "dishSpriteResourcePath"),
                 requiredIngredientIds = GetRowString(row, "requiredIngredientIds"),
                 cookingMethod = GetFirstRowString(row, "cookingMethod", "cookingMethodKey", "method"),
+                finishingStageKind = GetRowString(row, "finishingStageKind"),
                 linkedAbilityId = GetFirstRowInt(row, "linkedAbilityId", "abilityId"),
                 linkedAbilityKey = GetFirstRowString(row, "linkedAbilityKey", "abilityKey", "ability"),
                 memo = GetRowString(row, "memo")

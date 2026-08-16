@@ -45,12 +45,14 @@ public sealed class DishDefinition
     public string dishSpriteResourcePath;
     public string requiredIngredientIds;
     public string cookingMethod;
+    public string finishingStageKind;
     public int linkedAbilityId;
     public string linkedAbilityKey;
     public string memo;
 
     public bool HasCookingMethod => !string.IsNullOrWhiteSpace(cookingMethod);
     public IngredientPreparationKind CookingMethod => IngredientPreparationKindUtility.Parse(cookingMethod, dishId);
+    public DishFinishingStageKind FinishingStageKind => DishFinishingStageKindUtility.Parse(finishingStageKind);
     public bool HasLinkedAbility => linkedAbilityId > 0 || !string.IsNullOrWhiteSpace(linkedAbilityKey);
 
     public bool MatchesIngredients(System.Collections.Generic.IReadOnlyList<int> ingredientIds, bool allowAnyOrder)

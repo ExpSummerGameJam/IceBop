@@ -9,8 +9,6 @@ public sealed class PhysicalInventory2D : MonoBehaviour
     [SerializeField] private float dropYOffset = 0.35f;
     [SerializeField] private float spawnJitter = 0.16f;
     [SerializeField] private float itemGravityScale = 1f;
-    [SerializeField] private float overflowMargin = 0.35f;
-    [SerializeField] private float overflowCheckDelay = 0.45f;
     [SerializeField] private Collider2D bagBoundsCollider;
     [SerializeField] private Collider2D[] bagBoundaryColliders = new Collider2D[0];
     [SerializeField] private Transform itemRoot;
@@ -18,7 +16,6 @@ public sealed class PhysicalInventory2D : MonoBehaviour
     [SerializeField] private InventoryView2D inventoryView;
 
     private readonly List<InventoryItem2D> items = new();
-    private readonly Dictionary<InventoryItem2D, float> overflowCheckTimes = new();
     private Vector3 lastOverflowWorldPosition;
     private bool loggedMissingBagColliders;
 
@@ -98,34 +95,6 @@ public sealed class PhysicalInventory2D : MonoBehaviour
             Instance = null;
     }
 
-    private void FixedUpdate()
-    {
-        Rect bagRect = BagWorldRect;
-
-        for (int i = items.Count - 1; i >= 0; i--)
-        {
-            InventoryItem2D item = items[i];
-            if (item == null)
-            {
-                items.RemoveAt(i);
-                continue;
-            }
-
-            if (item.IsDragging)
-                continue;
-
-            if (overflowCheckTimes.TryGetValue(item, out float checkTime) && Time.time < checkTime)
-                continue;
-
-            Vector2 center = item.Bounds.center;
-            bool leftOrRightOverflow = center.x < bagRect.xMin - overflowMargin || center.x > bagRect.xMax + overflowMargin;
-            bool bottomOverflow = center.y < bagRect.yMin - overflowMargin;
-
-            if (leftOrRightOverflow || bottomOverflow)
-                OverflowItem(item);
-        }
-    }
-
     public int AddIngredients(int ingredientId, int count, Vector3 overflowWorldPosition)
     {
         SetOverflowWorldPosition(overflowWorldPosition);
@@ -153,7 +122,6 @@ public sealed class PhysicalInventory2D : MonoBehaviour
 
         InventoryItem2D item = CreateInventoryItem(definition);
         items.Add(item);
-        DelayOverflowCheck(item, overflowCheckDelay);
         InventoryChanged?.Invoke();
         return true;
     }
@@ -169,7 +137,6 @@ public sealed class PhysicalInventory2D : MonoBehaviour
             return false;
 
         bool removed = items.Remove(item);
-        overflowCheckTimes.Remove(item);
 
         if (removed)
         {
@@ -178,14 +145,6 @@ public sealed class PhysicalInventory2D : MonoBehaviour
         }
 
         return removed;
-    }
-
-    public void DelayOverflowCheck(InventoryItem2D item, float delay)
-    {
-        if (item == null)
-            return;
-
-        overflowCheckTimes[item] = Time.time + Mathf.Max(0f, delay);
     }
 
     public void SetOverflowWorldPosition(Vector3 worldPosition)
@@ -215,14 +174,13 @@ public sealed class PhysicalInventory2D : MonoBehaviour
         return item;
     }
 
-    private void OverflowItem(InventoryItem2D item)
+    public void OverflowItem(InventoryItem2D item)
     {
         if (item == null)
             return;
 
         int ingredientId = item.IngredientId;
         items.Remove(item);
-        overflowCheckTimes.Remove(item);
 
         Vector3 spawnPosition = FindPlayerPosition(lastOverflowWorldPosition);
         WorldIngredientPickup2D.Spawn(ingredientId, spawnPosition, true);
@@ -456,7 +414,6 @@ public sealed class PhysicalInventory2D : MonoBehaviour
     {
         bagInnerSize.x = Mathf.Max(0.5f, bagInnerSize.x);
         bagInnerSize.y = Mathf.Max(0.5f, bagInnerSize.y);
-        overflowCheckDelay = Mathf.Max(0f, overflowCheckDelay);
     }
 
     private void OnDrawGizmosSelected()

@@ -12,6 +12,9 @@ public sealed class PreparationKnifeTool2D : MonoBehaviour
     private SpriteRenderer toolRenderer;
     private Vector2 grabOffset;
     private int sortingOrderBeforeDrag;
+    private Sprite defaultBladeSprite;
+    private Sprite activeBladeSprite;
+    private bool isCutting;
 
     public static PreparationKnifeTool2D CurrentDraggingKnife { get; private set; }
 
@@ -35,6 +38,35 @@ public sealed class PreparationKnifeTool2D : MonoBehaviour
         PreviousBladeWorldPosition = BladeWorldPosition;
         PointerWorldPosition = BladeWorldPosition;
         PreviousPointerWorldPosition = PointerWorldPosition;
+    }
+
+    public void ConfigureBladeSprites(Sprite newDefaultSprite, Sprite newActiveSprite)
+    {
+        defaultBladeSprite = newDefaultSprite;
+        activeBladeSprite = newActiveSprite;
+        isCutting = false;
+        ApplyBladeSprite();
+    }
+
+    public void SetCutting(bool cutting)
+    {
+        if (isCutting == cutting)
+            return;
+
+        isCutting = cutting;
+        ApplyBladeSprite();
+    }
+
+    private void ApplyBladeSprite()
+    {
+        ResolveComponents();
+
+        if (toolRenderer == null)
+            return;
+
+        Sprite sprite = isCutting && activeBladeSprite != null ? activeBladeSprite : defaultBladeSprite;
+        if (sprite != null)
+            toolRenderer.sprite = sprite;
     }
 
     private void Awake()

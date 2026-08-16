@@ -109,11 +109,11 @@ public sealed class CookingFlowController2D : MonoBehaviour
 
         DishDefinition dish = ResolveDish(ingredients);
         IngredientPreparationKind cookingMethod = ResolveCookingMethod(dish, ingredients);
-        CookingMixingPot2D mixingPot = CreateMixingStage(ingredients, dish, cookingMethod, camera);
+        IDishFinishingStage finishingStage = CreateFinishingStage(ingredients, dish, cookingMethod, camera);
 
         bool dishPresented = false;
-        mixingPot.MixingCompleted += pot => pot.PlayResultPresentation();
-        mixingPot.DishPresented += _ => dishPresented = true;
+        finishingStage.InteractionCompleted += finishingStage.PlayResultPresentation;
+        finishingStage.ResultPresented += () => dishPresented = true;
 
         yield return new WaitUntil(() => dishPresented);
 
@@ -167,7 +167,7 @@ public sealed class CookingFlowController2D : MonoBehaviour
 
     private GrindableIngredient2D CreateGrindingStage(CookingIngredientEntry entry, Camera camera, CookingMethodToolVisual2D toolVisual)
     {
-        PreparationPointerTool2D grinder = CreatePointerTool("Grinder", CookingRuntimeVisuals2D.GetGrinderSprite(), new Vector3(0.66f, 0.66f, 1f), camera, toolVisual);
+        PreparationPointerTool2D grinder = CreatePointerTool("Grinder", CookingRuntimeVisuals2D.GetKnife1Sprite(), new Vector3(0.66f, 0.66f, 1f), camera, toolVisual);
         GameObject ingredient = CreatePreparedIngredientObject(entry, "GrindingIngredient");
 
         GrindableIngredient2D grindable = ingredient.AddComponent<GrindableIngredient2D>();
@@ -245,7 +245,11 @@ public sealed class CookingFlowController2D : MonoBehaviour
     {
         Sprite sprite = toolVisual != null && toolVisual.preparationToolSprite != null
             ? toolVisual.preparationToolSprite
-            : CookingRuntimeVisuals2D.GetKnifeSprite();
+            : CookingRuntimeVisuals2D.GetKnife1Sprite();
+
+        Sprite activeSprite = toolVisual != null && toolVisual.preparationToolActiveSprite != null
+            ? toolVisual.preparationToolActiveSprite
+            : CookingRuntimeVisuals2D.GetKnife2Sprite();
 
         GameObject knife = CreatePreparationToolObject(
             "PreparationKnife",
@@ -272,6 +276,7 @@ public sealed class CookingFlowController2D : MonoBehaviour
             tool = knife.AddComponent<PreparationKnifeTool2D>();
 
         tool.Configure(camera, new Vector2(0.92f, 0f));
+        tool.ConfigureBladeSprites(sprite, activeSprite);
         return tool;
     }
 
@@ -344,18 +349,28 @@ public sealed class CookingFlowController2D : MonoBehaviour
         return renderer;
     }
 
-    private CookingMixingPot2D CreateMixingStage(
+    private IDishFinishingStage CreateFinishingStage(
         IReadOnlyList<CookingIngredientEntry> ingredients,
         DishDefinition dish,
         IngredientPreparationKind cookingMethod,
         Camera camera)
     {
-        activeStageRoot = new GameObject("FinalMixingStage");
+        activeStageRoot = new GameObject("FinalCookingStage");
         activeStageRoot.transform.position = GetStageCenter();
 
-        CookingMixingPot2D mixingPot = activeStageRoot.AddComponent<CookingMixingPot2D>();
-        mixingPot.Configure(camera, ingredients, dish, ResolveToolVisual(cookingMethod));
-        return mixingPot;
+        DishFinishingStageKind stageKind = dish != null ? dish.FinishingStageKind : DishFinishingStageKind.Stir;
+        IDishFinishingStage stage = stageKind switch
+        {
+            DishFinishingStageKind.BasketShake => (IDishFinishingStage)activeStageRoot.AddComponent<BasketShakeFinishingStage2D>(),
+            DishFinishingStageKind.FryerSaltSprinkle => activeStageRoot.AddComponent<FryerFinishingStage2D>(),
+            DishFinishingStageKind.FryerSaltSqueeze => activeStageRoot.AddComponent<FryerFinishingStage2D>(),
+            DishFinishingStageKind.SkewerAssembly => activeStageRoot.AddComponent<SkewerAssemblyFinishingStage2D>(),
+            DishFinishingStageKind.GuidedPlacement => activeStageRoot.AddComponent<GuidedPlacementFinishingStage2D>(),
+            _ => activeStageRoot.AddComponent<CookingMixingPot2D>(),
+        };
+
+        stage.Configure(camera, ingredients, dish, ResolveToolVisual(cookingMethod));
+        return stage;
     }
 
     private void CreateStageLabel(int stageIndex, int stageCount, CookingIngredientEntry entry)

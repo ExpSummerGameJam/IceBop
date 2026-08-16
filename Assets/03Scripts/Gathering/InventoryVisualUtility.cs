@@ -8,18 +8,21 @@ using UnityEditor;
 
 public static class InventoryVisualUtility
 {
-    private const string IngredientAtlasResourcePath = "Atlas/IngredientAtlas";
+    private const string IngredientFolderResourcePath = "Atlas/Ingredient";
     private const string GatheringAtlasResourcePath = "Atlas/Gatering";
+    private const string FoodAtlasResourcePath = "Atlas/Food";
 #if UNITY_EDITOR
-    private const string IngredientAtlasAssetPath = "Assets/01Resources/Atlas/IngredientAtlas.spriteatlasv2";
+    private const string IngredientFolderAssetPath = "Assets/01Resources/Atlas/Ingredient";
     private const string GatheringAtlasAssetPath = "Assets/01Resources/Atlas/Gatering.spriteatlasv2";
+    private const string FoodAtlasAssetPath = "Assets/01Resources/Atlas/Food.spriteatlasv2";
 #endif
 
     private static Sprite whiteSprite;
-    private static SpriteAtlas ingredientAtlas;
     private static SpriteAtlas gatheringAtlas;
+    private static SpriteAtlas foodAtlas;
     private static readonly Dictionary<string, Sprite> ingredientSpritesByKey = new();
     private static readonly Dictionary<string, Sprite> gatheringSpritesByKey = new();
+    private static readonly Dictionary<string, Sprite> foodSpritesByKey = new();
 
     public static Sprite WhiteSprite
     {
@@ -73,6 +76,11 @@ public static class InventoryVisualUtility
         return GetAtlasSprite(resourcePathOrKey, gatheringSpritesByKey, GetGatheringAtlas);
     }
 
+    public static Sprite GetFoodSprite(string resourcePathOrKey)
+    {
+        return GetAtlasSprite(resourcePathOrKey, foodSpritesByKey, GetFoodAtlas);
+    }
+
     public static Color ColorFromId(int id)
     {
         float hue = Mathf.Repeat(id * 0.173f, 1f);
@@ -81,7 +89,25 @@ public static class InventoryVisualUtility
 
     private static Sprite GetIngredientSpriteByKey(string rawKey)
     {
-        return GetAtlasSprite(rawKey, ingredientSpritesByKey, GetIngredientAtlas);
+        string key = NormalizeAtlasKey(rawKey);
+        if (string.IsNullOrEmpty(key))
+            return null;
+
+        if (ingredientSpritesByKey.TryGetValue(key, out Sprite cachedSprite))
+            return cachedSprite;
+
+        Sprite sprite = Resources.Load<Sprite>($"{IngredientFolderResourcePath}/{key}");
+
+#if UNITY_EDITOR
+        if (sprite == null)
+            sprite = AssetDatabase.LoadAssetAtPath<Sprite>($"{IngredientFolderAssetPath}/{key}.png");
+#endif
+
+        if (sprite == null)
+            return null;
+
+        ingredientSpritesByKey[key] = sprite;
+        return sprite;
     }
 
     private static Sprite GetAtlasSprite(string rawKey, Dictionary<string, Sprite> cache, System.Func<SpriteAtlas> resolveAtlas)
@@ -105,21 +131,6 @@ public static class InventoryVisualUtility
         return sprite;
     }
 
-    private static SpriteAtlas GetIngredientAtlas()
-    {
-        if (ingredientAtlas != null)
-            return ingredientAtlas;
-
-        ingredientAtlas = Resources.Load<SpriteAtlas>(IngredientAtlasResourcePath);
-
-#if UNITY_EDITOR
-        if (ingredientAtlas == null)
-            ingredientAtlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(IngredientAtlasAssetPath);
-#endif
-
-        return ingredientAtlas;
-    }
-
     private static SpriteAtlas GetGatheringAtlas()
     {
         if (gatheringAtlas != null)
@@ -133,6 +144,21 @@ public static class InventoryVisualUtility
 #endif
 
         return gatheringAtlas;
+    }
+
+    private static SpriteAtlas GetFoodAtlas()
+    {
+        if (foodAtlas != null)
+            return foodAtlas;
+
+        foodAtlas = Resources.Load<SpriteAtlas>(FoodAtlasResourcePath);
+
+#if UNITY_EDITOR
+        if (foodAtlas == null)
+            foodAtlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(FoodAtlasAssetPath);
+#endif
+
+        return foodAtlas;
     }
 
     private static string NormalizeAtlasKey(string rawKey)

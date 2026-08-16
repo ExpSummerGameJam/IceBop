@@ -4,7 +4,7 @@ TextureImporter:
   internalIDToNameTable:
   - first:
       213: -1729386893490138763
-    second: icesalt_0
+    second: ingredient_salty_ice
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: icesalt_0
+      name: ingredient_salty_ice
       rect:
         serializedVersion: 2
         x: 29
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      icesalt_0: -1729386893490138763
+      ingredient_salty_ice: -1729386893490138763
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

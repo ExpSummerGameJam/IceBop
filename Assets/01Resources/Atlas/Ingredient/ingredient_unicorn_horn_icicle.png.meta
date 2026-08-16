@@ -4,7 +4,7 @@ TextureImporter:
   internalIDToNameTable:
   - first:
       213: 6154594126048180503
-    second: iceunicorn_0
+    second: ingredient_unicorn_horn_icicle
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: iceunicorn_0
+      name: ingredient_unicorn_horn_icicle
       rect:
         serializedVersion: 2
         x: 44
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      iceunicorn_0: 6154594126048180503
+      ingredient_unicorn_horn_icicle: 6154594126048180503
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

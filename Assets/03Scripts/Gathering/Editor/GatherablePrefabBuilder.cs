@@ -25,16 +25,9 @@ public static class GatherablePrefabBuilder
         foreach (GatherableDefinition definition in gatherables.Where(IsUniqueMaterialGatherable))
             BuildUniqueMaterialPrefab(definition);
 
-        List<GatherableDefinition> enhancementDefinitions = gatherables
-            .Where(IsEnhancementMaterialGatherable)
-            .ToList();
-
-        for (int i = 0; i < enhancementDefinitions.Count; i += 2)
-        {
-            GatherableDefinition first = enhancementDefinitions[i];
-            GatherableDefinition second = i + 1 < enhancementDefinitions.Count ? enhancementDefinitions[i + 1] : null;
-            BuildEnhancementMaterialPrefab(first, second, i / 2 + 1);
-        }
+        int stageIndex = 0;
+        foreach (GatherableDefinition definition in gatherables.Where(IsEnhancementMaterialGatherable))
+            BuildEnhancementMaterialPrefab(definition, ++stageIndex);
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
@@ -54,27 +47,21 @@ public static class GatherablePrefabBuilder
         SavePrefab(root, prefabPath);
     }
 
-    private static void BuildEnhancementMaterialPrefab(
-        GatherableDefinition first,
-        GatherableDefinition second,
-        int groupIndex)
+    private static void BuildEnhancementMaterialPrefab(GatherableDefinition definition, int stageIndex)
     {
-        string firstKey = GetIngredientKey(first);
-        string secondKey = second != null ? GetIngredientKey(second) : "empty";
-        string prefabName = $"EnhancementGatherable_Stage{groupIndex}_{firstKey}_{secondKey}";
+        GatherableDropMode dropMode = definition.DropMode != GatherableDropMode.DataIngredient
+            ? definition.DropMode
+            : GatherableDropMode.AllConfiguredIngredients;
+        int ingredientIdA = definition.configuredDropIngredientIdA;
+        int ingredientIdB = definition.configuredDropIngredientIdB;
+
+        string firstKey = GetIngredientKeyById(ingredientIdA, definition);
+        string secondKey = ingredientIdB > 0 ? GetIngredientKeyById(ingredientIdB, definition) : "empty";
+        string prefabName = $"EnhancementGatherable_Stage{stageIndex}_{firstKey}_{secondKey}";
         string prefabPath = $"{EnhancementMaterialsFolder}/{prefabName}.prefab";
 
-        GameObject root = CreateGatherableRoot(prefabName, first.gatherableId);
+        GameObject root = CreateGatherableRoot(prefabName, definition.gatherableId);
         GatherableObject gatherable = root.GetComponent<GatherableObject>();
-
-        GatherableDropMode dropMode = first.DropMode != GatherableDropMode.DataIngredient
-            ? first.DropMode
-            : GatherableDropMode.RandomFromConfiguredIngredients;
-        int ingredientIdA = first.configuredDropIngredientIdA > 0 ? first.configuredDropIngredientIdA : first.ingredientId;
-        int ingredientIdB = first.configuredDropIngredientIdB > 0
-            ? first.configuredDropIngredientIdB
-            : (second != null ? second.ingredientId : 0);
-
         gatherable.ConfigureDropIngredients(dropMode, ingredientIdA, ingredientIdB);
         DisableAutoApplySprites(gatherable);
 
@@ -141,15 +128,20 @@ public static class GatherablePrefabBuilder
 
     private static string GetIngredientKey(GatherableDefinition definition)
     {
-        if (GatheringDataLookup.TryGetIngredient(definition.ingredientId, out IngredientDefinition ingredient) &&
+        return GetIngredientKeyById(definition.ingredientId, definition);
+    }
+
+    private static string GetIngredientKeyById(int ingredientId, GatherableDefinition fallbackDefinition)
+    {
+        if (GatheringDataLookup.TryGetIngredient(ingredientId, out IngredientDefinition ingredient) &&
             !string.IsNullOrWhiteSpace(ingredient.ingredientKey))
             return SanitizeFileName(ingredient.ingredientKey);
 
-        string fileName = Path.GetFileName(definition.availableSpriteResourcePath);
+        string fileName = Path.GetFileName(fallbackDefinition.availableSpriteResourcePath);
         if (!string.IsNullOrWhiteSpace(fileName))
             return SanitizeFileName(fileName);
 
-        return $"id_{definition.gatherableId}";
+        return $"id_{ingredientId}";
     }
 
     private static string SanitizeFileName(string value)

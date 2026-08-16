@@ -14,9 +14,7 @@ public sealed class InventoryView2D : MonoBehaviour
     [SerializeField] private Vector2 miniViewSize = new(192f, 144f);
     [SerializeField] private Vector2 largeViewSize = new(1920f, 1080f);
     [SerializeField] private Vector2 miniViewMargin = new(16f, 16f);
-    [SerializeField] private float inventoryCameraMargin = 0.35f;
-    [SerializeField] private float miniDropPointPadding = 0.25f;
-    [SerializeField] private float miniBagScale = 1.25f;
+    [SerializeField] private float miniCameraAspectOverride = 0f;
     [SerializeField] private bool renderLargeViewAsCameraOverlay;
     [SerializeField] private float largeCameraDepthOffset = 1f;
     [SerializeField] private Vector3 largeCameraPositionCorrection = Vector3.zero;
@@ -26,7 +24,6 @@ public sealed class InventoryView2D : MonoBehaviour
     private RenderTexture miniTexture;
     private RenderTexture largeTexture;
     private bool largeCameraBasePositionCaptured;
-    private const float MinimumCameraSize = 0.1f;
 
     public bool IsLargeViewOpen { get; private set; }
     public RectTransform LargeViewport => largeView != null ? largeView.rectTransform : null;
@@ -116,7 +113,7 @@ public sealed class InventoryView2D : MonoBehaviour
         camera.farClipPlane = 50f;
 
         Vector2Int textureSize = GetTextureSize(viewSize);
-        ApplyInventoryCameraFrame(camera, textureSize, isMiniCamera);
+        ApplyInventoryCameraFrame(camera, isMiniCamera);
 
         if (!isMiniCamera && !largeCameraBasePositionCaptured)
         {
@@ -274,60 +271,20 @@ public sealed class InventoryView2D : MonoBehaviour
 
     private void UpdateInventoryCameraFrames()
     {
-        ApplyInventoryCameraFrame(miniCamera, GetTextureSize(miniViewSize), true);
-        ApplyInventoryCameraFrame(largeCamera, GetTextureSize(largeViewSize), false);
+        ApplyInventoryCameraFrame(miniCamera, true);
+        ApplyInventoryCameraFrame(largeCamera, false);
 
         if (largeCamera != null && IsLargeCameraOverlay)
             largeCamera.depth = ResolveLargeCameraDepth();
     }
 
-    private void ApplyInventoryCameraFrame(Camera camera, Vector2Int textureSize, bool includeDropPoint)
+    private void ApplyInventoryCameraFrame(Camera camera, bool includeDropPoint)
     {
         if (camera == null)
             return;
 
-        Rect bagRect = includeDropPoint ? GetMiniInventoryViewWorldRect() : GetInventoryViewWorldRect();
-        float frameScale = includeDropPoint ? miniBagScale : 1f;
-        camera.orthographicSize = CalculateInventoryCameraSize(textureSize, bagRect, frameScale);
-    }
-
-    private Rect GetMiniInventoryViewWorldRect()
-    {
-        Rect bagRect = GetInventoryViewWorldRect();
-
-        if (inventory != null)
-            return EncapsulatePoint(bagRect, inventory.DropWorldPosition, miniDropPointPadding);
-
-        Rect fallbackRect = inventory != null ? inventory.BagWorldRect : bagRect;
-        Vector2 fallbackDropPoint = new(fallbackRect.center.x, fallbackRect.yMax);
-        return EncapsulatePoint(bagRect, fallbackDropPoint, miniDropPointPadding);
-    }
-
-    private Rect GetInventoryViewWorldRect()
-    {
-        return inventory != null
-            ? inventory.BagViewWorldRect
-            : new Rect((Vector2)transform.position - new Vector2(2f, 1.5f), new Vector2(4f, 3f));
-    }
-
-    private float CalculateInventoryCameraSize(Vector2Int textureSize, Rect bagRect, float frameScale)
-    {
-        float aspect = textureSize.x / Mathf.Max(1f, textureSize.y);
-        float margin = Mathf.Max(0f, inventoryCameraMargin);
-        float halfHeight = bagRect.height * 0.5f + margin;
-        float halfWidthAsHeight = (bagRect.width * 0.5f + margin) / Mathf.Max(0.01f, aspect);
-        float cameraSize = Mathf.Max(halfHeight, halfWidthAsHeight);
-        return Mathf.Max(MinimumCameraSize, cameraSize / Mathf.Max(0.01f, frameScale));
-    }
-
-    private static Rect EncapsulatePoint(Rect rect, Vector2 point, float padding)
-    {
-        float safePadding = Mathf.Max(0f, padding);
-        return Rect.MinMaxRect(
-            Mathf.Min(rect.xMin, point.x - safePadding),
-            Mathf.Min(rect.yMin, point.y - safePadding),
-            Mathf.Max(rect.xMax, point.x + safePadding),
-            Mathf.Max(rect.yMax, point.y + safePadding));
+        if (includeDropPoint && miniCameraAspectOverride > 0f)
+            camera.aspect = miniCameraAspectOverride;
     }
 
     private static bool TryGetCameraScreenWorldPosition(Camera camera, Vector2 screenPosition, out Vector2 worldPosition)
@@ -391,9 +348,7 @@ public sealed class InventoryView2D : MonoBehaviour
 
     private void OnValidate()
     {
-        inventoryCameraMargin = Mathf.Max(0f, inventoryCameraMargin);
-        miniDropPointPadding = Mathf.Max(0f, miniDropPointPadding);
-        miniBagScale = Mathf.Max(0.01f, miniBagScale);
+        miniCameraAspectOverride = Mathf.Max(0f, miniCameraAspectOverride);
         largeCameraDepthOffset = Mathf.Max(0.01f, largeCameraDepthOffset);
     }
 

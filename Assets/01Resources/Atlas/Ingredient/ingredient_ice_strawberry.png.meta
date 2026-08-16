@@ -4,7 +4,7 @@ TextureImporter:
   internalIDToNameTable:
   - first:
       213: 2650013024892147116
-    second: icestraw_0
+    second: ingredient_ice_strawberry
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: icestraw_0
+      name: ingredient_ice_strawberry
       rect:
         serializedVersion: 2
         x: 35
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      icestraw_0: 2650013024892147116
+      ingredient_ice_strawberry: 2650013024892147116
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

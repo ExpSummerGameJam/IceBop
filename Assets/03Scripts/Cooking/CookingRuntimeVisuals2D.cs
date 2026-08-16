@@ -9,13 +9,19 @@ public static class CookingRuntimeVisuals2D
 {
     private const string HandkerchiefResourcePath = "Atlas/Pot/handkerchief";
     private const string CutboardResourcePath = "Atlas/Pot/cutboard";
+    private const string Knife1ResourcePath = "Atlas/Pot/knife1";
+    private const string Knife2ResourcePath = "Atlas/Pot/knife2";
 
 #if UNITY_EDITOR
     private const string HandkerchiefAssetPath = "Assets/01Resources/Atlas/Pot/handkerchief.png";
     private const string CutboardAssetPath = "Assets/01Resources/Atlas/Pot/cutboard.png";
+    private const string Knife1AssetPath = "Assets/01Resources/Atlas/Pot/knife1.png";
+    private const string Knife2AssetPath = "Assets/01Resources/Atlas/Pot/knife2.png";
 #endif
 
     private static Sprite knifeSprite;
+    private static Sprite knife1Sprite;
+    private static Sprite knife2Sprite;
     private static Sprite clothSprite;
     private static Sprite cutboardSprite;
     private static Sprite grinderSprite;
@@ -58,6 +64,34 @@ public static class CookingRuntimeVisuals2D
             knifeSprite = CreateKnifeSprite();
 
         return knifeSprite;
+    }
+
+    public static Sprite GetKnife1Sprite()
+    {
+        if (knife1Sprite == null)
+            knife1Sprite = LoadSprite(Knife1ResourcePath,
+#if UNITY_EDITOR
+                Knife1AssetPath,
+#else
+                null,
+#endif
+                "knife1") ?? CreateKnifeSprite();
+
+        return knife1Sprite;
+    }
+
+    public static Sprite GetKnife2Sprite()
+    {
+        if (knife2Sprite == null)
+            knife2Sprite = LoadSprite(Knife2ResourcePath,
+#if UNITY_EDITOR
+                Knife2AssetPath,
+#else
+                null,
+#endif
+                "knife2") ?? CreateKnifeSprite();
+
+        return knife2Sprite;
     }
 
     public static Sprite GetClothSprite()
@@ -110,7 +144,7 @@ public static class CookingRuntimeVisuals2D
     {
         if (dish != null && !string.IsNullOrWhiteSpace(dish.dishSpriteResourcePath))
         {
-            Sprite loaded = Resources.Load<Sprite>(dish.dishSpriteResourcePath);
+            Sprite loaded = InventoryVisualUtility.GetFoodSprite(dish.dishSpriteResourcePath);
             if (loaded != null)
                 return loaded;
         }

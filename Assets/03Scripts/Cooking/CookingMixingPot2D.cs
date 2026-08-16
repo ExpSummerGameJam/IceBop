@@ -1,16 +1,18 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class CookingMixingPot2D : MonoBehaviour
+public sealed class CookingMixingPot2D : MonoBehaviour, IDishFinishingStage
 {
+    private static readonly Vector3 LiquidFullLocalPosition = new(0f, 0.03f, 0f);
+    private static readonly Vector2 LiquidFullSize = new(1.20f, 0.44f);
+    private static readonly Color EmptyLiquidColor = new(0.50f, 0.30f, 0.14f, 0.38f);
+    private static readonly Color FullLiquidColor = new(0.78f, 0.48f, 0.20f, 0.92f);
+
     [SerializeField] private PreparationPointerTool2D ladleTool;
     [SerializeField] private int requiredAlternatingStrokes = 8;
     [SerializeField] private float minHorizontalStrokeDistance = 0.48f;
     [SerializeField] private float verticalNoiseRatio = 1.15f;
-    [SerializeField] private float finishTravelDuration = 0.65f;
-    [SerializeField] private float returnTravelDuration = 0.75f;
 
     private readonly List<SpriteRenderer> ingredientRenderers = new();
     private readonly List<Vector3> ingredientStartPositions = new();
@@ -19,8 +21,8 @@ public sealed class CookingMixingPot2D : MonoBehaviour
     private BoxCollider2D potCollider;
     private Transform contentRoot;
     private SpriteRenderer liquidRenderer;
-    private SpriteRenderer dishRenderer;
-    private TextMesh dishLabel;
+    private SpriteMask liquidMask;
+    private DishResultPresenter2D presenter;
     private Camera targetCamera;
     private DishDefinition dish;
     private IReadOnlyList<CookingIngredientEntry> ingredients;
@@ -33,8 +35,8 @@ public sealed class CookingMixingPot2D : MonoBehaviour
     private bool mixingCompleted;
     private bool presentingResult;
 
-    public event Action<CookingMixingPot2D> MixingCompleted;
-    public event Action<CookingMixingPot2D> DishPresented;
+    public event Action InteractionCompleted;
+    public event Action ResultPresented;
 
     public void Configure(Camera camera, IReadOnlyList<CookingIngredientEntry> newIngredients, DishDefinition newDish)
     {
@@ -59,10 +61,6 @@ public sealed class CookingMixingPot2D : MonoBehaviour
         ApplyMixVisuals();
     }
 
-    private void Awake()
-    {
-    }
-
     private void Update()
     {
         if (mixingCompleted || presentingResult || ladleTool == null || !ladleTool.HasPointerMovement)
@@ -76,7 +74,33 @@ public sealed class CookingMixingPot2D : MonoBehaviour
         if (presentingResult)
             return;
 
-        StartCoroutine(ResultPresentationRoutine());
+        presentingResult = true;
+
+        if (presenter == null)
+        {
+            presenter = gameObject.AddComponent<DishResultPresenter2D>();
+            presenter.Presented += () => ResultPresented?.Invoke();
+        }
+
+        presenter.Play(targetCamera, dish, ingredients, HideInteractiveVisuals);
+    }
+
+    private void HideInteractiveVisuals()
+    {
+        if (ladleTool != null)
+            ladleTool.gameObject.SetActive(false);
+
+        foreach (SpriteRenderer ingredientRenderer in ingredientRenderers)
+        {
+            if (ingredientRenderer != null)
+                ingredientRenderer.gameObject.SetActive(false);
+        }
+
+        if (liquidRenderer != null)
+            liquidRenderer.gameObject.SetActive(false);
+
+        if (liquidMask != null)
+            liquidMask.gameObject.SetActive(false);
     }
 
     private void ApplyLadleMovement(Vector2 previousPointerPosition, Vector2 currentPointerPosition)
@@ -117,7 +141,7 @@ public sealed class CookingMixingPot2D : MonoBehaviour
         if (mixProgress >= 1f && !mixingCompleted)
         {
             mixingCompleted = true;
-            MixingCompleted?.Invoke(this);
+            InteractionCompleted?.Invoke();
         }
     }
 
@@ -126,13 +150,17 @@ public sealed class CookingMixingPot2D : MonoBehaviour
         float progress = Mathf.Clamp01(mixProgress);
 
         if (liquidRenderer != null)
+            liquidRenderer.color = Color.Lerp(EmptyLiquidColor, FullLiquidColor, progress);
+
+        if (liquidMask != null)
         {
-            liquidRenderer.transform.localScale = new Vector3(
-                Mathf.Lerp(0.32f, 1.20f, progress),
-                Mathf.Lerp(0.08f, 0.44f, progress),
-                1f);
-            liquidRenderer.transform.localPosition = new Vector3(0f, Mathf.Lerp(-0.20f, 0.03f, progress), 0f);
-            liquidRenderer.color = Color.Lerp(new Color(0.50f, 0.30f, 0.14f, 0.38f), new Color(0.78f, 0.48f, 0.20f, 0.92f), progress);
+            // The liquid sprite itself stays fixed at full size; the mask's height grows
+            // from the bottom edge upward so the fill reads as rising liquid instead of a
+            // stretched blob.
+            float maskHeight = Mathf.Max(0.001f, LiquidFullSize.y * progress);
+            float bottomY = LiquidFullLocalPosition.y - LiquidFullSize.y * 0.5f;
+            liquidMask.transform.localScale = new Vector3(LiquidFullSize.x, maskHeight, 1f);
+            liquidMask.transform.localPosition = new Vector3(LiquidFullLocalPosition.x, bottomY + maskHeight * 0.5f, 0f);
         }
 
         for (int i = 0; i < ingredientRenderers.Count; i++)
@@ -158,98 +186,6 @@ public sealed class CookingMixingPot2D : MonoBehaviour
             return Vector2.Distance(worldPosition, transform.position) <= 1.25f;
 
         return potCollider.bounds.Contains(new Vector3(worldPosition.x, worldPosition.y, potCollider.bounds.center.z));
-    }
-
-    private IEnumerator ResultPresentationRoutine()
-    {
-        presentingResult = true;
-
-        if (ladleTool != null)
-            ladleTool.gameObject.SetActive(false);
-
-        Vector3 startPosition = transform.position;
-        Vector3 offscreenPosition = GetRightOffscreenPosition(startPosition);
-        yield return MoveTo(startPosition, offscreenPosition, finishTravelDuration);
-
-        ShowDishResult();
-        yield return MoveTo(offscreenPosition, startPosition, returnTravelDuration);
-
-        DishPresented?.Invoke(this);
-    }
-
-    private IEnumerator MoveTo(Vector3 from, Vector3 to, float duration)
-    {
-        float elapsed = 0f;
-        float safeDuration = Mathf.Max(0.01f, duration);
-
-        while (elapsed < safeDuration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / safeDuration);
-            t = t * t * (3f - 2f * t);
-            transform.position = Vector3.Lerp(from, to, t);
-            yield return null;
-        }
-
-        transform.position = to;
-    }
-
-    private Vector3 GetRightOffscreenPosition(Vector3 fallback)
-    {
-        Camera camera = targetCamera != null ? targetCamera : Camera.main;
-        if (camera == null)
-            return fallback + Vector3.right * 5f;
-
-        float zDistance = Mathf.Abs(camera.transform.position.z - fallback.z);
-        Vector3 rightEdge = camera.ViewportToWorldPoint(new Vector3(1.2f, 0.5f, zDistance));
-        return new Vector3(rightEdge.x + 1.2f, fallback.y, fallback.z);
-    }
-
-    private void ShowDishResult()
-    {
-        foreach (SpriteRenderer ingredientRenderer in ingredientRenderers)
-        {
-            if (ingredientRenderer != null)
-                ingredientRenderer.gameObject.SetActive(false);
-        }
-
-        if (liquidRenderer != null)
-            liquidRenderer.gameObject.SetActive(false);
-
-        if (dishRenderer == null)
-        {
-            GameObject dishObject = new("CompletedDish");
-            dishObject.transform.SetParent(transform, false);
-            dishObject.transform.localPosition = new Vector3(0f, 0.36f, 0f);
-            dishObject.transform.localScale = new Vector3(0.78f, 0.78f, 1f);
-            dishRenderer = dishObject.AddComponent<SpriteRenderer>();
-            dishRenderer.sortingOrder = 43;
-        }
-
-        dishRenderer.sprite = CookingRuntimeVisuals2D.GetDishSprite(dish, ingredients);
-        dishRenderer.color = Color.white;
-        dishRenderer.gameObject.SetActive(true);
-
-        if (dishLabel == null)
-        {
-            GameObject labelObject = new("CompletedDishLabel");
-            labelObject.transform.SetParent(transform, false);
-            labelObject.transform.localPosition = new Vector3(0f, -0.96f, 0f);
-            dishLabel = labelObject.AddComponent<TextMesh>();
-            dishLabel.anchor = TextAnchor.MiddleCenter;
-            dishLabel.alignment = TextAlignment.Center;
-            dishLabel.fontSize = 34;
-            dishLabel.characterSize = 0.055f;
-            dishLabel.color = new Color(0.94f, 0.96f, 0.92f, 1f);
-
-            MeshRenderer renderer = labelObject.GetComponent<MeshRenderer>();
-            if (renderer != null)
-                renderer.sortingOrder = 44;
-        }
-
-        dishLabel.text = dish != null && !string.IsNullOrWhiteSpace(dish.displayName)
-            ? dish.displayName
-            : "Completed Dish";
     }
 
     private void EmitBubbles()
@@ -311,7 +247,18 @@ public sealed class CookingMixingPot2D : MonoBehaviour
 
         if (liquidRenderer == null)
         {
-            liquidRenderer = CookingRuntimeVisuals2D.CreateBlock("MixLiquid", contentRoot, new Vector3(0f, -0.20f, 0f), new Vector3(0.32f, 0.08f, 1f), new Color(0.50f, 0.30f, 0.14f, 0.38f), 39);
+            liquidRenderer = CookingRuntimeVisuals2D.CreateBlock(
+                "MixLiquid", contentRoot, LiquidFullLocalPosition,
+                new Vector3(LiquidFullSize.x, LiquidFullSize.y, 1f), EmptyLiquidColor, 39);
+            liquidRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+        }
+
+        if (liquidMask == null)
+        {
+            GameObject maskObject = new("MixLiquidMask");
+            maskObject.transform.SetParent(contentRoot, false);
+            liquidMask = maskObject.AddComponent<SpriteMask>();
+            liquidMask.sprite = InventoryVisualUtility.WhiteSprite;
         }
 
         EnsureIngredientBits();
@@ -397,7 +344,5 @@ public sealed class CookingMixingPot2D : MonoBehaviour
         requiredAlternatingStrokes = Mathf.Max(1, requiredAlternatingStrokes);
         minHorizontalStrokeDistance = Mathf.Max(0.01f, minHorizontalStrokeDistance);
         verticalNoiseRatio = Mathf.Max(0.1f, verticalNoiseRatio);
-        finishTravelDuration = Mathf.Max(0.01f, finishTravelDuration);
-        returnTravelDuration = Mathf.Max(0.01f, returnTravelDuration);
     }
 }

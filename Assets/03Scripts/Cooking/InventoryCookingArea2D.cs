@@ -1,10 +1,9 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
-public sealed class InventoryCookingArea2D : MonoBehaviour, IInventoryItemDropReceiver2D
+public sealed class InventoryCookingArea2D : MonoBehaviour
 {
     [SerializeField] private InventoryCookingStation2D cookingStation;
-    [SerializeField] private bool hideRendererOnPlay = true;
 
     private Collider2D areaCollider;
 
@@ -24,30 +23,42 @@ public sealed class InventoryCookingArea2D : MonoBehaviour, IInventoryItemDropRe
         if (areaCollider != null)
             areaCollider.isTrigger = true;
 
-        if (hideRendererOnPlay && TryGetComponent(out Renderer areaRenderer))
-            areaRenderer.enabled = false;
-
         if (cookingStation != null)
             cookingStation.BindCookingArea(areaCollider);
     }
 
-    public bool TryReceiveInventoryItem(InventoryItem2D item)
+    private void OnTriggerEnter2D(Collider2D other)
     {
+        NotifyItemPresence(other, true);
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        NotifyItemPresence(other, false);
+    }
+
+    private void OnDisable()
+    {
+        cookingStation?.ClearItemsFromArea(this);
+    }
+
+    private void NotifyItemPresence(Collider2D other, bool isOnPot)
+    {
+        if (other == null)
+            return;
+
+        InventoryItem2D item = other.GetComponentInParent<InventoryItem2D>();
+        if (item == null)
+            return;
+
         ResolveReferences();
-
-        if (cookingStation == null)
-            return false;
-
-        return cookingStation.TryReceiveInventoryItem(item);
+        cookingStation?.SetItemOnPot(item, isOnPot);
     }
 
     private void ResolveReferences()
     {
         if (areaCollider == null)
             areaCollider = GetComponent<Collider2D>();
-
-        if (TryGetComponent(out SpriteRenderer renderer) && renderer.sprite == null)
-            renderer.sprite = InventoryVisualUtility.WhiteSprite;
 
         if (cookingStation == null)
             cookingStation = GetComponentInParent<InventoryCookingStation2D>();
