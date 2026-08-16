@@ -1,15 +1,24 @@
 using System;
 using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 [DisallowMultipleComponent]
 public sealed class ProgressiveLayeredAudioController : MonoBehaviour
 {
-    private const int MaxLayerCount = 9;
+    private const int MaxLayerCount = 3;
+    private const string BgmResourcePathPrefix = "Sound/BGM/BGM_";
+#if UNITY_EDITOR
+    private const string BgmAssetPathPrefix = "Assets/01Resources/Sound/BGM/BGM_";
+#endif
 
     [Header("Layers")]
     [SerializeField] private AudioSource[] layerSources = new AudioSource[MaxLayerCount];
     [SerializeField] private AudioClip[] layerClips = new AudioClip[MaxLayerCount];
     [SerializeField] private bool createMissingSourcesFromClips = true;
+    [SerializeField] private bool loadMissingClipsFromBgmFolder = true;
 
     [Header("Playback")]
     [Range(0, MaxLayerCount)]
@@ -18,21 +27,45 @@ public sealed class ProgressiveLayeredAudioController : MonoBehaviour
     [SerializeField] private bool loop = true;
     [SerializeField] private double scheduledStartDelay = 0.1d;
 
+    [Header("Settings")]
+    [SerializeField] private bool registerSourcesWithSettings = true;
+    [SerializeField] private GameAudioChannelType settingsAudioChannel = GameAudioChannelType.BackgroundMusic;
+
     [Header("Input")]
     [SerializeField] private bool numberKeysSetActiveLayerCount = true;
     [SerializeField] private bool includeNumpadKeys = true;
     [SerializeField] private bool zeroKeyMutesAll = true;
 
     private int activeLayerCount;
+    private readonly float[] layerBaseVolumes = new float[MaxLayerCount];
+    private readonly bool[] layerBaseVolumeInitialized = new bool[MaxLayerCount];
+    private GameSettingsManager settings;
 
     public int ActiveLayerCount => activeLayerCount;
 
     private void Awake()
     {
         activeLayerCount = Mathf.Clamp(initialActiveLayerCount, 0, MaxLayerCount);
+        EnsureLayerClipsFromBgmFolder();
         EnsureRuntimeSources();
         ConfigureSources();
         ApplyMuteState();
+    }
+
+    private void OnEnable()
+    {
+        settings = GameSettingsManager.EnsureExists();
+        if (settings != null)
+        {
+            settings.VolumeChanged += OnSettingsVolumeChanged;
+            ApplySettingsVolumeToSources();
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (settings != null)
+            settings.VolumeChanged -= OnSettingsVolumeChanged;
     }
 
     private void Start()
@@ -43,6 +76,9 @@ public sealed class ProgressiveLayeredAudioController : MonoBehaviour
 
     private void Update()
     {
+        if (GamePauseState.IsPaused)
+            return;
+
         if (!numberKeysSetActiveLayerCount)
             return;
 
@@ -107,6 +143,32 @@ public sealed class ProgressiveLayeredAudioController : MonoBehaviour
         ApplyMuteState();
     }
 
+    private void EnsureLayerClipsFromBgmFolder()
+    {
+        if (!loadMissingClipsFromBgmFolder || layerClips == null)
+            return;
+
+        for (int i = 0; i < MaxLayerCount; i++)
+        {
+            if (layerClips[i] != null)
+                continue;
+
+            layerClips[i] = LoadBgmClip(i + 1);
+        }
+    }
+
+    private static AudioClip LoadBgmClip(int stageNumber)
+    {
+        AudioClip clip = Resources.Load<AudioClip>(BgmResourcePathPrefix + stageNumber);
+
+#if UNITY_EDITOR
+        if (clip == null)
+            clip = AssetDatabase.LoadAssetAtPath<AudioClip>(BgmAssetPathPrefix + stageNumber + ".mp3");
+#endif
+
+        return clip;
+    }
+
     private void EnsureRuntimeSources()
     {
         if (!createMissingSourcesFromClips || layerClips == null)
@@ -143,6 +205,56 @@ public sealed class ProgressiveLayeredAudioController : MonoBehaviour
         source.playOnAwake = false;
         source.loop = loop;
         source.mute = layerIndex >= activeLayerCount;
+
+        RegisterSourceWithSettings(source, layerIndex);
+    }
+
+    private void RegisterSourceWithSettings(AudioSource source, int layerIndex)
+    {
+        if (!registerSourcesWithSettings || source == null)
+            return;
+
+        GameAudioChannel channel = source.GetComponent<GameAudioChannel>();
+        if (channel != null)
+        {
+            channel.SetChannelType(settingsAudioChannel);
+            return;
+        }
+
+        if (!layerBaseVolumeInitialized[layerIndex])
+        {
+            layerBaseVolumes[layerIndex] = source.volume;
+            layerBaseVolumeInitialized[layerIndex] = true;
+        }
+
+        GameSettingsManager currentSettings = settings != null ? settings : GameSettingsManager.EnsureExists();
+        if (currentSettings == null)
+            return;
+
+        source.volume = layerBaseVolumes[layerIndex] * currentSettings.GetVolume01(settingsAudioChannel);
+    }
+
+    private void OnSettingsVolumeChanged(GameAudioChannelType changedChannelType, float volume01)
+    {
+        if (changedChannelType != settingsAudioChannel)
+            return;
+
+        ApplySettingsVolumeToSources();
+    }
+
+    private void ApplySettingsVolumeToSources()
+    {
+        if (!registerSourcesWithSettings)
+            return;
+
+        for (int i = 0; i < MaxLayerCount; i++)
+        {
+            AudioSource source = layerSources[i];
+            if (source == null || source.GetComponent<GameAudioChannel>() != null)
+                continue;
+
+            RegisterSourceWithSettings(source, i);
+        }
     }
 
     private void ApplyMuteState()

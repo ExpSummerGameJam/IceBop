@@ -1,29 +1,31 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 
 public sealed class NpcSpeechBubble2D : MonoBehaviour
 {
+    public const string DefaultBubblePrefabResourcePath = "Prefabs/UI/NpcSpeechBubble";
+
     [SerializeField] private Transform followTarget;
     [SerializeField] private Vector3 worldOffset = new(0f, 1.35f, 0f);
+    [SerializeField] private Vector3 bubblePositionCorrection = new(-0.2f, 0f, 0f);
+
+    [SerializeField] private GameObject bubblePrefab;
+    [SerializeField] private string bubblePrefabResourcePath = DefaultBubblePrefabResourcePath;
+
     [SerializeField] private int wrapCharacters = 18;
     [SerializeField] private float charactersPerSecond = 42f;
     [SerializeField] private float autoHideDelay = 1.15f;
-    [SerializeField] private float characterSize = 0.07f;
-    [SerializeField] private int fontSize = 48;
-    [SerializeField] private int sortingOrder = 120;
-    [SerializeField] private Color backgroundColor = new(0.02f, 0.02f, 0.025f, 0.94f);
-    [SerializeField] private Color borderColor = new(0.92f, 0.95f, 0.98f, 1f);
-    [SerializeField] private Color textColor = Color.white;
 
     private readonly Queue<string> queuedLines = new();
+    private readonly StringBuilder wrapBuilder = new(128);
+    private readonly StringBuilder displayBuilder = new(128);
+
     private Transform bubbleRoot;
-    private SpriteRenderer borderRenderer;
-    private SpriteRenderer backgroundRenderer;
-    private SpriteRenderer tailRenderer;
-    private TextMesh textMesh;
+    private Text bubbleText;
     private Coroutine speechRoutine;
-    private string wrappedText = string.Empty;
 
     private void Awake()
     {
@@ -39,7 +41,10 @@ public sealed class NpcSpeechBubble2D : MonoBehaviour
         if (bubbleRoot == null || followTarget == null)
             return;
 
-        bubbleRoot.position = followTarget.position + worldOffset;
+        bubbleRoot.position =
+            followTarget.position +
+            worldOffset +
+            bubblePositionCorrection;
     }
 
     public void Speak(string message)
@@ -50,6 +55,7 @@ public sealed class NpcSpeechBubble2D : MonoBehaviour
     public void Speak(string message, float hideDelay)
     {
         queuedLines.Clear();
+
         if (!string.IsNullOrWhiteSpace(message))
             queuedLines.Enqueue(message);
 
@@ -79,12 +85,16 @@ public sealed class NpcSpeechBubble2D : MonoBehaviour
 
         speechRoutine = null;
         queuedLines.Clear();
+
         SetVisible(false);
     }
 
     private void RestartSpeech(float hideDelay)
     {
         EnsureVisuals();
+
+        if (bubbleText == null)
+            return;
 
         if (speechRoutine != null)
             StopCoroutine(speechRoutine);
@@ -97,19 +107,26 @@ public sealed class NpcSpeechBubble2D : MonoBehaviour
         while (queuedLines.Count > 0)
         {
             string line = queuedLines.Dequeue();
-            wrappedText = WrapText(line, Mathf.Max(4, wrapCharacters));
-            ApplyBubbleSize(wrappedText);
-            SetVisible(true);
 
-            int characterCount = wrappedText.Length;
-            float safeCharactersPerSecond = Mathf.Max(1f, charactersPerSecond);
-            for (int i = 0; i <= characterCount; i++)
+            BuildWrappedText(line, Mathf.Max(4, wrapCharacters));
+
+            displayBuilder.Clear();
+
+            SetVisible(true);
+            bubbleText.text = string.Empty;
+
+            float delay = 1f / Mathf.Max(1f, charactersPerSecond);
+
+            for (int i = 0; i < wrapBuilder.Length; i++)
             {
-                textMesh.text = wrappedText.Substring(0, i);
-                yield return new WaitForSeconds(1f / safeCharactersPerSecond);
+                displayBuilder.Append(wrapBuilder[i]);
+                bubbleText.text = displayBuilder.ToString();
+
+                yield return new WaitForSeconds(delay);
             }
 
             float visibleDelay = Mathf.Max(0f, hideDelay);
+
             if (visibleDelay > 0f)
                 yield return new WaitForSeconds(visibleDelay);
         }
@@ -118,112 +135,153 @@ public sealed class NpcSpeechBubble2D : MonoBehaviour
         speechRoutine = null;
     }
 
+    private void BuildWrappedText(string text, int maxCharacters)
+    {
+        wrapBuilder.Clear();
+
+        if (string.IsNullOrEmpty(text))
+            return;
+
+        int currentLineLength = 0;
+        int wordStart = 0;
+
+        while (wordStart < text.Length)
+        {
+            while (wordStart < text.Length && text[wordStart] == ' ')
+                wordStart++;
+
+            if (wordStart >= text.Length)
+                break;
+
+            int wordEnd = wordStart;
+
+            while (wordEnd < text.Length && text[wordEnd] != ' ')
+                wordEnd++;
+
+            int wordLength = wordEnd - wordStart;
+
+            if (wordLength > maxCharacters)
+            {
+                if (currentLineLength > 0)
+                {
+                    wrapBuilder.Append('\n');
+                    currentLineLength = 0;
+                }
+
+                int index = wordStart;
+
+                while (index < wordEnd)
+                {
+                    int remaining = wordEnd - index;
+                    int take = Mathf.Min(maxCharacters, remaining);
+
+                    for (int i = 0; i < take; i++)
+                        wrapBuilder.Append(text[index + i]);
+
+                    index += take;
+                    currentLineLength = take;
+
+                    if (index < wordEnd)
+                    {
+                        wrapBuilder.Append('\n');
+                        currentLineLength = 0;
+                    }
+                }
+            }
+            else
+            {
+                int requiredLength = currentLineLength == 0
+                    ? wordLength
+                    : wordLength + 1;
+
+                if (currentLineLength > 0 &&
+                    currentLineLength + requiredLength > maxCharacters)
+                {
+                    wrapBuilder.Append('\n');
+                    currentLineLength = 0;
+                }
+
+                if (currentLineLength > 0)
+                {
+                    wrapBuilder.Append(' ');
+                    currentLineLength++;
+                }
+
+                for (int i = wordStart; i < wordEnd; i++)
+                    wrapBuilder.Append(text[i]);
+
+                currentLineLength += wordLength;
+            }
+
+            wordStart = wordEnd + 1;
+        }
+    }
+
     private void EnsureVisuals()
     {
         if (bubbleRoot != null)
             return;
 
-        bubbleRoot = new GameObject("NPC_SpeechBubble").transform;
-        bubbleRoot.SetParent(transform, false);
-        bubbleRoot.localPosition = worldOffset;
-        bubbleRoot.localRotation = Quaternion.identity;
-        bubbleRoot.localScale = Vector3.one;
+        GameObject prefab = ResolveBubblePrefab();
 
-        borderRenderer = CreateRenderer("BubbleBorder", bubbleRoot, new Vector3(0f, 0f, 0.02f), borderColor, sortingOrder);
-        backgroundRenderer = CreateRenderer("BubbleBackground", bubbleRoot, new Vector3(0f, 0f, 0.01f), backgroundColor, sortingOrder + 1);
-        tailRenderer = CreateRenderer("BubbleTail", bubbleRoot, new Vector3(0f, -0.32f, 0.015f), backgroundColor, sortingOrder + 1);
-        tailRenderer.transform.localRotation = Quaternion.Euler(0f, 0f, 45f);
-
-        GameObject textObject = new("BubbleText");
-        textObject.transform.SetParent(bubbleRoot, false);
-        textObject.transform.localPosition = new Vector3(0f, 0.01f, -0.01f);
-
-        textMesh = textObject.AddComponent<TextMesh>();
-        textMesh.anchor = TextAnchor.MiddleCenter;
-        textMesh.alignment = TextAlignment.Center;
-        textMesh.fontSize = fontSize;
-        textMesh.characterSize = characterSize;
-        textMesh.color = textColor;
-
-        MeshRenderer textRenderer = textObject.GetComponent<MeshRenderer>();
-        if (textRenderer != null)
-            textRenderer.sortingOrder = sortingOrder + 2;
-    }
-
-    private SpriteRenderer CreateRenderer(string name, Transform parent, Vector3 localPosition, Color color, int order)
-    {
-        GameObject visual = new(name);
-        visual.transform.SetParent(parent, false);
-        visual.transform.localPosition = localPosition;
-
-        SpriteRenderer renderer = visual.AddComponent<SpriteRenderer>();
-        renderer.sprite = InventoryVisualUtility.WhiteSprite;
-        renderer.color = color;
-        renderer.sortingOrder = order;
-        return renderer;
-    }
-
-    private void ApplyBubbleSize(string text)
-    {
-        string[] lines = text.Split('\n');
-        int longestLine = 1;
-        foreach (string line in lines)
-            longestLine = Mathf.Max(longestLine, line.Length);
-
-        float width = Mathf.Clamp(longestLine * characterSize * 0.62f + 0.44f, 1.15f, 3.9f);
-        float height = Mathf.Clamp(lines.Length * characterSize * 1.55f + 0.34f, 0.52f, 2.2f);
-
-        borderRenderer.transform.localScale = new Vector3(width + 0.08f, height + 0.08f, 1f);
-        backgroundRenderer.transform.localScale = new Vector3(width, height, 1f);
-        tailRenderer.transform.localScale = new Vector3(0.24f, 0.24f, 1f);
-        tailRenderer.transform.localPosition = new Vector3(-width * 0.24f, -height * 0.5f, 0.015f);
-    }
-
-    private static string WrapText(string text, int maxCharacters)
-    {
-        if (string.IsNullOrWhiteSpace(text))
-            return string.Empty;
-
-        string[] words = text.Split(' ');
-        if (words.Length <= 1)
-            return WrapLongToken(text, maxCharacters);
-
-        List<string> lines = new();
-        string currentLine = string.Empty;
-        foreach (string word in words)
+        if (prefab == null)
         {
-            if (string.IsNullOrWhiteSpace(word))
-                continue;
+            Debug.LogError(
+                $"NpcSpeechBubble2D: Prefab을 찾을 수 없습니다. Path: {bubblePrefabResourcePath}",
+                this
+            );
 
-            string candidate = string.IsNullOrEmpty(currentLine) ? word : $"{currentLine} {word}";
-            if (candidate.Length <= maxCharacters)
-            {
-                currentLine = candidate;
-                continue;
-            }
-
-            if (!string.IsNullOrEmpty(currentLine))
-                lines.Add(currentLine);
-
-            currentLine = word.Length > maxCharacters ? WrapLongToken(word, maxCharacters) : word;
+            return;
         }
 
-        if (!string.IsNullOrEmpty(currentLine))
-            lines.Add(currentLine);
+        GameObject instance = Instantiate(prefab, transform, false);
 
-        return string.Join("\n", lines);
+        bubbleRoot = instance.transform;
+        bubbleRoot.localPosition =
+            worldOffset +
+            bubblePositionCorrection;
+
+        bubbleText = FindBubbleText(instance);
+
+        if (bubbleText == null)
+        {
+            Debug.LogError(
+                "NpcSpeechBubble2D: BubbleText를 찾을 수 없습니다.",
+                instance
+            );
+        }
     }
 
-    private static string WrapLongToken(string text, int maxCharacters)
+    private GameObject ResolveBubblePrefab()
     {
-        List<string> lines = new();
-        for (int i = 0; i < text.Length; i += maxCharacters)
+        if (bubblePrefab != null)
+            return bubblePrefab;
+
+        string resourcePath =
+            string.IsNullOrWhiteSpace(bubblePrefabResourcePath)
+                ? DefaultBubblePrefabResourcePath
+                : bubblePrefabResourcePath.Trim();
+
+        return Resources.Load<GameObject>(resourcePath);
+    }
+
+    private Text FindBubbleText(GameObject instance)
+    {
+        Transform[] children =
+            instance.GetComponentsInChildren<Transform>(true);
+
+        foreach (Transform child in children)
         {
-            int length = Mathf.Min(maxCharacters, text.Length - i);
-            lines.Add(text.Substring(i, length));
+            if (child.name != "BubbleText")
+                continue;
+
+            Text text = child.GetComponent<Text>();
+
+            if (text != null)
+                return text;
         }
 
-        return string.Join("\n", lines);
+        return instance.GetComponentInChildren<Text>(true);
     }
 
     private void SetVisible(bool visible)
@@ -237,7 +295,5 @@ public sealed class NpcSpeechBubble2D : MonoBehaviour
         wrapCharacters = Mathf.Max(4, wrapCharacters);
         charactersPerSecond = Mathf.Max(1f, charactersPerSecond);
         autoHideDelay = Mathf.Max(0f, autoHideDelay);
-        characterSize = Mathf.Max(0.01f, characterSize);
-        fontSize = Mathf.Max(8, fontSize);
     }
 }

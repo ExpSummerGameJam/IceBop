@@ -12,9 +12,13 @@ public sealed class GatherableDefinition
     public string depletedSpriteResourcePath;
     public int dropCount;
     public bool canGatherOnce;
+    public string dropMode;
+    public int configuredDropIngredientIdA;
+    public int configuredDropIngredientIdB;
     public string memo;
 
     public int SafeDropCount => Mathf.Max(1, dropCount);
+    public GatherableDropMode DropMode => GatherableDropModeUtility.Parse(dropMode);
 }
 
 [Serializable]

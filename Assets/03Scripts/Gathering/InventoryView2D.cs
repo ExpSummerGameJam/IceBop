@@ -19,11 +19,13 @@ public sealed class InventoryView2D : MonoBehaviour
     [SerializeField] private float miniBagScale = 1.25f;
     [SerializeField] private bool renderLargeViewAsCameraOverlay;
     [SerializeField] private float largeCameraDepthOffset = 1f;
+    [SerializeField] private Vector3 largeCameraPositionCorrection = Vector3.zero;
     [SerializeField] private Color miniTint = Color.white;
     [SerializeField] private Color largeTint = Color.white;
 
     private RenderTexture miniTexture;
     private RenderTexture largeTexture;
+    private bool largeCameraBasePositionCaptured;
     private const float MinimumCameraSize = 0.1f;
 
     public bool IsLargeViewOpen { get; private set; }
@@ -115,6 +117,12 @@ public sealed class InventoryView2D : MonoBehaviour
 
         Vector2Int textureSize = GetTextureSize(viewSize);
         ApplyInventoryCameraFrame(camera, textureSize, isMiniCamera);
+
+        if (!isMiniCamera && !largeCameraBasePositionCaptured)
+        {
+            largeCameraBasePositionCaptured = true;
+            camera.transform.position += largeCameraPositionCorrection;
+        }
 
         if (!isMiniCamera && IsLargeCameraOverlay)
         {
@@ -280,7 +288,6 @@ public sealed class InventoryView2D : MonoBehaviour
 
         Rect bagRect = includeDropPoint ? GetMiniInventoryViewWorldRect() : GetInventoryViewWorldRect();
         float frameScale = includeDropPoint ? miniBagScale : 1f;
-        camera.transform.position = new Vector3(bagRect.center.x, bagRect.center.y, -10f);
         camera.orthographicSize = CalculateInventoryCameraSize(textureSize, bagRect, frameScale);
     }
 

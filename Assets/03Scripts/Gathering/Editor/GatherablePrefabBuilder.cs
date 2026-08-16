@@ -66,10 +66,16 @@ public static class GatherablePrefabBuilder
 
         GameObject root = CreateGatherableRoot(prefabName, first.gatherableId);
         GatherableObject gatherable = root.GetComponent<GatherableObject>();
-        gatherable.ConfigureDropIngredients(
-            GatherableDropMode.RandomFromConfiguredIngredients,
-            first.ingredientId,
-            second != null ? second.ingredientId : 0);
+
+        GatherableDropMode dropMode = first.DropMode != GatherableDropMode.DataIngredient
+            ? first.DropMode
+            : GatherableDropMode.RandomFromConfiguredIngredients;
+        int ingredientIdA = first.configuredDropIngredientIdA > 0 ? first.configuredDropIngredientIdA : first.ingredientId;
+        int ingredientIdB = first.configuredDropIngredientIdB > 0
+            ? first.configuredDropIngredientIdB
+            : (second != null ? second.ingredientId : 0);
+
+        gatherable.ConfigureDropIngredients(dropMode, ingredientIdA, ingredientIdB);
         DisableAutoApplySprites(gatherable);
 
         SavePrefab(root, prefabPath);

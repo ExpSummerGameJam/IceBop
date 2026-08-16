@@ -4,6 +4,47 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
+    <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/CookingIntegrationTestScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/CookingIntegrationTestScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/NpcSpeechBubbleTestScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/NpcSpeechBubbleTestScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_frozen_frog.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_frozen_frog.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_octopus_icicle.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Ingredient/ingredient_octopus_icicle.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/icepotin.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/icepotin.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/icepotwall.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/icepotwall.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage1_carrot_icicle_salty_ice.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage1_carrot_icicle_salty_ice.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage2_ice_strawberry_unicorn_horn_icicle.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage2_ice_strawberry_unicorn_horn_icicle.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage3_frozen_dinosaur_tail_eternal_snow.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage3_frozen_dinosaur_tail_eternal_snow.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/PhysicalInventory2D.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/PhysicalInventory2D.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/UI/icebagback.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/UI/icebagback.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/UI/icebagwall.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/UI/icebagwall.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingFlowController2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingFlowController2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingMethodToolVisual2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingMethodToolVisual2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingRuntimeVisuals2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingRuntimeVisuals2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/IngredientPreparationTestSceneBootstrap.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/IngredientPreparationTestSceneBootstrap.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/PreparationKnifeTool2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/PreparationKnifeTool2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/PreparationPointerTool2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/PreparationPointerTool2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/FixedResolution1920x1080.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/FixedResolution1920x1080.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/BagTestPlayerController2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/BagTestPlayerController2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/Editor/GatherableObjectEditor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/Editor/GatherableObjectEditor.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/Editor/GatherablePrefabBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/Editor/GatherablePrefabBuilder.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatherableDefinition.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatherableDefinition.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatherableObject.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatherableObject.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatheringDataLookup.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatheringDataLookup.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatheringInput.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatheringInput.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/InventoryDragController2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/InventoryDragController2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/InventoryItem2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/InventoryItem2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/InventoryView2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/InventoryView2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/InventoryVisualUtility.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/InventoryVisualUtility.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/WorldIngredientPickup2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/WorldIngredientPickup2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingInputController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingInputController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Skills/SkillInputController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Skills/SkillInputController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/NpcSpeechBubble2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/NpcSpeechBubble2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/ProgressiveLayeredAudioController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/ProgressiveLayeredAudioController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JJData/Xlsx/CookingData.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JJData/Xlsx/CookingData.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JJData/Xlsx/GatheringData.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JJData/Xlsx/GatheringData.xlsx" afterDir="false" />
+    </list>
     <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -11,12 +52,13 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="3" />
+    <option name="cachedIndexableFilesCount" value="32" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$USER_HOME$/.jetbrains/acp.json" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/JJData/Xlsx/CookingData.xlsx.meta" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="McpProjectServerCommands">
@@ -31,21 +73,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "git-widget-placeholder": "main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "ml.llm.AcpAgentsConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
+}]]></component>
+  <component name="RunManager" selected="Unity 에디터에 연결.Unity 에디터에 연결">
 }</component>
   <component name="RunManager" selected="Attach to Unity Editor.Unity 에디터에 연결">
     <configuration name="유닛 테스트(배치 모드)" type="RunUnityExe" factoryName="Unity Executable">
@@ -93,7 +139,8 @@
       <option name="presentableId" value="Default" />
       <updated>1786864106237</updated>
       <workItem from="1786864108400" duration="5978000" />
-      <workItem from="1786873899522" duration="19045000" />
+      <workItem from="1786873899522" duration="24908000" />
+      <workItem from="1786902866458" duration="5265000" />
     </task>
     <servers />
   </component>
@@ -127,5 +174,9 @@
         </breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

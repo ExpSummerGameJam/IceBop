@@ -159,6 +159,9 @@ public static class GatheringDataLookup
                 depletedSpriteResourcePath = GetString(row, "depletedSpriteResourcePath"),
                 dropCount = GetInt(row, "dropCount"),
                 canGatherOnce = GetBool(row, "canGatherOnce"),
+                dropMode = GetString(row, "dropMode"),
+                configuredDropIngredientIdA = GetInt(row, "configuredDropIngredientIdA"),
+                configuredDropIngredientIdB = GetInt(row, "configuredDropIngredientIdB"),
                 memo = GetString(row, "memo")
             };
 
@@ -367,6 +370,9 @@ public static class GatheringDataLookup
                 depletedSpriteResourcePath = GetRowString(row, "depletedSpriteResourcePath"),
                 dropCount = GetRowInt(row, "dropCount"),
                 canGatherOnce = GetRowBool(row, "canGatherOnce"),
+                dropMode = GetRowString(row, "dropMode"),
+                configuredDropIngredientIdA = GetRowInt(row, "configuredDropIngredientIdA"),
+                configuredDropIngredientIdB = GetRowInt(row, "configuredDropIngredientIdB"),
                 memo = GetRowString(row, "memo")
             };
 

@@ -4,6 +4,9 @@ public static class GatheringInput
 {
     public static bool WasInteractPressed()
     {
+        if (GamePauseState.IsPaused)
+            return false;
+
         bool pressed = false;
 
 #if ENABLE_INPUT_SYSTEM
@@ -20,6 +23,9 @@ public static class GatheringInput
 
     public static bool WasInventoryPressed()
     {
+        if (GamePauseState.IsPaused)
+            return false;
+
         bool pressed = false;
 
 #if ENABLE_INPUT_SYSTEM
@@ -36,6 +42,9 @@ public static class GatheringInput
 
     public static bool WasPrimaryPressed()
     {
+        if (GamePauseState.IsPaused)
+            return false;
+
         bool pressed = false;
 
 #if ENABLE_INPUT_SYSTEM
@@ -52,6 +61,9 @@ public static class GatheringInput
 
     public static bool IsPrimaryHeld()
     {
+        if (GamePauseState.IsPaused)
+            return false;
+
         bool held = false;
 
 #if ENABLE_INPUT_SYSTEM
@@ -68,6 +80,9 @@ public static class GatheringInput
 
     public static bool WasPrimaryReleased()
     {
+        if (GamePauseState.IsPaused)
+            return false;
+
         bool released = false;
 
 #if ENABLE_INPUT_SYSTEM

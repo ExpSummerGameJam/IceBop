@@ -77,7 +77,7 @@ public sealed class GatherableObjectEditor : Editor
 
     private static void DrawSprite(string label, string resourcePath)
     {
-        Sprite sprite = string.IsNullOrWhiteSpace(resourcePath) ? null : Resources.Load<Sprite>(resourcePath);
+        Sprite sprite = InventoryVisualUtility.GetGatherableSprite(resourcePath);
         EditorGUILayout.ObjectField(label, sprite, typeof(Sprite), false);
     }
 

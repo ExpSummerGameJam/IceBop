@@ -53,6 +53,12 @@ public sealed class PreparationKnifeTool2D : MonoBehaviour
 
     private void Update()
     {
+        if (GamePauseState.IsPaused)
+        {
+            EndDrag();
+            return;
+        }
+
         if (!IsDragging && GatheringInput.WasPrimaryPressed())
             TryBeginDrag();
 

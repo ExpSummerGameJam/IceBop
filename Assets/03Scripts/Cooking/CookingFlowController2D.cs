@@ -131,12 +131,10 @@ public sealed class CookingFlowController2D : MonoBehaviour
     {
         activeStageRoot = new GameObject($"PreparationStage_{stageIndex + 1}_{entry.ingredientId}");
 
-        GameObject board = CookingRuntimeVisuals2D.CreateBoard(GetStageCenter(), GetStageSize(), -1);
-        board.transform.SetParent(activeStageRoot.transform, true);
+        CookingMethodToolVisual2D toolVisual = ResolveToolVisual(entry.preparationKind);
+        CreatePreparationBoard(toolVisual);
 
         CreateStageLabel(stageIndex, stageCount, entry);
-
-        CookingMethodToolVisual2D toolVisual = ResolveToolVisual(entry.preparationKind);
 
         return entry.preparationKind switch
         {
@@ -159,7 +157,7 @@ public sealed class CookingFlowController2D : MonoBehaviour
 
     private DustWipeIngredient2D CreateDustWipeStage(CookingIngredientEntry entry, Camera camera, CookingMethodToolVisual2D toolVisual)
     {
-        PreparationPointerTool2D cloth = CreatePointerTool("DustCloth", CookingRuntimeVisuals2D.GetClothSprite(), new Vector3(0.76f, 0.76f, 1f), camera, toolVisual);
+        PreparationPointerTool2D cloth = CreatePointerTool("Handkerchief", CookingRuntimeVisuals2D.GetClothSprite(), Vector3.one, camera, toolVisual);
         GameObject ingredient = CreatePreparedIngredientObject(entry, "DustWipeIngredient");
 
         DustWipeIngredient2D dustWipe = ingredient.AddComponent<DustWipeIngredient2D>();
@@ -198,6 +196,49 @@ public sealed class CookingFlowController2D : MonoBehaviour
         collider.offset = renderer.sprite.bounds.center;
 
         return ingredient;
+    }
+
+    private GameObject CreatePreparationBoard(CookingMethodToolVisual2D toolVisual)
+    {
+        if (toolVisual != null && toolVisual.preparationBoardPrefab != null)
+        {
+            GameObject board = Instantiate(toolVisual.preparationBoardPrefab, activeStageRoot.transform, false);
+            board.name = "PreparationBoard";
+            board.transform.localPosition = GetStageCenter();
+
+            if (toolVisual.preparationBoardScale != Vector3.zero)
+                board.transform.localScale = toolVisual.preparationBoardScale;
+
+            ApplyPreparationBoardSprite(board, toolVisual.preparationBoardSprite);
+            return board;
+        }
+
+        GameObject defaultBoard = CookingRuntimeVisuals2D.CreateBoard(GetStageCenter(), GetStageSize(), -1);
+        defaultBoard.transform.SetParent(activeStageRoot.transform, true);
+
+        if (toolVisual != null)
+        {
+            ApplyPreparationBoardSprite(defaultBoard, toolVisual.preparationBoardSprite);
+
+            if (toolVisual.preparationBoardScale != Vector3.zero)
+                defaultBoard.transform.localScale = toolVisual.preparationBoardScale;
+        }
+
+        return defaultBoard;
+    }
+
+    private static void ApplyPreparationBoardSprite(GameObject board, Sprite sprite)
+    {
+        if (board == null || sprite == null)
+            return;
+
+        SpriteRenderer renderer = board.GetComponent<SpriteRenderer>();
+        if (renderer == null)
+            renderer = board.AddComponent<SpriteRenderer>();
+
+        renderer.sprite = sprite;
+        renderer.color = Color.white;
+        renderer.sortingOrder = -1;
     }
 
     private PreparationKnifeTool2D CreateKnife(Camera camera, CookingMethodToolVisual2D toolVisual)

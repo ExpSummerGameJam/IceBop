@@ -209,7 +209,7 @@ public sealed class GatherableObject : MonoBehaviour
         if (targetRenderer == null || string.IsNullOrWhiteSpace(resourcePath))
             return;
 
-        Sprite sprite = Resources.Load<Sprite>(resourcePath);
+        Sprite sprite = InventoryVisualUtility.GetGatherableSprite(resourcePath);
         if (sprite != null)
             targetRenderer.sprite = sprite;
     }
