@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -26,6 +27,7 @@ public sealed class ProgressiveLayeredAudioController : MonoBehaviour
     [SerializeField] private bool playOnStart = true;
     [SerializeField] private bool loop = true;
     [SerializeField] private double scheduledStartDelay = 0.1d;
+    [SerializeField] private float layerFadeDuration = 1f;
 
     [Header("Settings")]
     [SerializeField] private bool registerSourcesWithSettings = true;
@@ -39,6 +41,8 @@ public sealed class ProgressiveLayeredAudioController : MonoBehaviour
     private int activeLayerCount;
     private readonly float[] layerBaseVolumes = new float[MaxLayerCount];
     private readonly bool[] layerBaseVolumeInitialized = new bool[MaxLayerCount];
+    private readonly bool[] layerActive = new bool[MaxLayerCount];
+    private readonly Coroutine[] layerFadeRoutines = new Coroutine[MaxLayerCount];
     private GameSettingsManager settings;
 
     public int ActiveLayerCount => activeLayerCount;
@@ -49,7 +53,7 @@ public sealed class ProgressiveLayeredAudioController : MonoBehaviour
         EnsureLayerClipsFromBgmFolder();
         EnsureRuntimeSources();
         ConfigureSources();
-        ApplyMuteState();
+        SnapMuteState();
     }
 
     private void OnEnable()
@@ -104,6 +108,7 @@ public sealed class ProgressiveLayeredAudioController : MonoBehaviour
         EnsureArraySize(ref layerClips);
         initialActiveLayerCount = Mathf.Clamp(initialActiveLayerCount, 0, MaxLayerCount);
         scheduledStartDelay = Math.Max(0d, scheduledStartDelay);
+        layerFadeDuration = Mathf.Max(0.01f, layerFadeDuration);
     }
 
     [ContextMenu("Play All Synced")]
@@ -122,7 +127,7 @@ public sealed class ProgressiveLayeredAudioController : MonoBehaviour
 
             source.Stop();
             source.timeSamples = 0;
-            source.mute = i >= activeLayerCount;
+            SnapLayerVolume(i, i < activeLayerCount);
             source.PlayScheduled(startTime);
         }
     }
@@ -204,7 +209,6 @@ public sealed class ProgressiveLayeredAudioController : MonoBehaviour
 
         source.playOnAwake = false;
         source.loop = loop;
-        source.mute = layerIndex >= activeLayerCount;
 
         RegisterSourceWithSettings(source, layerIndex);
     }
@@ -227,11 +231,15 @@ public sealed class ProgressiveLayeredAudioController : MonoBehaviour
             layerBaseVolumeInitialized[layerIndex] = true;
         }
 
-        GameSettingsManager currentSettings = settings != null ? settings : GameSettingsManager.EnsureExists();
-        if (currentSettings == null)
-            return;
+        if (layerActive[layerIndex])
+            source.volume = GetLayerTargetVolume(layerIndex);
+    }
 
-        source.volume = layerBaseVolumes[layerIndex] * currentSettings.GetVolume01(settingsAudioChannel);
+    private float GetLayerTargetVolume(int layerIndex)
+    {
+        GameSettingsManager currentSettings = settings != null ? settings : GameSettingsManager.EnsureExists();
+        float settingsVolume01 = currentSettings != null ? currentSettings.GetVolume01(settingsAudioChannel) : 1f;
+        return layerBaseVolumes[layerIndex] * settingsVolume01;
     }
 
     private void OnSettingsVolumeChanged(GameAudioChannelType changedChannelType, float volume01)
@@ -257,16 +265,79 @@ public sealed class ProgressiveLayeredAudioController : MonoBehaviour
         }
     }
 
+    private void SnapMuteState()
+    {
+        for (int i = 0; i < MaxLayerCount; i++)
+            SnapLayerVolume(i, i < activeLayerCount);
+    }
+
     private void ApplyMuteState()
     {
         for (int i = 0; i < MaxLayerCount; i++)
         {
-            AudioSource source = layerSources[i];
-            if (source == null)
+            bool shouldBeActive = i < activeLayerCount;
+            if (shouldBeActive == layerActive[i])
                 continue;
 
-            source.mute = i >= activeLayerCount;
+            StartLayerFade(i, shouldBeActive);
         }
+    }
+
+    private void SnapLayerVolume(int layerIndex, bool active)
+    {
+        StopLayerFade(layerIndex);
+        layerActive[layerIndex] = active;
+
+        AudioSource source = layerSources[layerIndex];
+        if (source == null)
+            return;
+
+        source.mute = false;
+        source.volume = active ? GetLayerTargetVolume(layerIndex) : 0f;
+    }
+
+    private void StartLayerFade(int layerIndex, bool fadeIn)
+    {
+        layerActive[layerIndex] = fadeIn;
+        StopLayerFade(layerIndex);
+
+        AudioSource source = layerSources[layerIndex];
+        if (source == null)
+            return;
+
+        source.mute = false;
+        layerFadeRoutines[layerIndex] = StartCoroutine(FadeLayerVolumeRoutine(layerIndex, fadeIn));
+    }
+
+    private void StopLayerFade(int layerIndex)
+    {
+        if (layerFadeRoutines[layerIndex] == null)
+            return;
+
+        StopCoroutine(layerFadeRoutines[layerIndex]);
+        layerFadeRoutines[layerIndex] = null;
+    }
+
+    private IEnumerator FadeLayerVolumeRoutine(int layerIndex, bool fadeIn)
+    {
+        AudioSource source = layerSources[layerIndex];
+        if (source == null)
+            yield break;
+
+        float targetVolume = fadeIn ? GetLayerTargetVolume(layerIndex) : 0f;
+        float startVolume = source.volume;
+        float duration = Mathf.Max(0.01f, layerFadeDuration);
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            source.volume = Mathf.Lerp(startVolume, targetVolume, elapsed / duration);
+            yield return null;
+        }
+
+        source.volume = targetVolume;
+        layerFadeRoutines[layerIndex] = null;
     }
 
     private bool WasNumberKeyPressed(int number)

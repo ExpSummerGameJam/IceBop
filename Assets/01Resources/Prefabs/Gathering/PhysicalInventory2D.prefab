@@ -91,12 +91,12 @@ MonoBehaviour:
   largeView: {fileID: 100123}
   dragController: {fileID: 100004}
   cookingStation: {fileID: 100005}
-  miniViewSize: {x: 460, y: 1080}
+  miniViewSize: {x: 420, y: 1080}
   largeViewSize: {x: 1920, y: 1080}
-  miniViewMargin: {x: 16, y: 16}
-  inventoryCameraMargin: 0.35
-  miniDropPointPadding: 0.25
-  miniBagScale: 1.25
+  miniViewMargin: {x: 0, y: 0}
+  inventoryCameraMargin: 0.2
+  miniDropPointPadding: 1.2
+  miniBagScale: 1.75
   renderLargeViewAsCameraOverlay: 0
   largeCameraDepthOffset: 1
   miniTint: {r: 1, g: 1, b: 1, a: 1}
@@ -1046,11 +1046,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 100101}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -14, y: -23}
-  m_SizeDelta: {x: 459.8438, y: 1152.393}
-  m_Pivot: {x: 0, y: 0}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 420, y: 1080}
+  m_Pivot: {x: 1, y: 0}
 --- !u!222 &100112
 CanvasRenderer:
   m_ObjectHideFlags: 0
