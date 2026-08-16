@@ -27,6 +27,9 @@ namespace IceBop.JumpKing
 
         private void Update()
         {
+            if (global::GamePauseState.IsPaused)
+                return;
+
             if (!skillAction.action.WasPressedThisFrame()) return;
 
             foreach (var skill in skillsInPriorityOrder)

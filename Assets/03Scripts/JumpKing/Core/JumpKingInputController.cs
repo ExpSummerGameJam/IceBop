@@ -62,6 +62,12 @@ namespace IceBop.JumpKing
 
         private void Update()
         {
+            if (global::GamePauseState.IsPaused)
+            {
+                CancelCharge();
+                return;
+            }
+
             UpdateFacing();
 
             if (jumpAction.action.WasPressedThisFrame() && character.CanControlJump)
@@ -117,6 +123,17 @@ namespace IceBop.JumpKing
             Vector2 direction = ReadDirection();
             character.ExecuteJump(direction, ChargeRatio01);
             ChargeRatio01 = 0f;
+        }
+
+        private void CancelCharge()
+        {
+            if (!isCharging)
+                return;
+
+            isCharging = false;
+            chargeTimer = 0f;
+            ChargeRatio01 = 0f;
+            chargeHorizontal = 0f;
         }
 
         /// <summary>

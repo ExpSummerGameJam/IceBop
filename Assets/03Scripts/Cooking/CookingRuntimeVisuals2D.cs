@@ -1,10 +1,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 public static class CookingRuntimeVisuals2D
 {
+    private const string HandkerchiefResourcePath = "Atlas/Pot/handkerchief";
+    private const string CutboardResourcePath = "Atlas/Pot/cutboard";
+
+#if UNITY_EDITOR
+    private const string HandkerchiefAssetPath = "Assets/01Resources/Atlas/Pot/handkerchief.png";
+    private const string CutboardAssetPath = "Assets/01Resources/Atlas/Pot/cutboard.png";
+#endif
+
     private static Sprite knifeSprite;
     private static Sprite clothSprite;
+    private static Sprite cutboardSprite;
     private static Sprite grinderSprite;
     private static Sprite ladleSprite;
 
@@ -50,9 +63,31 @@ public static class CookingRuntimeVisuals2D
     public static Sprite GetClothSprite()
     {
         if (clothSprite == null)
-            clothSprite = CreateClothSprite();
+            clothSprite = LoadSprite(HandkerchiefResourcePath,
+#if UNITY_EDITOR
+                HandkerchiefAssetPath,
+#else
+                null,
+#endif
+                "handkerchief") ?? CreateClothSprite();
 
         return clothSprite;
+    }
+
+    public static Sprite GetCutboardSprite()
+    {
+        if (cutboardSprite == null)
+        {
+            cutboardSprite = LoadSprite(CutboardResourcePath,
+#if UNITY_EDITOR
+                CutboardAssetPath,
+#else
+                null,
+#endif
+                "cutboard");
+        }
+
+        return cutboardSprite;
     }
 
     public static Sprite GetGrinderSprite()
@@ -99,11 +134,22 @@ public static class CookingRuntimeVisuals2D
     {
         GameObject board = new("PreparationBoard");
         board.transform.position = position;
-        board.transform.localScale = new Vector3(size.x, size.y, 1f);
 
         SpriteRenderer renderer = board.AddComponent<SpriteRenderer>();
-        renderer.sprite = InventoryVisualUtility.WhiteSprite;
-        renderer.color = new Color(0.66f, 0.46f, 0.25f, 1f);
+        Sprite cutboard = GetCutboardSprite();
+        if (cutboard != null)
+        {
+            renderer.sprite = cutboard;
+            renderer.color = Color.white;
+            board.transform.localScale = Vector3.one;
+        }
+        else
+        {
+            renderer.sprite = InventoryVisualUtility.WhiteSprite;
+            renderer.color = new Color(0.66f, 0.46f, 0.25f, 1f);
+            board.transform.localScale = new Vector3(size.x, size.y, 1f);
+        }
+
         renderer.sortingOrder = sortingOrder;
 
         return board;
@@ -230,6 +276,58 @@ public static class CookingRuntimeVisuals2D
         }
 
         return CreateSprite(texture, "RuntimeCloth", 64f);
+    }
+
+    private static Sprite LoadSprite(string resourcePath, string editorAssetPath, string spriteName)
+    {
+        Sprite[] resourceSprites = Resources.LoadAll<Sprite>(resourcePath);
+        Sprite sprite = FindBestSprite(resourceSprites, spriteName);
+        if (sprite != null)
+            return sprite;
+
+        sprite = Resources.Load<Sprite>(resourcePath);
+        if (sprite != null)
+            return sprite;
+
+#if UNITY_EDITOR
+        if (!string.IsNullOrWhiteSpace(editorAssetPath))
+        {
+            UnityEngine.Object[] assets = AssetDatabase.LoadAllAssetsAtPath(editorAssetPath);
+            sprite = FindBestSprite(assets, spriteName);
+            if (sprite != null)
+                return sprite;
+        }
+#endif
+
+        return null;
+    }
+
+    private static Sprite FindBestSprite(IEnumerable<UnityEngine.Object> assets, string spriteName)
+    {
+        if (assets == null)
+            return null;
+
+        Sprite firstSprite = null;
+        foreach (UnityEngine.Object asset in assets)
+        {
+            if (asset is not Sprite sprite)
+                continue;
+
+            firstSprite ??= sprite;
+            if (IsSpriteNameMatch(sprite.name, spriteName))
+                return sprite;
+        }
+
+        return firstSprite;
+    }
+
+    private static bool IsSpriteNameMatch(string actualName, string expectedName)
+    {
+        if (string.IsNullOrWhiteSpace(actualName) || string.IsNullOrWhiteSpace(expectedName))
+            return false;
+
+        return string.Equals(actualName, expectedName, System.StringComparison.OrdinalIgnoreCase) ||
+               actualName.StartsWith($"{expectedName}_", System.StringComparison.OrdinalIgnoreCase);
     }
 
     private static Sprite CreateGrinderSprite()

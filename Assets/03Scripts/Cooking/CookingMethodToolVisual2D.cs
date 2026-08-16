@@ -5,6 +5,9 @@ using UnityEngine;
 public sealed class CookingMethodToolVisual2D
 {
     public IngredientPreparationKind cookingMethod;
+    public GameObject preparationBoardPrefab;
+    public Sprite preparationBoardSprite;
+    public Vector3 preparationBoardScale;
     public GameObject preparationToolPrefab;
     public Sprite preparationToolSprite;
     public Vector3 preparationToolScale;

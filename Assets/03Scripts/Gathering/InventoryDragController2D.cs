@@ -21,6 +21,12 @@ public sealed class InventoryDragController2D : MonoBehaviour
 
     private void Update()
     {
+        if (GamePauseState.IsPaused)
+        {
+            CancelDraggedItem();
+            return;
+        }
+
         if (inventoryView == null || !inventoryView.IsLargeViewOpen)
         {
             ReleaseDraggedItem();
@@ -38,6 +44,17 @@ public sealed class InventoryDragController2D : MonoBehaviour
 
         if (GatheringInput.WasPrimaryReleased())
             ReleaseDraggedItem();
+    }
+
+    private void CancelDraggedItem()
+    {
+        if (draggedItem == null)
+            return;
+
+        InventoryItem2D canceledItem = draggedItem;
+        draggedItem = null;
+        canceledItem.SetDragging(false);
+        inventory?.DelayOverflowCheck(canceledItem, 0.4f);
     }
 
     private void TryBeginDrag()
@@ -93,8 +110,8 @@ public sealed class InventoryDragController2D : MonoBehaviour
         if (item == null)
             return false;
 
-        Bounds bounds = item.Bounds;
-        Collider2D[] hits = Physics2D.OverlapBoxAll(bounds.center, bounds.size, 0f);
+        Vector2 dropPosition = item.Bounds.center;
+        Collider2D[] hits = Physics2D.OverlapPointAll(dropPosition);
         HashSet<IInventoryItemDropReceiver2D> checkedReceivers = new();
 
         foreach (Collider2D hit in hits)

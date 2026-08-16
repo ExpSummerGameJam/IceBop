@@ -17,6 +17,12 @@ public sealed class BagTestPlayerController2D : MonoBehaviour
 
     private void Update()
     {
+        if (GamePauseState.IsPaused)
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
+
         moveInput = ReadMoveInput();
     }
 

@@ -32,6 +32,17 @@ public sealed class FixedResolution1920x1080 : MonoBehaviour
     private float ReferenceAspect =>
         referenceResolution.y <= 0 ? 16f / 9f : referenceResolution.x / (float)referenceResolution.y;
 
+    private FullScreenMode RuntimeFullScreenMode
+    {
+        get
+        {
+            if (Application.isPlaying && GameSettingsManager.Instance != null)
+                return GameSettingsManager.Instance.IsFullScreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
+
+            return fullScreenMode;
+        }
+    }
+
     private void OnEnable()
     {
         ApplyNow();
@@ -82,10 +93,13 @@ public sealed class FixedResolution1920x1080 : MonoBehaviour
         if (!Application.isPlaying || !setScreenResolutionInPlayMode)
             return;
 
-        if (Screen.width == referenceResolution.x && Screen.height == referenceResolution.y)
+        FullScreenMode targetFullScreenMode = RuntimeFullScreenMode;
+        if (Screen.width == referenceResolution.x &&
+            Screen.height == referenceResolution.y &&
+            Screen.fullScreenMode == targetFullScreenMode)
             return;
 
-        Screen.SetResolution(referenceResolution.x, referenceResolution.y, fullScreenMode);
+        Screen.SetResolution(referenceResolution.x, referenceResolution.y, targetFullScreenMode);
     }
 
     private void ApplyCameraRects()

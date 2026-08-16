@@ -22,8 +22,8 @@ public sealed class IngredientPreparationTestSceneBootstrap : MonoBehaviour
             "DustWipeTest_Cloth",
             camera,
             dustStationPosition + new Vector2(-1.05f, -1.65f),
-            CreateClothSprite(),
-            new Vector3(0.75f, 0.75f, 1f),
+            CookingRuntimeVisuals2D.GetClothSprite(),
+            Vector3.one,
             26);
         CreateDustWipeIngredient(cloth, dustStationPosition + new Vector2(0f, 0.18f));
 
@@ -59,17 +59,20 @@ public sealed class IngredientPreparationTestSceneBootstrap : MonoBehaviour
 
     private static void CreateStationBoard(string name, Vector2 position)
     {
-        GameObject board = new(name);
-        board.transform.position = new Vector3(position.x, position.y, 0.1f);
-        board.transform.localScale = new Vector3(3.45f, 2.18f, 1f);
-
-        SpriteRenderer renderer = board.AddComponent<SpriteRenderer>();
-        renderer.sprite = InventoryVisualUtility.WhiteSprite;
-        renderer.color = new Color(0.72f, 0.56f, 0.34f, 1f);
-        renderer.sortingOrder = -2;
+        GameObject board = CookingRuntimeVisuals2D.CreateBoard(new Vector3(position.x, position.y, 0.1f), new Vector2(3.45f, 2.18f), -2);
+        board.name = name;
 
         BoxCollider2D collider = board.AddComponent<BoxCollider2D>();
-        collider.size = Vector2.one;
+        SpriteRenderer renderer = board.GetComponent<SpriteRenderer>();
+        if (renderer != null && renderer.sprite != null)
+        {
+            collider.size = renderer.sprite.bounds.size;
+            collider.offset = renderer.sprite.bounds.center;
+        }
+        else
+        {
+            collider.size = Vector2.one;
+        }
     }
 
     private static void CreateStationLabel(string labelText, Vector2 stationPosition)

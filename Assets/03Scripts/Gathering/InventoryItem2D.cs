@@ -1,12 +1,15 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(PolygonCollider2D))]
 [RequireComponent(typeof(SpriteRenderer))]
 public sealed class InventoryItem2D : MonoBehaviour
 {
+    private readonly List<Vector2> physicsShapeBuffer = new();
+
     private Rigidbody2D itemRigidbody;
-    private BoxCollider2D itemCollider;
+    private PolygonCollider2D itemCollider;
     private SpriteRenderer itemRenderer;
     private RigidbodyType2D bodyTypeBeforeDrag;
     private float gravityScaleBeforeDrag;
@@ -94,7 +97,7 @@ public sealed class InventoryItem2D : MonoBehaviour
             itemRigidbody = GetComponent<Rigidbody2D>();
 
         if (itemCollider == null)
-            itemCollider = GetComponent<BoxCollider2D>();
+            itemCollider = GetComponent<PolygonCollider2D>();
 
         if (itemRenderer == null)
             itemRenderer = GetComponent<SpriteRenderer>();
@@ -102,16 +105,42 @@ public sealed class InventoryItem2D : MonoBehaviour
 
     private void ApplyPhysicalSize(Sprite sprite)
     {
+        transform.localScale = Vector3.one;
+
         Sprite sizeSprite = sprite != null ? sprite : InventoryVisualUtility.WhiteSprite;
         if (sizeSprite == null || sizeSprite.bounds.size.x <= 0f || sizeSprite.bounds.size.y <= 0f)
         {
-            transform.localScale = Vector3.one;
-            itemCollider.size = new Vector2(0.55f, 0.55f);
+            ApplyBoundsRectangleShape(new Bounds(Vector3.zero, new Vector3(0.55f, 0.55f, 0f)));
             return;
         }
 
-        Vector2 spriteSize = sizeSprite.bounds.size;
-        transform.localScale = Vector3.one;
-        itemCollider.size = spriteSize;
+        int shapeCount = sizeSprite.GetPhysicsShapeCount();
+        if (shapeCount <= 0)
+        {
+            ApplyBoundsRectangleShape(sizeSprite.bounds);
+            return;
+        }
+
+        itemCollider.pathCount = shapeCount;
+        for (int i = 0; i < shapeCount; i++)
+        {
+            sizeSprite.GetPhysicsShape(i, physicsShapeBuffer);
+            itemCollider.SetPath(i, physicsShapeBuffer);
+        }
+    }
+
+    private void ApplyBoundsRectangleShape(Bounds bounds)
+    {
+        Vector2 min = bounds.min;
+        Vector2 max = bounds.max;
+
+        itemCollider.pathCount = 1;
+        itemCollider.SetPath(0, new[]
+        {
+            new Vector2(min.x, min.y),
+            new Vector2(max.x, min.y),
+            new Vector2(max.x, max.y),
+            new Vector2(min.x, max.y),
+        });
     }
 }
