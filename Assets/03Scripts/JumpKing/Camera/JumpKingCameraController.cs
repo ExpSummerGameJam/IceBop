@@ -16,14 +16,14 @@ namespace IceBop.JumpKing
         [SerializeField] private JumpKingCharacter target;
 
         [Header("방(Room) 세로 크기")]
-        [Tooltip("카메라 한 화면이 담당하는 세로 월드 크기. 보통 orthographicSize * 2 로 맞춘다.")]
+        [Tooltip("이 값만큼 Y가 바뀌면 '다른 방'으로 판정해 스크롤한다. 보통 orthographicSize * 2 로 맞춘다.")]
         [SerializeField] private float roomHeight = 9f;
 
-        [Header("세로 앵커")]
-        [Tooltip("0이면 방 정중앙에 캐릭터/바닥이 옴. 값을 키우면 카메라가 위로 당겨져서 " +
-                 "바닥이 화면 아래쪽으로 내려가고 위쪽(점프 경로)이 더 넓게 보인다. 범위 -0.5~0.5.")]
-        [Range(-0.5f, 0.5f)]
-        [SerializeField] private float verticalAnchorRatio = 0.15f;
+        [Header("세로 프레이밍")]
+        [Tooltip("착지한 바닥(캐릭터 Y)을 카메라 중심보다 얼마나 위로 당길지, 월드 단위. " +
+                 "커질수록 바닥이 화면 더 아래쪽에 위치하고 위쪽(점프 경로)이 넓게 보인다. " +
+                 "roomHeight/2를 넘기면 바닥이 화면 밖으로 나가니 그보다 작게 잡을 것.")]
+        [SerializeField] private float floorScreenOffset = 1.5f;
 
         [Header("가로 추적")]
         [Tooltip("X축을 얼마나 부드럽게 따라갈지(초). 0에 가까울수록 캐릭터 위치에 즉시 딱 붙는다.")]
@@ -49,10 +49,10 @@ namespace IceBop.JumpKing
 
         private void Start()
         {
-            // 시작 시점엔 연출 없이 캐릭터가 속한 방으로 즉시 고정한다.
             currentRoomIndexY = RoomIndexOf(target.transform.position.y);
-            float anchorY = AnchorY(currentRoomIndexY);
-            transform.position = new Vector3(target.transform.position.x, anchorY, transform.position.z);
+            // 시작 시점에도 즉시 스냅하지 않고, 인스펙터에 배치해둔 카메라 위치에서
+            // 캐릭터 기준 위치로 스크롤 연출이 한 번 재생되게 한다.
+            scrollRoutine = StartCoroutine(ScrollYTo(AnchorY(target.transform.position.y)));
         }
 
         private void Update()
@@ -73,16 +73,13 @@ namespace IceBop.JumpKing
             {
                 StopCoroutine(scrollRoutine);
             }
-            scrollRoutine = StartCoroutine(ScrollYTo(AnchorY(newRoomIndexY)));
+            scrollRoutine = StartCoroutine(ScrollYTo(AnchorY(target.transform.position.y)));
         }
 
         private int RoomIndexOf(float worldY) => Mathf.FloorToInt(worldY / roomHeight);
 
-        private float AnchorY(int roomIndexY)
-        {
-            float roomBottom = roomIndexY * roomHeight;
-            return roomBottom + roomHeight * (0.5f + verticalAnchorRatio);
-        }
+        /// <summary>실제 착지 지점(floorY) 기준으로, 그보다 floorScreenOffset만큼 위에 카메라를 둔다.</summary>
+        private float AnchorY(float floorY) => floorY + floorScreenOffset;
 
         private IEnumerator ScrollYTo(float destinationY)
         {

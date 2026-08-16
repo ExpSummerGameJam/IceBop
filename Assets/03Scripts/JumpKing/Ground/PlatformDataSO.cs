@@ -14,8 +14,9 @@ namespace IceBop.JumpKing
         public PlatformType type;
 
         [Header("C. 미끄러운 필드 전용")]
-        [Tooltip("관성이 감쇠하는 정도. 0에 가까울수록 오래 미끄러짐")]
-        public float slipperyDamping = 0.5f;
+        [Tooltip("초당 속도 감소량(units/s²). 값이 작을수록 오래 미끄러짐. " +
+                 "점프 최대 속도가 10~15 정도라면 5~8 부근이 적당히 미끄러지다 멈추는 느낌.")]
+        public float slipperyDamping = 6f;
 
         [Header("B. 경사로 전용")]
         [Tooltip("경사면을 따라 미끄러질 때 가속도")]

@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace IceBop.JumpKing
 {
     /// <summary>A. 하드 필드 - 일반적인 바닥. 착지 시 점프 조작이 가능하다.</summary>
@@ -8,7 +10,7 @@ namespace IceBop.JumpKing
 
         public void OnLand(JumpKingCharacter character, PlatformSurface surface)
         {
-            // TODO: 착지 시 수평/수직 속도를 0으로 정지 (관성 없음)
+            character.Rb.linearVelocity = Vector2.zero; // 관성 없음: 착지 즉시 정지
         }
 
         public void OnPhysicsStep(JumpKingCharacter character, PlatformSurface surface)
