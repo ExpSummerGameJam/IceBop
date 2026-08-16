@@ -6,16 +6,18 @@
   <component name="ChangeListManager">
     <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingCharacter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingCharacter.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/HardFieldBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/HardFieldBehaviour.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/IGroundBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/IGroundBehaviour.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/PlatformSurface.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/PlatformSurface.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/SlipperyFieldBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/SlipperyFieldBehaviour.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/SlopeBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/SlopeBehaviour.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/WeakFieldBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/WeakFieldBehaviour.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/WeakFieldGroup.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/WeakFieldGroup.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/icesalad.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/icesalad.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/icesoup1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/icesoup1.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/icesoup2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/icesoup2.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JJData/Scripts/Processor/XlsxDataProcessor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Processor/XlsxDataProcessor.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JJData/Xlsx/CookingData.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JJData/Xlsx/CookingData.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JJData/Xlsx/DataBaseName.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JJData/Xlsx/DataBaseName.xlsx.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JJData/Xlsx/~$GatheringData.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JJData/Xlsx/~$GatheringData.xlsx.meta" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,7 +64,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Attach to Unity Editor.Unity 에디터에 연결">
+  <component name="RunManager" selected="Unity 에디터에 연결.Unity 에디터에 연결">
     <configuration name="유닛 테스트(배치 모드)" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.3.7f1\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath D:\GitHub\2_UNITIYGAME\IceBop -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />

@@ -43,7 +43,7 @@ public class XlsxDataProcessor : IDataProcessor
 
             // 워크북에서 시트 정보 추출
             string workbookPath = Path.Combine(extractPath, "xl", "workbook.xml");
-            List<(string sheetName, string sheetPath)> sheets = GetSheetInfo(workbookPath);
+            List<(string sheetName, string sheetPath)> sheets = GetSheetInfo(workbookPath, extractPath);
 
             // 데이터 틀이 되는 Xlsx Class 생성
             string[] sheetNames = sheets.Select(sheet => sheet.sheetName).ToArray();
@@ -245,7 +245,7 @@ public class XlsxDataProcessor : IDataProcessor
         }
 
         // 시트 정보를 가져옴
-        List<(string sheetName, string sheetPath)> GetSheetInfo(string workbookPath)
+        List<(string sheetName, string sheetPath)> GetSheetInfo(string workbookPath, string extractPath)
         {
             using XmlReader reader = XmlReader.Create(workbookPath, new() { IgnoreWhitespace = true, IgnoreComments = true });
             List<(string sheetName, string sheetPath)> sheets = new();
@@ -263,7 +263,7 @@ public class XlsxDataProcessor : IDataProcessor
                 {
                     string id = relationshipNode.Attributes["Id"].Value;
                     string target = relationshipNode.Attributes["Target"].Value;
-                    sheetIdToTarget[id] = target.Replace('/', Path.DirectorySeparatorChar);
+                    sheetIdToTarget[id] = target;
                 }
             }
 
@@ -275,13 +275,24 @@ public class XlsxDataProcessor : IDataProcessor
                     string sheetId = reader.GetAttribute("r:id");
                     if (sheetIdToTarget.TryGetValue(sheetId, out string target))
                     {
-                        string sheetPath = Path.Combine(Path.GetDirectoryName(workbookPath), target);
+                        string sheetPath = ResolveRelationshipTarget(Path.GetDirectoryName(workbookPath), extractPath, target);
                         if (sheetName[0] != '#') // #은 주석
                             sheets.Add((sheetName, sheetPath));
                     }
                 }
             }
             return sheets;
+        }
+
+        // OPC 관계의 Target을 실제 경로로 변환한다.
+        // Target이 '/'로 시작하면 패키지 루트(extractPath) 기준 절대 경로, 아니면 관계 파일이 속한 파트(xl 폴더) 기준 상대 경로다.
+        string ResolveRelationshipTarget(string basePartDirectory, string extractPath, string rawTarget)
+        {
+            bool isPackageAbsolute = rawTarget.StartsWith("/", StringComparison.Ordinal);
+            string normalizedTarget = rawTarget.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+            return isPackageAbsolute
+                ? Path.Combine(extractPath, normalizedTarget)
+                : Path.Combine(basePartDirectory, normalizedTarget);
         }
 
         // 열 인덱스 변환
