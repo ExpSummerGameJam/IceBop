@@ -19,6 +19,12 @@ namespace IceBop.JumpKing
         [SerializeField] private float maxChargeSeconds = 1.2f;
         [SerializeField] private AnimationCurve chargeCurve = AnimationCurve.Linear(0, 0, 1, 1);
 
+        [Header("입력 버퍼")]
+        [Tooltip("점프를 눌렀을 때 아직 CanControlJump가 false여도, 이 시간(초) 안에 true가 되면 " +
+                 "눌렀던 입력을 그대로 인정해 차지를 시작한다. 착지 판정 순간의 물리 미세 떨림으로 " +
+                 "입력이 씹히는 걸 방지한다.")]
+        [SerializeField] private float jumpBufferSeconds = 0.15f;
+
         [Header("방향 튜닝")]
         [Tooltip("방향키 좌우 입력에 곱해지는 값. 1보다 작을수록 옆으로 덜 날아감 (세로 성분은 항상 1로 고정).")]
         [Range(0f, 1f)]
@@ -31,6 +37,9 @@ namespace IceBop.JumpKing
         private JumpKingCharacter character;
         private float chargeTimer;
         private bool isCharging;
+
+        /// <summary>0보다 크면 "점프 입력이 대기 중"이라는 뜻. 매 프레임 감소하며, 0 이하가 되면 만료.</summary>
+        private float jumpBufferTimer;
 
         /// <summary>차지하는 동안 감지된 마지막 좌우 입력값. 스페이스보다 방향키를 먼저 떼도 방향이 씹히지 않도록 버퍼링한다.</summary>
         private float chargeHorizontal;
@@ -70,9 +79,21 @@ namespace IceBop.JumpKing
 
             UpdateFacing();
 
-            if (jumpAction.action.WasPressedThisFrame() && character.CanControlJump)
+            if (jumpAction.action.WasPressedThisFrame())
             {
-                BeginCharge();
+                jumpBufferTimer = jumpBufferSeconds;
+            }
+
+            if (jumpBufferTimer > 0f)
+            {
+                jumpBufferTimer -= Time.deltaTime;
+                // 버퍼가 풀리는 시점에 버튼을 이미 뗀 상태라면 시작하지 않는다.
+                // (그러면 WasReleasedThisFrame을 놓쳐서 차지가 끝없이 늘어나는 버그가 생김)
+                if (character.CanControlJump && jumpAction.action.IsPressed())
+                {
+                    BeginCharge();
+                    jumpBufferTimer = 0f;
+                }
             }
 
             if (isCharging)

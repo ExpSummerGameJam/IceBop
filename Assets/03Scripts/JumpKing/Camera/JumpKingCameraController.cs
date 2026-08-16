@@ -4,97 +4,100 @@ using UnityEngine;
 namespace IceBop.JumpKing
 {
     /// <summary>
-    /// 점프킹 스타일 카메라.
-    /// X축: 공중/착지 상관없이 매 프레임 캐릭터를 따라가 항상 화면 중앙에 위치시킨다.
-    /// Y축: 평소엔 고정되어 있다가, 캐릭터가 새로운 방(수직 구간)에 착지하는 순간에만 스크롤 이동한다.
-    /// 실제로 방(Y)이 바뀌었을 때만 ScrollManager.NotifyScrollChanged()를 호출해
-    /// 약한 바닥(D) 초기화 등을 트리거한다 — 같은 방 안에서 착지만 반복해서는 초기화되지 않는다.
+    /// 16x16 타일 단위의 "방(room)" 카메라.
+    /// X/Y 모두 캐릭터가 속한 방 정중앙을 비추도록 고정되어 있다가,
+    /// 캐릭터가 그 방 경계를 넘는 순간(공중/착지 상관없이) 옆/위/아래 방으로 스크롤 이동한다.
+    /// 실제로 방이 바뀌었을 때만 ScrollManager.NotifyScrollChanged()를 호출해
+    /// 약한 바닥(D) 초기화 등을 트리거한다.
     /// </summary>
     public class JumpKingCameraController : MonoBehaviour
     {
         [Header("참조")]
         [SerializeField] private JumpKingCharacter target;
 
-        [Header("방(Room) 세로 크기")]
-        [Tooltip("이 값만큼 Y가 바뀌면 '다른 방'으로 판정해 스크롤한다. 보통 orthographicSize * 2 로 맞춘다.")]
-        [SerializeField] private float roomHeight = 9f;
+        [Header("방(Room) 크기")]
+        [Tooltip("타일 하나의 월드 유닛 크기. 프로젝트 Grid의 Cell Size와 맞출 것 (현재 1).")]
+        [SerializeField] private float tileSize = 1f;
+        [Tooltip("방 한 변에 들어가는 타일 수(16이면 16x16). 방과 방 사이의 실제 간격(=카메라 뷰포트 크기)은 " +
+                 "(타일 수 - 1) * 타일 크기다. 예: 16타일이면 간격은 15 — 카메라 Orthographic Size는 이 값의 절반으로 맞출 것.")]
+        [SerializeField] private int roomSizeInTiles = 16;
 
-        [Header("세로 프레이밍")]
-        [Tooltip("착지한 바닥(캐릭터 Y)을 카메라 중심보다 얼마나 위로 당길지, 월드 단위. " +
-                 "커질수록 바닥이 화면 더 아래쪽에 위치하고 위쪽(점프 경로)이 넓게 보인다. " +
-                 "roomHeight/2를 넘기면 바닥이 화면 밖으로 나가니 그보다 작게 잡을 것.")]
-        [SerializeField] private float floorScreenOffset = 1.5f;
-
-        [Header("가로 추적")]
-        [Tooltip("X축을 얼마나 부드럽게 따라갈지(초). 0에 가까울수록 캐릭터 위치에 즉시 딱 붙는다.")]
-        [SerializeField] private float horizontalSmoothTime = 0.08f;
+        [Header("방 그리드 기준점")]
+        [Tooltip("첫 방의 X 중앙, Y 맨 아래 경계 좌표(월드). 예: (-3,-4)면 첫 방은 X=-3에 고정되고 아래쪽 경계가 Y=-4.")]
+        [SerializeField] private Vector2 startRoomReference = new Vector2(-3f, -4f);
 
         [Header("전환 연출")]
         [SerializeField] private float scrollDuration = 0.4f;
         [SerializeField] private AnimationCurve scrollCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
-        private int currentRoomIndexY;
-        private float xVelocity;
+        /// <summary>방과 방 사이의 실제 간격 = 카메라 뷰포트 한 변의 크기.</summary>
+        private float RoomSpacing => (roomSizeInTiles - 1) * tileSize;
+
+        /// <summary>방(0,0)의 중앙. X는 이미 중앙 좌표로 주어졌으니 그대로, Y는 "아래쪽 경계"이므로 반 칸(RoomSpacing/2) 위로 보정.</summary>
+        private Vector2 FirstRoomCenter => new Vector2(
+            startRoomReference.x,
+            startRoomReference.y + RoomSpacing * 0.5f);
+
+        /// <summary>방(0,0)의 왼쪽 아래 모서리.</summary>
+        private Vector2 GridOrigin => FirstRoomCenter - new Vector2(RoomSpacing, RoomSpacing) * 0.5f;
+
+        private Vector2Int currentRoomIndex;
         private Coroutine scrollRoutine;
-
-        private void OnEnable()
-        {
-            target.OnLanded += HandleLanded;
-        }
-
-        private void OnDisable()
-        {
-            target.OnLanded -= HandleLanded;
-        }
 
         private void Start()
         {
-            currentRoomIndexY = RoomIndexOf(target.transform.position.y);
+            currentRoomIndex = RoomIndexOf(target.transform.position);
             // 시작 시점에도 즉시 스냅하지 않고, 인스펙터에 배치해둔 카메라 위치에서
-            // 캐릭터 기준 위치로 스크롤 연출이 한 번 재생되게 한다.
-            scrollRoutine = StartCoroutine(ScrollYTo(AnchorY(target.transform.position.y)));
+            // 캐릭터가 속한 방 중앙으로 스크롤 연출이 한 번 재생되게 한다.
+            scrollRoutine = StartCoroutine(ScrollTo(RoomToWorldCenter(currentRoomIndex)));
         }
 
-        private void Update()
+        private void LateUpdate()
         {
-            // X축은 공중/착지 상관없이 항상 캐릭터를 따라가 화면 중앙에 둔다.
-            float smoothedX = Mathf.SmoothDamp(transform.position.x, target.transform.position.x, ref xVelocity, horizontalSmoothTime);
-            transform.position = new Vector3(smoothedX, transform.position.y, transform.position.z);
-        }
+            // 캐릭터의 물리 이동이 끝난 뒤(LateUpdate)에 방 경계를 넘었는지 매 프레임 검사한다.
+            // 착지 여부와 상관없이, 방 경계를 넘는 즉시 스크롤을 시작한다.
+            Vector2Int newRoomIndex = RoomIndexOf(target.transform.position);
+            if (newRoomIndex == currentRoomIndex) return;
 
-        private void HandleLanded(PlatformSurface surface)
-        {
-            int newRoomIndexY = RoomIndexOf(target.transform.position.y);
-            if (newRoomIndexY == currentRoomIndexY) return; // 같은 방이면 스크롤 불필요
-
-            currentRoomIndexY = newRoomIndexY;
+            currentRoomIndex = newRoomIndex;
 
             if (scrollRoutine != null)
             {
                 StopCoroutine(scrollRoutine);
             }
-            scrollRoutine = StartCoroutine(ScrollYTo(AnchorY(target.transform.position.y)));
+            scrollRoutine = StartCoroutine(ScrollTo(RoomToWorldCenter(currentRoomIndex)));
         }
 
-        private int RoomIndexOf(float worldY) => Mathf.FloorToInt(worldY / roomHeight);
-
-        /// <summary>실제 착지 지점(floorY) 기준으로, 그보다 floorScreenOffset만큼 위에 카메라를 둔다.</summary>
-        private float AnchorY(float floorY) => floorY + floorScreenOffset;
-
-        private IEnumerator ScrollYTo(float destinationY)
+        private Vector2Int RoomIndexOf(Vector3 worldPosition)
         {
-            float startY = transform.position.y;
+            Vector2 origin = GridOrigin;
+            return new Vector2Int(
+                Mathf.FloorToInt((worldPosition.x - origin.x) / RoomSpacing),
+                Mathf.FloorToInt((worldPosition.y - origin.y) / RoomSpacing));
+        }
+
+        private Vector3 RoomToWorldCenter(Vector2Int roomIndex)
+        {
+            Vector2 origin = GridOrigin;
+            float x = origin.x + (roomIndex.x + 0.5f) * RoomSpacing;
+            float y = origin.y + (roomIndex.y + 0.5f) * RoomSpacing;
+            return new Vector3(x, y, transform.position.z);
+        }
+
+        private IEnumerator ScrollTo(Vector3 destination)
+        {
+            Vector3 start = transform.position;
             float t = 0f;
 
             while (t < scrollDuration)
             {
                 t += Time.deltaTime;
                 float eval = scrollCurve.Evaluate(Mathf.Clamp01(t / scrollDuration));
-                transform.position = new Vector3(transform.position.x, Mathf.Lerp(startY, destinationY, eval), transform.position.z);
+                transform.position = Vector3.Lerp(start, destination, eval);
                 yield return null;
             }
 
-            transform.position = new Vector3(transform.position.x, destinationY, transform.position.z);
+            transform.position = destination;
             ScrollManager.NotifyScrollChanged();
         }
     }

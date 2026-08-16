@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace IceBop.JumpKing
 {
     /// <summary>
@@ -20,5 +22,11 @@ namespace IceBop.JumpKing
 
         /// <summary>이 발판을 벗어나는 순간 1회 호출.</summary>
         void OnLeave(JumpKingCharacter character, PlatformSurface surface);
+
+        /// <summary>
+        /// 윗면(착지)이 아니라 옆면/아랫면으로 부딪혔을 때 호출. normal은 충돌 지점의 표면 노멀(월드 기준).
+        /// 이 경우 착지로 취급하지 않으므로 State/CurrentGround는 바뀌지 않는다.
+        /// </summary>
+        void OnSideHit(JumpKingCharacter character, PlatformSurface surface, Vector2 normal);
     }
 }
