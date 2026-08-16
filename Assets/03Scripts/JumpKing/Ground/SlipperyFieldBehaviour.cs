@@ -10,7 +10,7 @@ namespace IceBop.JumpKing
         public PlatformType Type => PlatformType.Slippery;
         public bool AllowsJumpControl => true;
 
-        public void OnLand(JumpKingCharacter character, PlatformSurface surface)
+        public void OnLand(JumpKingCharacter character, PlatformSurface surface, Vector2 contactPoint)
         {
             // 하드 필드와 달리 착지 시 수평 속도를 0으로 만들지 않는다 (관성 유지).
         }

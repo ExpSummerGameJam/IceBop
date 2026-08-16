@@ -14,8 +14,8 @@ namespace IceBop.JumpKing
         /// <summary>이 발판 위에서 점프 차지/발사 조작이 가능한지.</summary>
         bool AllowsJumpControl { get; }
 
-        /// <summary>착지 순간 1회 호출.</summary>
-        void OnLand(JumpKingCharacter character, PlatformSurface surface);
+        /// <summary>착지 순간 1회 호출. contactPoint는 접촉 지점(월드 기준) — 약한 바닥이 어느 타일 셀인지 찾는 데 쓴다.</summary>
+        void OnLand(JumpKingCharacter character, PlatformSurface surface, Vector2 contactPoint);
 
         /// <summary>착지해 있는 동안 매 FixedUpdate 호출 (경사로 미끄러짐, 관성 감쇠 등).</summary>
         void OnPhysicsStep(JumpKingCharacter character, PlatformSurface surface);

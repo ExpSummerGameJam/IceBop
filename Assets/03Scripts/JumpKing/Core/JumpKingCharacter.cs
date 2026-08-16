@@ -99,9 +99,9 @@ namespace IceBop.JumpKing
         private void OnCollisionEnter2D(Collision2D collision)
         {
             var surface = collision.collider.GetComponent<PlatformSurface>();
-            if (surface == null || surface.IsBroken) return;
+            if (surface == null) return;
 
-            bool isTopHit = TryGetMostUpwardNormal(collision, out Vector2 normal);
+            bool isTopHit = TryGetMostUpwardContact(collision, out Vector2 normal, out Vector2 point);
 
             if (!isTopHit)
             {
@@ -113,27 +113,57 @@ namespace IceBop.JumpKing
             CurrentGround = GroundBehaviourFactory.Get(surface.Type);
             State = CurrentGround.AllowsJumpControl ? JumpKingMoveState.Idle : JumpKingMoveState.Sliding;
 
-            CurrentGround.OnLand(this, surface);
+            CurrentGround.OnLand(this, surface, point);
             OnLanded?.Invoke(surface);
         }
 
         /// <summary>
-        /// 접촉점이 여러 개일 수 있으므로(모서리 등) 그중 가장 위쪽에 가까운 노멀을 찾는다.
+        /// L자 코너처럼 여러 발판이 동시에 접촉하는 상황에서는, OnCollisionEnter2D가 호출되는
+        /// 그 순간 하필 이 발판의 접촉 노멀이 코너 때문에 애매하게(옆면처럼) 잡혀 착지가 무산될 수 있다.
+        /// 아직 다른 곳에 착지하지 못한 상태라면, 접촉이 유지되는 동안 매 스텝 재시도해서
+        /// 뒤늦게라도 위쪽 노멀이 확인되면 착지 처리한다.
+        /// </summary>
+        private void OnCollisionStay2D(Collision2D collision)
+        {
+            if (CurrentSurface != null) return; // 이미 다른 곳에 착지해 있으면 재검사 불필요
+
+            // 막 점프해서 위로 솟구치는 중이면 재착지 처리를 하지 않는다.
+            // 점프 직후에도 콜라이더가 물리적으로 아직 안 떨어진 스텝이 있는데, 이 가드 없이는
+            // 방금 준 점프 속도를 여기서 다시 0으로 죽여버려 점프가 거의 안 되는 것처럼 보인다.
+            if (Rb.linearVelocity.y > 0f) return;
+
+            var surface = collision.collider.GetComponent<PlatformSurface>();
+            if (surface == null) return;
+            if (!TryGetMostUpwardContact(collision, out _, out Vector2 point)) return;
+
+            CurrentSurface = surface;
+            CurrentGround = GroundBehaviourFactory.Get(surface.Type);
+            State = CurrentGround.AllowsJumpControl ? JumpKingMoveState.Idle : JumpKingMoveState.Sliding;
+
+            CurrentGround.OnLand(this, surface, point);
+            OnLanded?.Invoke(surface);
+        }
+
+        /// <summary>
+        /// 접촉점이 여러 개일 수 있으므로(모서리 등) 그중 가장 위쪽에 가까운 접촉(노멀+지점)을 찾는다.
         /// 그 노멀조차 기준(landingNormalThreshold)을 못 넘으면 착지가 아니라 옆면/아랫면 충돌로 판정한다.
         /// </summary>
-        private bool TryGetMostUpwardNormal(Collision2D collision, out Vector2 bestNormal)
+        private bool TryGetMostUpwardContact(Collision2D collision, out Vector2 bestNormal, out Vector2 bestPoint)
         {
-            bestNormal = collision.GetContact(0).normal;
+            ContactPoint2D contact = collision.GetContact(0);
+            bestNormal = contact.normal;
+            bestPoint = contact.point;
             float bestDot = Vector2.Dot(bestNormal, Vector2.up);
 
             for (int i = 1; i < collision.contactCount; i++)
             {
-                Vector2 normal = collision.GetContact(i).normal;
-                float dot = Vector2.Dot(normal, Vector2.up);
+                contact = collision.GetContact(i);
+                float dot = Vector2.Dot(contact.normal, Vector2.up);
                 if (dot > bestDot)
                 {
                     bestDot = dot;
-                    bestNormal = normal;
+                    bestNormal = contact.normal;
+                    bestPoint = contact.point;
                 }
             }
 
