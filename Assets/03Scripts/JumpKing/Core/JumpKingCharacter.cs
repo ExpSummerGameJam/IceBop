@@ -14,6 +14,12 @@ namespace IceBop.JumpKing
         [SerializeField] private float minJumpPower = 4f;
         [SerializeField] private float maxJumpPower = 14f;
 
+        [Header("충돌 반발력")]
+        [Tooltip("옆면 충돌 시 Unity 물리 엔진이 직접 튕겨내는 정도. 0=안 튕김, 1=완전 탄성. " +
+                 "이 값은 캐릭터 전체에 균일하게 적용된다 (발판 종류별로 다르게 줄 수 없음).")]
+        [Range(0f, 1f)]
+        [SerializeField] private float bounciness = 0.6f;
+
         public Rigidbody2D Rb { get; private set; }
         public JumpKingMoveState State { get; private set; } = JumpKingMoveState.Idle;
         public PlatformSurface CurrentSurface { get; private set; }
@@ -37,6 +43,9 @@ namespace IceBop.JumpKing
             // 빠른 낙하/점프 속도에서 얇은 바닥 콜라이더를 그냥 통과(터널링)하는 걸 막기 위해
             // 인스펙터 설정과 무관하게 항상 연속 충돌 감지를 강제한다.
             Rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            // 정지/미끄러짐은 우리 스크립트가 직접 제어하므로 마찰은 0으로 강제한다.
+            // 옆면 충돌 시 튕겨나가는 건 Unity 물리 엔진의 Bounciness에 맡긴다.
+            Rb.sharedMaterial = new PhysicsMaterial2D(name + "_Physics") { friction = 0f, bounciness = bounciness };
         }
 
         private void FixedUpdate()
@@ -82,10 +91,23 @@ namespace IceBop.JumpKing
             //       anchored == false -> Airborne으로 복귀 (재점프 입력 대기)
         }
 
+        [Header("충돌 판정")]
+        [Tooltip("충돌 노멀과 위쪽(Vector2.up)의 내적이 이 값을 넘어야 '착지'로 취급한다. " +
+                 "그보다 낮으면(옆면/아랫면) OnSideHit으로 처리된다.")]
+        [SerializeField] private float landingNormalThreshold = 0.5f;
+
         private void OnCollisionEnter2D(Collision2D collision)
         {
             var surface = collision.collider.GetComponent<PlatformSurface>();
             if (surface == null || surface.IsBroken) return;
+
+            bool isTopHit = TryGetMostUpwardNormal(collision, out Vector2 normal);
+
+            if (!isTopHit)
+            {
+                GroundBehaviourFactory.Get(surface.Type).OnSideHit(this, surface, normal);
+                return;
+            }
 
             CurrentSurface = surface;
             CurrentGround = GroundBehaviourFactory.Get(surface.Type);
@@ -93,6 +115,29 @@ namespace IceBop.JumpKing
 
             CurrentGround.OnLand(this, surface);
             OnLanded?.Invoke(surface);
+        }
+
+        /// <summary>
+        /// 접촉점이 여러 개일 수 있으므로(모서리 등) 그중 가장 위쪽에 가까운 노멀을 찾는다.
+        /// 그 노멀조차 기준(landingNormalThreshold)을 못 넘으면 착지가 아니라 옆면/아랫면 충돌로 판정한다.
+        /// </summary>
+        private bool TryGetMostUpwardNormal(Collision2D collision, out Vector2 bestNormal)
+        {
+            bestNormal = collision.GetContact(0).normal;
+            float bestDot = Vector2.Dot(bestNormal, Vector2.up);
+
+            for (int i = 1; i < collision.contactCount; i++)
+            {
+                Vector2 normal = collision.GetContact(i).normal;
+                float dot = Vector2.Dot(normal, Vector2.up);
+                if (dot > bestDot)
+                {
+                    bestDot = dot;
+                    bestNormal = normal;
+                }
+            }
+
+            return bestDot > landingNormalThreshold;
         }
 
         private void OnCollisionExit2D(Collision2D collision)

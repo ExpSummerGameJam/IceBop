@@ -27,5 +27,10 @@ namespace IceBop.JumpKing
         public void OnLeave(JumpKingCharacter character, PlatformSurface surface)
         {
         }
+
+        public void OnSideHit(JumpKingCharacter character, PlatformSurface surface, Vector2 normal)
+        {
+            // TODO: 필요하면 미끄러운 필드도 옆면 충돌 처리 추가 (지금은 Unity 기본 물리 반응에 맡김)
+        }
     }
 }

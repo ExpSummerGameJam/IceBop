@@ -6,15 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2jump1.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2jump1.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2jump2.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2jump2.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2jump3.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2jump3.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemaincharshift.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemaincharshift.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemaincharshift2.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemaincharshift2.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Camera/JumpKingCameraController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Camera/JumpKingCameraController.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingCharacter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingCharacter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/HardFieldBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/HardFieldBehaviour.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/IGroundBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/IGroundBehaviour.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/SlipperyFieldBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/SlipperyFieldBehaviour.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/SlopeBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/SlopeBehaviour.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/WeakFieldBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/WeakFieldBehaviour.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
