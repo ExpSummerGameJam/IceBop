@@ -34,6 +34,9 @@ namespace IceBop.JumpKing
         private void Awake()
         {
             Rb = GetComponent<Rigidbody2D>();
+            // 빠른 낙하/점프 속도에서 얇은 바닥 콜라이더를 그냥 통과(터널링)하는 걸 막기 위해
+            // 인스펙터 설정과 무관하게 항상 연속 충돌 감지를 강제한다.
+            Rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         }
 
         private void FixedUpdate()

@@ -5,77 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/indexLayout.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Dohyun.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Data.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/JJData.asmdef" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/JJData.asmdef.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Converter.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Converter/ParsingPerformanceTest.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Converter/ParsingPerformanceTest.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Converter/String2TypeByteConverter.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Converter/String2TypeByteConverter.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Converter/Type2TypeByteConverter.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Converter/Type2TypeByteConverter.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Converter/TypeByte2TypeConverter.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Converter/TypeByte2TypeConverter.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Enum.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Enum/JJDataEnum.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Enum/JJDataEnum.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Class.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Class/ClassGenerator.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Class/ClassGenerator.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Class/IClassGenerator.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Class/IClassGenerator.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Data.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Data/BinSheetDataGenerator.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Data/BinSheetDataGenerator.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Data/ISheetDataGenerator.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Data/ISheetDataGenerator.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Parser.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Parser/IParserGenerator.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Parser/IParserGenerator.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Parser/ParserGenerator.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Parser/ParserGenerator.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Viewer.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Viewer/ViewerGenerator.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Generator/Viewer/ViewerGenerator.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Manager.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Manager/XlsxDataManager.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Manager/XlsxDataManager.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Processor.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Processor/IDataProcessor.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Processor/IDataProcessor.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Processor/ProcessedData.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Processor/ProcessedData.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Processor/XlsxDataProcessor.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Processor/XlsxDataProcessor.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Save.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Save/JJSave.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Save/JJSave.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Util.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Util/SheetDataUtil.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Util/SheetDataUtil.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Watcher.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Watcher/XlsxWatcher.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Watcher/XlsxWatcher.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Xlsx.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Xlsx/CookingData.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Xlsx/CookingData.xlsx.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Xlsx/DataBaseName.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Xlsx/DataBaseName.xlsx.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Xlsx/GatheringData.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/JJData/Xlsx/GatheringData.xlsx.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/BagInventoryTestScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/BagInventoryTestScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/BagInventoryTestScene.unity.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/BagInventoryTestScene.unity.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2jump1.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2jump1.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2jump2.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2jump2.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2jump3.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemainchar2jump3.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemaincharshift.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemaincharshift.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemaincharshift2.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/MainSprite/icemaincharshift2.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Camera/JumpKingCameraController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Camera/JumpKingCameraController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingCharacter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingCharacter.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -119,7 +58,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Unity 에디터에 연결.Unity 에디터에 연결">
+  <component name="RunManager" selected="Attach to Unity Editor.Unity 에디터에 연결">
     <configuration name="유닛 테스트(배치 모드)" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.3.7f1\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath D:\GitHub\2_UNITIYGAME\IceBop -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />
