@@ -3,19 +3,19 @@ using UnityEngine;
 namespace IceBop.JumpKing
 {
     /// <summary>
-    /// D. 약한 바닥 - 하드 필드와 동일하게 동작하지만, 2번째 착지에 파괴되어 사라진다.
-    /// 파손 카운트는 이 행동 객체가 아니라 인스턴스별 상태를 가진 PlatformSurface에 저장한다
-    /// (이 객체는 모든 약한 바닥 타일이 공유하는 싱글턴이기 때문).
+    /// D. 약한 바닥 - 하드 필드와 동일하게 동작하지만, 밟은 타일 셀이 2번째 착지에 파괴되어 사라진다.
+    /// 셀 단위 파손 카운트/복구는 같은 오브젝트에 붙어있는 WeakTilemap이 담당한다
+    /// (이 객체는 모든 약한 바닥 타일맵이 공유하는 싱글턴이라 상태를 가질 수 없기 때문).
     /// </summary>
     public class WeakFieldBehaviour : IGroundBehaviour
     {
         public PlatformType Type => PlatformType.Weak;
         public bool AllowsJumpControl => true;
 
-        public void OnLand(JumpKingCharacter character, PlatformSurface surface)
+        public void OnLand(JumpKingCharacter character, PlatformSurface surface, Vector2 contactPoint)
         {
-            // TODO: 하드 필드와 동일하게 수평/수직 속도 정지
-            surface.RegisterLanding();
+            character.Rb.linearVelocity = Vector2.zero; // 하드 필드와 동일하게 착지 즉시 정지
+            surface.GetComponent<WeakTilemap>()?.RegisterLanding(contactPoint);
         }
 
         public void OnPhysicsStep(JumpKingCharacter character, PlatformSurface surface)

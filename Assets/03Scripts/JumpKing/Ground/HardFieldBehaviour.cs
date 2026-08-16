@@ -8,7 +8,7 @@ namespace IceBop.JumpKing
         public PlatformType Type => PlatformType.Hard;
         public bool AllowsJumpControl => true;
 
-        public void OnLand(JumpKingCharacter character, PlatformSurface surface)
+        public void OnLand(JumpKingCharacter character, PlatformSurface surface, Vector2 contactPoint)
         {
             character.Rb.linearVelocity = Vector2.zero; // 관성 없음: 착지 즉시 정지
         }

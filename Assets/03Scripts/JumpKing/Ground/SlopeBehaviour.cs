@@ -11,7 +11,7 @@ namespace IceBop.JumpKing
         public PlatformType Type => PlatformType.Slope;
         public bool AllowsJumpControl => false;
 
-        public void OnLand(JumpKingCharacter character, PlatformSurface surface)
+        public void OnLand(JumpKingCharacter character, PlatformSurface surface, Vector2 contactPoint)
         {
             // 경사로는 "착지"라기보다 "닿음" 취급. 캐릭터 상태를 Sliding으로 전환하는 처리는
             // JumpKingCharacter.OnCollisionEnter2D 쪽에서 AllowsJumpControl 값을 보고 이미 결정한다.

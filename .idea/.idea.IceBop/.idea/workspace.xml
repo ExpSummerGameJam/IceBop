@@ -5,7 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingCharacter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingCharacter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/HardFieldBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/HardFieldBehaviour.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/IGroundBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/IGroundBehaviour.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/PlatformSurface.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/PlatformSurface.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/SlipperyFieldBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/SlipperyFieldBehaviour.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/SlopeBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/SlopeBehaviour.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/WeakFieldBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/WeakFieldBehaviour.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/WeakFieldGroup.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/WeakFieldGroup.cs.meta" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

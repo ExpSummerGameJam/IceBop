@@ -99,9 +99,9 @@ namespace IceBop.JumpKing
         private void OnCollisionEnter2D(Collision2D collision)
         {
             var surface = collision.collider.GetComponent<PlatformSurface>();
-            if (surface == null || surface.IsBroken) return;
+            if (surface == null) return;
 
-            bool isTopHit = TryGetMostUpwardNormal(collision, out Vector2 normal);
+            bool isTopHit = TryGetMostUpwardContact(collision, out Vector2 normal, out Vector2 point);
 
             if (!isTopHit)
             {
@@ -113,7 +113,7 @@ namespace IceBop.JumpKing
             CurrentGround = GroundBehaviourFactory.Get(surface.Type);
             State = CurrentGround.AllowsJumpControl ? JumpKingMoveState.Idle : JumpKingMoveState.Sliding;
 
-            CurrentGround.OnLand(this, surface);
+            CurrentGround.OnLand(this, surface, point);
             OnLanded?.Invoke(surface);
         }
 
@@ -133,34 +133,37 @@ namespace IceBop.JumpKing
             if (Rb.linearVelocity.y > 0f) return;
 
             var surface = collision.collider.GetComponent<PlatformSurface>();
-            if (surface == null || surface.IsBroken) return;
-            if (!TryGetMostUpwardNormal(collision, out _)) return;
+            if (surface == null) return;
+            if (!TryGetMostUpwardContact(collision, out _, out Vector2 point)) return;
 
             CurrentSurface = surface;
             CurrentGround = GroundBehaviourFactory.Get(surface.Type);
             State = CurrentGround.AllowsJumpControl ? JumpKingMoveState.Idle : JumpKingMoveState.Sliding;
 
-            CurrentGround.OnLand(this, surface);
+            CurrentGround.OnLand(this, surface, point);
             OnLanded?.Invoke(surface);
         }
 
         /// <summary>
-        /// 접촉점이 여러 개일 수 있으므로(모서리 등) 그중 가장 위쪽에 가까운 노멀을 찾는다.
+        /// 접촉점이 여러 개일 수 있으므로(모서리 등) 그중 가장 위쪽에 가까운 접촉(노멀+지점)을 찾는다.
         /// 그 노멀조차 기준(landingNormalThreshold)을 못 넘으면 착지가 아니라 옆면/아랫면 충돌로 판정한다.
         /// </summary>
-        private bool TryGetMostUpwardNormal(Collision2D collision, out Vector2 bestNormal)
+        private bool TryGetMostUpwardContact(Collision2D collision, out Vector2 bestNormal, out Vector2 bestPoint)
         {
-            bestNormal = collision.GetContact(0).normal;
+            ContactPoint2D contact = collision.GetContact(0);
+            bestNormal = contact.normal;
+            bestPoint = contact.point;
             float bestDot = Vector2.Dot(bestNormal, Vector2.up);
 
             for (int i = 1; i < collision.contactCount; i++)
             {
-                Vector2 normal = collision.GetContact(i).normal;
-                float dot = Vector2.Dot(normal, Vector2.up);
+                contact = collision.GetContact(i);
+                float dot = Vector2.Dot(contact.normal, Vector2.up);
                 if (dot > bestDot)
                 {
                     bestDot = dot;
-                    bestNormal = normal;
+                    bestNormal = contact.normal;
+                    bestPoint = contact.point;
                 }
             }
 
