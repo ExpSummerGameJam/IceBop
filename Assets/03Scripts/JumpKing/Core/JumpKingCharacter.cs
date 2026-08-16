@@ -127,6 +127,11 @@ namespace IceBop.JumpKing
         {
             if (CurrentSurface != null) return; // 이미 다른 곳에 착지해 있으면 재검사 불필요
 
+            // 막 점프해서 위로 솟구치는 중이면 재착지 처리를 하지 않는다.
+            // 점프 직후에도 콜라이더가 물리적으로 아직 안 떨어진 스텝이 있는데, 이 가드 없이는
+            // 방금 준 점프 속도를 여기서 다시 0으로 죽여버려 점프가 거의 안 되는 것처럼 보인다.
+            if (Rb.linearVelocity.y > 0f) return;
+
             var surface = collision.collider.GetComponent<PlatformSurface>();
             if (surface == null || surface.IsBroken) return;
             if (!TryGetMostUpwardNormal(collision, out _)) return;
