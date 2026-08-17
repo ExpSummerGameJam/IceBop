@@ -827,7 +827,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100082, guid: 85bcbf3ceb6e42b3b80f46e9a9e999e4, type: 3}
       propertyPath: m_NormalizedViewPortRect.y
-      value: 0.057659417
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 100082, guid: 85bcbf3ceb6e42b3b80f46e9a9e999e4, type: 3}
       propertyPath: m_NormalizedViewPortRect.width
@@ -835,7 +835,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100082, guid: 85bcbf3ceb6e42b3b80f46e9a9e999e4, type: 3}
       propertyPath: m_NormalizedViewPortRect.height
-      value: 0.88468117
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 100092, guid: 85bcbf3ceb6e42b3b80f46e9a9e999e4, type: 3}
       propertyPath: m_NormalizedViewPortRect.x
@@ -843,7 +843,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100092, guid: 85bcbf3ceb6e42b3b80f46e9a9e999e4, type: 3}
       propertyPath: m_NormalizedViewPortRect.y
-      value: 0.057659417
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 100092, guid: 85bcbf3ceb6e42b3b80f46e9a9e999e4, type: 3}
       propertyPath: m_NormalizedViewPortRect.width
@@ -851,7 +851,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100092, guid: 85bcbf3ceb6e42b3b80f46e9a9e999e4, type: 3}
       propertyPath: m_NormalizedViewPortRect.height
-      value: 0.88468117
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1150,6 +1150,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 270c876f73ce0cd4787197c21fcf844f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::IceBop.JumpKing.JumpKingCharacter
+--- !u!4 &4487302563151466187 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2681359913103394199, guid: cb63689bae72c0c43ac57053b73ae6f2, type: 3}
+  m_PrefabInstance: {fileID: 4487302563151466184}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4497231244331382083
 Transform:
   m_ObjectHideFlags: 0
@@ -1409,8 +1414,69 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 278758143555986697, guid: 68757e81536e0454a96c9c32bfb7e251, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6967615768750010243}
+    - targetCorrespondingSourceObject: {fileID: 278758143555986697, guid: 68757e81536e0454a96c9c32bfb7e251, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6967615768750010242}
   m_SourcePrefab: {fileID: 100100000, guid: 68757e81536e0454a96c9c32bfb7e251, type: 3}
+--- !u!1 &6967615768750010241 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 278758143555986697, guid: 68757e81536e0454a96c9c32bfb7e251, type: 3}
+  m_PrefabInstance: {fileID: 6967615768750010240}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6967615768750010242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6967615768750010241}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7d9a4c8c30c4f839c7f6adbe4c8e291, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProgressiveLayeredAudioController
+  layerSources:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  layerClips:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  createMissingSourcesFromClips: 1
+  loadMissingClipsFromBgmFolder: 1
+  initialActiveLayerCount: 0
+  playOnStart: 1
+  loop: 1
+  scheduledStartDelay: 0.1
+  layerFadeDuration: 1
+  registerSourcesWithSettings: 1
+  settingsAudioChannel: 0
+  numberKeysSetActiveLayerCount: 1
+  includeNumpadKeys: 1
+  zeroKeyMutesAll: 1
+--- !u!114 &6967615768750010243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6967615768750010241}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c341ac54a0ccc3e4c819feb09977666f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHeightLayeredAudioController
+  player: {fileID: 4487302563151466187}
+  layeredAudio: {fileID: 6967615768750010242}
+  layerActivationHeights:
+  - 0
+  - 80
+  - 160
 --- !u!114 &6991026461950009111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1428,10 +1494,6 @@ MonoBehaviour:
   cameraController: {fileID: 4648182188242467302}
   floorCollider: {fileID: 6228249395958718403}
   jumpAction: {fileID: -2099379676528639254, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
-  waitForAnyKeyToStart: 1
-  spawnAboveReference: {fileID: 6109418407729829196}
-  spawnHeightAboveReference: 3
-  hideOnFirstScroll: {fileID: 6756207142304828518}
   spawnRoomIndex: 13
   spawnX: -3
   fallSpinDegreesPerSecond: 360
@@ -1515,7 +1577,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!81 &8496424939213268845
 AudioListener:
@@ -1553,9 +1615,9 @@ Camera:
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
-    y: 0.057659417
+    y: 0
     width: 1
-    height: 0.88468117
+    height: 1
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 34
