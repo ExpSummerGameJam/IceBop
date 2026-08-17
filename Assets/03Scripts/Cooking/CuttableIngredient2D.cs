@@ -49,6 +49,7 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
     [SerializeField] private float cutPieceImpulse = 0.5f;
     [SerializeField] private float cutPieceTorque = 0.6f;
 
+    private readonly CookingActionSfxLoop actionSfx = new();
     private readonly List<List<SpriteRenderer>> guideDots = new();
     private readonly List<GameObject> generatedPieces = new();
     private Sprite sourceSprite;
@@ -121,11 +122,14 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
     // since OnDisable reliably fires when the slot is SetActive(false).
     private void OnDisable()
     {
+        actionSfx.Stop();
         ClearGeneratedPieces();
     }
 
     private void Update()
     {
+        actionSfx.Tick();
+
         if (IsPrepared)
             return;
 
@@ -161,6 +165,7 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
         if (!changed)
             return;
 
+        actionSfx.Notify(transform, GameSfx.ActionCut);
         activeKnife.SetCutting(true);
         UpdateAllGuideColors();
 

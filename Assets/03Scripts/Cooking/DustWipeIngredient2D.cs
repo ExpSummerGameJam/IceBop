@@ -12,6 +12,7 @@ public sealed class DustWipeIngredient2D : IngredientPreparationBehaviour2D
     [SerializeField] private float wipeRadius = 0.32f;
     [SerializeField] private Color dustColor = new(0.36f, 0.34f, 0.31f, 0.92f);
 
+    private readonly CookingActionSfxLoop actionSfx = new();
     private readonly List<SpriteRenderer> dustPatches = new();
 
     public void BindCloth(PreparationPointerTool2D newClothTool)
@@ -66,10 +67,17 @@ public sealed class DustWipeIngredient2D : IngredientPreparationBehaviour2D
 
     private void Update()
     {
+        actionSfx.Tick();
+
         if (IsPrepared || clothTool == null || !clothTool.IsDragging)
             return;
 
         WipeAt(clothTool.PointerWorldPosition);
+    }
+
+    private void OnDisable()
+    {
+        actionSfx.Stop();
     }
 
     private void WipeAt(Vector2 worldPosition)

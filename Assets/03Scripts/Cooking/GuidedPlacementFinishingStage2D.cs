@@ -145,6 +145,7 @@ public sealed class GuidedPlacementFinishingStage2D : MonoBehaviour, IDishFinish
 
         item.transform.localPosition = item.targetLocalPosition;
         item.placed = true;
+        GameSfxPlayer.Play(GameSfx.ActionPlace);
 
         if (item.collider != null)
             item.collider.enabled = false;

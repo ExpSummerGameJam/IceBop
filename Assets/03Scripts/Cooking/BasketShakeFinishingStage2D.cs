@@ -17,6 +17,7 @@ public sealed class BasketShakeFinishingStage2D : MonoBehaviour, IDishFinishingS
     [SerializeField] private float minShakeDistance = 0.42f;
     [SerializeField] private float verticalNoiseRatio = 1.1f;
 
+    private readonly CookingActionSfxLoop actionSfx = new();
     private readonly List<SpriteRenderer> ingredientRenderers = new();
 
     private Coroutine dropInRoutine;
@@ -60,8 +61,12 @@ public sealed class BasketShakeFinishingStage2D : MonoBehaviour, IDishFinishingS
 
     private void Update()
     {
+        actionSfx.Tick();
+
         if (interactionCompleted || presentingResult || basketHandle == null || !basketHandle.HasPointerMovement)
             return;
+
+        actionSfx.Notify(transform, GameSfx.ActionFry);
 
         Vector2 delta = basketHandle.PointerWorldPosition - basketHandle.PreviousPointerWorldPosition;
         if (!strokeTracker.ApplyMovement(delta))
@@ -197,7 +202,7 @@ public sealed class BasketShakeFinishingStage2D : MonoBehaviour, IDishFinishingS
 
             // Spawn above the basket, slightly randomized so pieces dropped in sequence don't
             // spawn stacked exactly on top of each other - physics then decides where each lands.
-            spawnPositions.Add(new Vector3(UnityEngine.Random.Range(-0.3f, 0.3f), 0.45f + i * 0.05f, 0f));
+            spawnPositions.Add(new Vector3(UnityEngine.Random.Range(-0.3f, 0.3f), 0.12f + i * 0.03f, 0f));
 
             SpriteRenderer renderer = bit.AddComponent<SpriteRenderer>();
             renderer.sprite = CookingRuntimeVisuals2D.GetIngredientSprite(entry);
@@ -209,6 +214,11 @@ public sealed class BasketShakeFinishingStage2D : MonoBehaviour, IDishFinishingS
 
         dropInRoutine = StartCoroutine(CookingRuntimeVisuals2D.DropInIngredientsPhysics(
             ingredientRenderers, spawnPositions, 1.5f));
+    }
+
+    private void OnDisable()
+    {
+        actionSfx.Stop();
     }
 
     private void OnValidate()

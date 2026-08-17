@@ -515,6 +515,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6809325540177101981, guid: d41013dafb2fba4488ed31e467000189, type: 3}
       insertIndex: -1
       addedObject: {fileID: 400854987}
+    - targetCorrespondingSourceObject: {fileID: 7206460596764990828, guid: d41013dafb2fba4488ed31e467000189, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1515298081}
     - targetCorrespondingSourceObject: {fileID: 4801570647634719662, guid: d41013dafb2fba4488ed31e467000189, type: 3}
       insertIndex: -1
       addedObject: {fileID: 496451987}
@@ -696,6 +699,27 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9722ed759d5d4058a8714020ea9f1666, type: 3}
+--- !u!1 &1515298079 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7206460596764990828, guid: d41013dafb2fba4488ed31e467000189, type: 3}
+  m_PrefabInstance: {fileID: 1357016934}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1515298081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1515298079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9f98881d970c5e4fb98721050420a1c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DishResultPresenter2D
+  finishTravelDuration: 0.65
+  returnTravelDuration: 0.75
+  dishRenderer: {fileID: 0}
+  dishLabel: {fileID: 0}
 --- !u!1 &1715112289 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2386214302900688822, guid: d41013dafb2fba4488ed31e467000189, type: 3}

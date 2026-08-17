@@ -191,6 +191,7 @@ public sealed class SkewerAssemblyFinishingStage2D : MonoBehaviour, IDishFinishi
 
         piece.placed = true;
         slot.occupied = true;
+        GameSfxPlayer.Play(GameSfx.ActionSkewer);
 
         piece.transform.SetParent(slot.transform, true);
         piece.transform.position = slot.transform.position;

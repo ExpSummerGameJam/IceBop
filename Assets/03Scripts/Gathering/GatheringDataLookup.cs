@@ -84,6 +84,23 @@ public static class GatheringDataLookup
         return dishesById.Values;
     }
 
+    public static bool TryGetDishByKey(string dishKey, out DishDefinition definition)
+    {
+        EnsureDishes();
+
+        if (string.IsNullOrWhiteSpace(dishKey))
+        {
+            definition = null;
+            return false;
+        }
+
+        string key = dishKey.Trim();
+        definition = dishesById.Values.FirstOrDefault(dish =>
+            dish != null && string.Equals(dish.dishKey, key, StringComparison.OrdinalIgnoreCase));
+
+        return definition != null;
+    }
+
     public static bool TryFindDishForIngredients(IReadOnlyList<int> ingredientIds, out DishDefinition definition)
     {
         EnsureDishes();

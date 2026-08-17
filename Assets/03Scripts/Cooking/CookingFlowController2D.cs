@@ -6,6 +6,9 @@ using UnityEngine;
 
 public sealed class CookingFlowController2D : MonoBehaviour
 {
+    /// <summary>Dish key for the "you made nothing" result. Matches its sprite name in Atlas/Food.</summary>
+    private const string FailedDishKey = "failure_mother";
+
     [SerializeField] private InventoryCookingStation2D cookingStation;
     [SerializeField] private InventoryView2D inventoryView;
     [SerializeField] private Transform stageRig;
@@ -107,6 +110,7 @@ public sealed class CookingFlowController2D : MonoBehaviour
         {
             CookingIngredientEntry entry = ingredients[i];
             IngredientPreparationBehaviour2D preparation = CreatePreparationStage(entry, i, ingredients.Count, camera);
+            GameSfxPlayer.Play(GameSfx.NewCookingStage);
             bool stageCompleted = false;
             preparation.PreparationCompleted += _ => stageCompleted = true;
 
@@ -131,10 +135,12 @@ public sealed class CookingFlowController2D : MonoBehaviour
         DishDefinition dish = ResolveDish(ingredients);
         IngredientPreparationKind cookingMethod = ResolveCookingMethod(dish, ingredients);
         IDishFinishingStage finishingStage = CreateFinishingStage(ingredients, dish, cookingMethod, camera);
+        GameSfxPlayer.Play(GameSfx.NewCookingStage);
 
         bool dishPresented = false;
         finishingStage.InteractionCompleted += finishingStage.PlayResultPresentation;
         finishingStage.ResultPresented += () => dishPresented = true;
+        finishingStage.InteractionCompleted += () => GameSfxPlayer.Play(GameSfx.DishCompleted);
 
         yield return new WaitUntil(() => dishPresented);
 
@@ -385,11 +391,18 @@ public sealed class CookingFlowController2D : MonoBehaviour
         if (GatheringDataLookup.TryFindDishForIngredients(ingredientIds, out DishDefinition dish))
             return dish;
 
+        // No recipe matched - the cook produces the authored "failed dish" row, which carries
+        // no ability charges. Looked up by key so its sprite/name/finishing stage all come
+        // from the Dishes sheet like every other dish.
+        if (GatheringDataLookup.TryGetDishByKey(FailedDishKey, out DishDefinition failedDish))
+            return failedDish;
+
         return new DishDefinition
         {
             dishId = 0,
-            dishKey = "mixed_dish",
-            displayName = "Mixed Dish",
+            dishKey = FailedDishKey,
+            displayName = "실패한 요리",
+            dishSpriteResourcePath = FailedDishKey,
             requiredIngredientIds = string.Join(",", ingredientIds)
         };
     }

@@ -17,6 +17,8 @@ public sealed class GrindableIngredient2D : IngredientPreparationBehaviour2D
     [SerializeField] private Vector2 groundLocalOffset = new(0f, -0.72f);
     [SerializeField] private Vector2 groundFinalScale = new(1.12f, 0.18f);
 
+    private readonly CookingActionSfxLoop actionSfx = new();
+
     private PolygonCollider2D ingredientCollider;
     private Bounds sourceBounds;
     private float progress;
@@ -80,10 +82,17 @@ public sealed class GrindableIngredient2D : IngredientPreparationBehaviour2D
 
     private void Update()
     {
+        actionSfx.Tick();
+
         if (IsPrepared || grindingTool == null || !grindingTool.HasPointerMovement)
             return;
 
         ApplyGrindingMovement(grindingTool.PreviousPointerWorldPosition, grindingTool.PointerWorldPosition);
+    }
+
+    private void OnDisable()
+    {
+        actionSfx.Stop();
     }
 
     private void ApplyGrindingMovement(Vector2 previousPointerPosition, Vector2 currentPointerPosition)
@@ -105,6 +114,8 @@ public sealed class GrindableIngredient2D : IngredientPreparationBehaviour2D
             currentStrokeDirection = direction;
             currentStrokeDistance = 0f;
         }
+
+        actionSfx.Notify(transform, GameSfx.ActionGrind);
 
         currentStrokeDistance += Mathf.Abs(delta.y);
         if (currentStrokeDistance < minVerticalStrokeDistance || direction == lastCompletedStrokeDirection)

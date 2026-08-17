@@ -8,6 +8,7 @@ public sealed class InventoryCookingStation2D : MonoBehaviour
     [SerializeField] private InventoryView2D inventoryView;
     [SerializeField] private Collider2D cookingAreaCollider;
     [SerializeField] private bool requirePlayerInCookingArea = true;
+    [SerializeField] private int minIngredients = 2;
     [SerializeField] private int maxIngredients = 4;
     [SerializeField] private Vector2 buttonSize = new(0.86f, 0.28f);
 
@@ -27,6 +28,8 @@ public sealed class InventoryCookingStation2D : MonoBehaviour
     public bool IsCooking => isCooking;
     public IReadOnlyCollection<InventoryItem2D> ItemsOnPot => itemsOnPot;
     public bool HasPrepPot => potRoot != null;
+    /// <summary>A dish always combines at least two ingredients, so one item alone can't be cooked.</summary>
+    public bool HasEnoughIngredients => itemsOnPot.Count >= Mathf.Max(1, minIngredients);
     public Vector3 PrepPotCenter => potCollider != null
         ? (Vector3)potCollider.bounds.center
         : (potRoot != null ? potRoot.position : Vector3.zero);
@@ -125,7 +128,7 @@ public sealed class InventoryCookingStation2D : MonoBehaviour
 
     private void TryStartCookingFromClick()
     {
-        if (itemsOnPot.Count == 0 || isCooking || !CanUseCookingStation || !GatheringInput.WasPrimaryPressed())
+        if (!HasEnoughIngredients || isCooking || !CanUseCookingStation || !GatheringInput.WasPrimaryPressed())
             return;
 
         if (!TryGetPointerWorldPosition(out Vector2 worldPosition))
@@ -144,7 +147,7 @@ public sealed class InventoryCookingStation2D : MonoBehaviour
 
     private void StartCooking()
     {
-        if (itemsOnPot.Count == 0 || isCooking || !CanUseCookingStation)
+        if (!HasEnoughIngredients || isCooking || !CanUseCookingStation)
             return;
 
         isCooking = true;
@@ -277,7 +280,7 @@ public sealed class InventoryCookingStation2D : MonoBehaviour
         if (cookButtonRenderer == null)
             return;
 
-        bool canCook = itemsOnPot.Count > 0 && !isCooking && CanUseCookingStation;
+        bool canCook = HasEnoughIngredients && !isCooking && CanUseCookingStation;
         cookButtonRenderer.gameObject.SetActive(canCook);
     }
 
@@ -321,7 +324,8 @@ public sealed class InventoryCookingStation2D : MonoBehaviour
 
     private void OnValidate()
     {
-        maxIngredients = Mathf.Max(1, maxIngredients);
+        minIngredients = Mathf.Max(1, minIngredients);
+        maxIngredients = Mathf.Max(minIngredients, maxIngredients);
         buttonSize.x = Mathf.Max(0.1f, buttonSize.x);
         buttonSize.y = Mathf.Max(0.1f, buttonSize.y);
     }

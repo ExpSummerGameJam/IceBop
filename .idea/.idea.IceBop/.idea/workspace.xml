@@ -4,7 +4,24 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="" />
+    <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/Test.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/Test.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/BasketShakeFinishingStage2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/BasketShakeFinishingStage2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingFlowController2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingFlowController2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingMixingPot2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingMixingPot2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CuttableIngredient2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CuttableIngredient2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/DishResultPresenter2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/DishResultPresenter2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/DustWipeIngredient2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/DustWipeIngredient2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/Editor/CookingStagePrefabBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/Editor/CookingStagePrefabBuilder.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/FryerFinishingStage2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/FryerFinishingStage2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/GrindableIngredient2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/GrindableIngredient2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/GuidedPlacementFinishingStage2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/GuidedPlacementFinishingStage2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/InventoryCookingStation2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/InventoryCookingStation2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/SkewerAssemblyFinishingStage2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/SkewerAssemblyFinishingStage2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/UI/PauseSettingsMenuRuntime.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/UI/PauseSettingsMenuRuntime.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/JJData/Xlsx/~$CookingData.xlsx.meta" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

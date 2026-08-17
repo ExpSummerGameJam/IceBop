@@ -13,6 +13,7 @@ public static class CookingStagePrefabBuilder
 {
     private const string RootFolder = "Assets/01Resources/Prefabs/Cooking";
     private const string PrefabPath = RootFolder + "/CookingStageRig.prefab";
+    private const string FontAssetPath = "Assets/01Resources/Font/DungGeunMo SDF.asset";
     private static readonly Vector2 BoardSize = new(3.55f, 2.18f);
 
     [MenuItem("IceBop/Build Cooking Stage Rig")]
@@ -66,6 +67,12 @@ public static class CookingStagePrefabBuilder
         text.enableAutoSizing = false;
         text.fontSize = 2.6f;
         text.color = color;
+
+        TMP_FontAsset font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontAssetPath);
+        if (font != null)
+            text.font = font;
+        else
+            Debug.LogWarning($"CookingStagePrefabBuilder: font asset not found at {FontAssetPath}.");
 
         RectTransform rectTransform = text.rectTransform;
         rectTransform.sizeDelta = new Vector2(width, 0.6f);
@@ -173,21 +180,11 @@ public static class CookingStagePrefabBuilder
         stage.SetActive(false);
     }
 
-    // The completed-dish sprite and its name label that DishResultPresenter2D drives - placed
-    // here rather than created at runtime so they can be positioned/styled in the prefab.
+    // Only the dish-name label is placed here - DishResultPresenter2D still builds the dish
+    // sprite itself at runtime, since that visual is driven entirely by the cooked result.
     private static void BuildDishResultVisuals(Transform parent)
     {
-        Transform resultRoot = FindOrCreateChild(parent, "DishResult");
-
-        GameObject dishObject = new("CompletedDish");
-        dishObject.transform.SetParent(resultRoot, false);
-        dishObject.transform.localPosition = new Vector3(0f, 0.36f, 0f);
-        dishObject.transform.localScale = new Vector3(0.78f, 0.78f, 1f);
-
-        SpriteRenderer dishRenderer = dishObject.AddComponent<SpriteRenderer>();
-        dishRenderer.sortingOrder = 43;
-
-        GameObject labelObject = BuildWorldText(resultRoot, "CompletedDishLabel", 3f, new Color(0.94f, 0.96f, 0.92f, 1f), 44);
+        GameObject labelObject = BuildWorldText(parent, "CompletedDishLabel", 3f, new Color(0.94f, 0.96f, 0.92f, 1f), 44);
         labelObject.transform.localPosition = new Vector3(0f, -0.55f, 0f);
     }
 

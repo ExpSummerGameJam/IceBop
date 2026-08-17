@@ -213,6 +213,7 @@ public sealed class PauseSettingsMenuRuntime : MonoBehaviour
             button.targetGraphic = graphic;
 
         button.colors = CreateButtonColors(selected);
+        button.onClick.AddListener(() => GameSfxPlayer.Play(GameSfx.Button));
         button.onClick.AddListener(onClick);
     }
 

@@ -16,6 +16,7 @@ public sealed class CookingMixingPot2D : MonoBehaviour, IDishFinishingStage
     [SerializeField] private float minHorizontalStrokeDistance = 0.48f;
     [SerializeField] private float verticalNoiseRatio = 1.15f;
 
+    private readonly CookingActionSfxLoop actionSfx = new();
     private readonly List<SpriteRenderer> ingredientRenderers = new();
     private readonly List<Vector3> ingredientStartScales = new();
 
@@ -69,10 +70,17 @@ public sealed class CookingMixingPot2D : MonoBehaviour, IDishFinishingStage
 
     private void Update()
     {
+        actionSfx.Tick();
+
         if (mixingCompleted || presentingResult || ladleTool == null || !ladleTool.HasPointerMovement)
             return;
 
         ApplyLadleMovement(ladleTool.PreviousPointerWorldPosition, ladleTool.PointerWorldPosition);
+    }
+
+    private void OnDisable()
+    {
+        actionSfx.Stop();
     }
 
     public void PlayResultPresentation()
@@ -116,6 +124,8 @@ public sealed class CookingMixingPot2D : MonoBehaviour, IDishFinishingStage
             strokeTracker.AbandonCurrentStroke();
             return;
         }
+
+        actionSfx.Notify(transform, GameSfx.ActionStir);
 
         Vector2 delta = currentPointerPosition - previousPointerPosition;
         if (!strokeTracker.ApplyMovement(delta))
@@ -268,7 +278,7 @@ public sealed class CookingMixingPot2D : MonoBehaviour, IDishFinishingStage
 
             // Spawn above the pot, slightly randomized so pieces dropped in sequence don't
             // spawn stacked exactly on top of each other - physics then decides where each lands.
-            spawnPositions.Add(new Vector3(UnityEngine.Random.Range(-0.3f, 0.3f), 0.45f + i * 0.05f, 0f));
+            spawnPositions.Add(new Vector3(UnityEngine.Random.Range(-0.3f, 0.3f), 0.12f + i * 0.03f, 0f));
 
             SpriteRenderer renderer = bit.AddComponent<SpriteRenderer>();
             renderer.sprite = CookingRuntimeVisuals2D.GetIngredientSprite(entry);
@@ -285,30 +295,39 @@ public sealed class CookingMixingPot2D : MonoBehaviour, IDishFinishingStage
             ingredientRenderers, spawnPositions, RestIngredientScale));
     }
 
-    // The player grabs the pot's own rim (hand-placed "PotBody/PotWall", collider already
-    // authored there) and shakes it to stir - no separate ladle prop is built anymore.
+    // The player grabs the whole hand-placed "PotBody" (parent of the "PotWall" rim art) and
+    // swirls it to stir - no separate ladle prop is built anymore.
     private void EnsureWallTool()
     {
-        if (ladleTool != null)
-        {
-            ladleTool.gameObject.SetActive(true);
-            ladleTool.Configure(targetCamera != null ? targetCamera : Camera.main, inventoryView);
-            potCollider = ladleTool.GetComponent<Collider2D>();
-            return;
-        }
-
         if (potBody == null)
             return;
 
-        Transform wall = potBody.Find("PotWall");
-        if (wall == null)
-            return;
+        // The hand-authored EdgeCollider2D on the child "PotWall" is a thin rim outline
+        // (edgeRadius 0), so OverlapPoint only registers a hit within a hair of the exact
+        // outline - attaching the drag tool there leaves the pot effectively ungrabbable and
+        // the stir can never be completed. Put a filled trigger collider on "PotBody" itself,
+        // sized to its sprite, so the whole visible pot is grabbable (and IsPointerOverPot has
+        // a real area to test). Matches how the fryer/basket stages are set up.
+        BoxCollider2D dragCollider = potBody.GetComponent<BoxCollider2D>();
+        if (dragCollider == null)
+            dragCollider = potBody.gameObject.AddComponent<BoxCollider2D>();
 
-        ladleTool = wall.GetComponent<PreparationPointerTool2D>();
+        dragCollider.isTrigger = true;
+        SpriteRenderer bodyRenderer = potBody.GetComponent<SpriteRenderer>();
+        if (bodyRenderer != null && bodyRenderer.sprite != null)
+        {
+            dragCollider.size = bodyRenderer.sprite.bounds.size;
+            dragCollider.offset = bodyRenderer.sprite.bounds.center;
+        }
+
+        potCollider = dragCollider;
+
+        ladleTool = potBody.GetComponent<PreparationPointerTool2D>();
         if (ladleTool == null)
-            ladleTool = wall.gameObject.AddComponent<PreparationPointerTool2D>();
+            ladleTool = potBody.gameObject.AddComponent<PreparationPointerTool2D>();
 
-        potCollider = wall.GetComponent<Collider2D>();
+        ladleTool.gameObject.SetActive(true);
+        ladleTool.enabled = true;
         ladleTool.Configure(targetCamera != null ? targetCamera : Camera.main, inventoryView);
     }
 

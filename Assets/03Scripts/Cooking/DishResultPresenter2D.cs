@@ -10,14 +10,13 @@ using UnityEngine;
 /// </summary>
 public sealed class DishResultPresenter2D : MonoBehaviour
 {
-    private const string DishRendererChildPath = "DishResult/CompletedDish";
-    private const string DishLabelChildPath = "DishResult/CompletedDishLabel";
+    private const string DishLabelChildPath = "CompletedDishLabel";
 
     [SerializeField] private float finishTravelDuration = 0.65f;
     [SerializeField] private float returnTravelDuration = 0.75f;
-    [SerializeField] private SpriteRenderer dishRenderer;
     [SerializeField] private TMP_Text dishLabel;
 
+    private SpriteRenderer dishRenderer;
     private bool presenting;
     private bool loggedMissingVisuals;
 
@@ -89,15 +88,22 @@ public sealed class DishResultPresenter2D : MonoBehaviour
 
     private void ShowDishResult(DishDefinition dish, IReadOnlyList<CookingIngredientEntry> ingredients)
     {
-        ResolveVisuals();
-
-        if (dishRenderer != null)
+        // The dish sprite itself is still built here - only the name label is a placed object.
+        if (dishRenderer == null)
         {
-            dishRenderer.sprite = CookingRuntimeVisuals2D.GetDishSprite(dish, ingredients);
-            dishRenderer.color = Color.white;
-            dishRenderer.gameObject.SetActive(true);
+            GameObject dishObject = new("CompletedDish");
+            dishObject.transform.SetParent(transform, false);
+            dishObject.transform.localPosition = new Vector3(0f, 0.36f, 0f);
+            dishObject.transform.localScale = new Vector3(0.78f, 0.78f, 1f);
+            dishRenderer = dishObject.AddComponent<SpriteRenderer>();
+            dishRenderer.sortingOrder = 43;
         }
 
+        dishRenderer.sprite = CookingRuntimeVisuals2D.GetDishSprite(dish, ingredients);
+        dishRenderer.color = Color.white;
+        dishRenderer.gameObject.SetActive(true);
+
+        ResolveDishLabel();
         if (dishLabel == null)
             return;
 
@@ -107,38 +113,22 @@ public sealed class DishResultPresenter2D : MonoBehaviour
             : "Completed Dish";
     }
 
-    // Both visuals are placed objects under the finishing stage (built by
-    // CookingStagePrefabBuilder), not created here - so the artist can position/style them.
-    private void ResolveVisuals()
+    private void ResolveDishLabel()
     {
-        if (dishRenderer == null)
-        {
-            Transform dishTransform = transform.Find(DishRendererChildPath);
-            if (dishTransform != null)
-                dishRenderer = dishTransform.GetComponent<SpriteRenderer>();
-        }
+        if (dishLabel != null)
+            return;
 
-        if (dishLabel == null)
-        {
-            Transform labelTransform = transform.Find(DishLabelChildPath);
-            if (labelTransform != null)
-                dishLabel = labelTransform.GetComponent<TMP_Text>();
-        }
+        Transform labelTransform = transform.Find(DishLabelChildPath);
+        if (labelTransform != null)
+            dishLabel = labelTransform.GetComponent<TMP_Text>();
 
-        if (dishRenderer == null || dishLabel == null)
-            WarnMissingVisuals();
-    }
-
-    private void WarnMissingVisuals()
-    {
-        if (loggedMissingVisuals)
+        if (dishLabel != null || loggedMissingVisuals)
             return;
 
         loggedMissingVisuals = true;
         Debug.LogError(
-            $"DishResultPresenter2D needs placed \"{DishRendererChildPath}\" (SpriteRenderer) and " +
-            $"\"{DishLabelChildPath}\" (TextMeshPro) objects under this finishing stage. " +
-            "Rebuild the rig via IceBop/Build Cooking Stage Rig.",
+            $"DishResultPresenter2D needs a placed \"{DishLabelChildPath}\" (TextMeshPro) object " +
+            "under this finishing stage. Rebuild the rig via IceBop/Build Cooking Stage Rig.",
             this);
     }
 
