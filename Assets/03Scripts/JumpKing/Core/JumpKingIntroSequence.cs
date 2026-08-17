@@ -6,13 +6,16 @@ namespace IceBop.JumpKing
 {
     /// <summary>
     /// 씬 시작 인트로 연출.
-    /// 1) 캐릭터를 spawnRoomIndex(기본 14)번째 방 위치로 순간이동시키고, 회전을 풀어 빙글빙글 돌며 낙하시킨다.
-    ///    낙하 중에는 floorCollider(맨 아래 바닥)를 제외한 모든 PlatformSurface와의 충돌을 무시하고,
-    ///    공기저항(linearDamping)을 일시적으로 높여 너무 빨리 떨어지지 않게 한다.
+    /// 0) waitForAnyKeyToStart가 켜져 있으면, 스폰 위치에 캐릭터를 완전히 정지시켜둔 채
+    ///    아무 키나 눌러야 낙하가 시작된다 (타이틀 화면 등에서 사용). 꺼두면 씬 시작과 동시에 바로 낙하한다.
+    /// 1) 캐릭터를 spawnAboveReference(설정 시) 또는 spawnRoomIndex(기본)번째 방 위치로 순간이동시키고,
+    ///    회전을 풀어 빙글빙글 돌며 낙하시킨다. 낙하 중에는 floorCollider(맨 아래 바닥)를 제외한 모든
+    ///    PlatformSurface와의 충돌을 무시하고, 공기저항/중력을 일시적으로 조정한다.
     /// 2) 바닥에 닿으면 눕는다. 이때부터 스페이스(jumpAction) 입력을 직접 세어,
     ///    1~9번째 입력은 꿈틀(Wiggle) 연출, 10번째 입력에 기상 + 두리번(좌우 반전) 연출을 재생한다.
     /// 3) 연출이 끝나면 회전을 다시 고정하고, 무시했던 모든 발판과의 충돌을 정상 복구하고,
     ///    JumpKingInputController를 다시 켜서 평소 조작으로 돌아간다.
+    /// 카메라가 처음 스크롤(방 전환)되는 순간 hideOnFirstScroll(타이틀 로고 등)을 비활성화한다.
     /// </summary>
     public class JumpKingIntroSequence : MonoBehaviour
     {
@@ -25,9 +28,20 @@ namespace IceBop.JumpKing
         [Tooltip("웨이크업 입력 카운트에 쓸 액션. 보통 Player/Jump(스페이스)와 동일한 참조를 넣는다.")]
         [SerializeField] private InputActionReference jumpAction;
 
+        [Header("타이틀 화면 연동 (선택)")]
+        [Tooltip("켜두면 씬 시작과 동시에 낙하하지 않고, 아무 키나 누를 때까지 캐릭터를 스폰 위치에 " +
+                 "완전히 정지시켜둔다 (중력도 안 받음). 타이틀 화면에서 사용.")]
+        [SerializeField] private bool waitForAnyKeyToStart;
+        [Tooltip("설정하면 이 Transform 바로 위에서 낙하를 시작한다 (예: 타이틀 로고). " +
+                 "비워두면 기존처럼 spawnRoomIndex/spawnX 기준으로 스폰한다.")]
+        [SerializeField] private Transform spawnAboveReference;
+        [SerializeField] private float spawnHeightAboveReference = 3f;
+        [Tooltip("카메라가 처음 스크롤(방 전환)되는 순간 비활성화할 오브젝트 (예: 타이틀 로고).")]
+        [SerializeField] private GameObject hideOnFirstScroll;
+
         [Header("낙하 연출")]
         [SerializeField] private int spawnRoomIndex = 4;
-        [Tooltip("낙하를 시작할 맵 기준 X좌표.")]
+        [Tooltip("낙하를 시작할 맵 기준 X좌표. spawnAboveReference를 쓰면 무시된다.")]
         [SerializeField] private float spawnX = -3f;
         [SerializeField] private float fallSpinDegreesPerSecond = 360f;
         [Tooltip("낙하 중에만 적용할 공기저항(Rigidbody2D.linearDamping). 착지하면 원래 값으로 복구된다.")]
@@ -47,6 +61,7 @@ namespace IceBop.JumpKing
 
         private Collider2D characterCollider;
         private int wakeUpPresses;
+        private bool hasStarted;
         private bool isFalling;
         private bool isAwake;
         private float defaultLinearDamping;
@@ -56,15 +71,103 @@ namespace IceBop.JumpKing
         {
             characterCollider = character.GetComponent<Collider2D>();
 
-            // JumpKingCameraController.Start()보다 먼저 실행되도록(Awake는 모든 오브젝트에서 Start보다 항상 먼저 돈다)
-            // 캐릭터를 spawnRoomIndex 위치로 여기서 순간이동시킨다.
-            float spawnY = cameraController.GetRoomCenterY(spawnRoomIndex);
+            // 카메라 등 다른 오브젝트의 Start()보다 먼저 실행되도록(Awake는 모든 오브젝트에서 Start보다
+            // 항상 먼저 돈다) 캐릭터를 스폰 위치로 여기서 순간이동시킨다.
             Vector3 pos = character.transform.position;
-            character.transform.position = new Vector3(spawnX, spawnY, pos.z);
+            float x;
+            float y;
+
+            if (spawnAboveReference != null)
+            {
+                x = spawnAboveReference.position.x;
+                y = spawnAboveReference.position.y + spawnHeightAboveReference;
+            }
+            else
+            {
+                x = spawnX;
+                y = cameraController.GetRoomCenterY(spawnRoomIndex);
+            }
+
+            character.transform.position = new Vector3(x, y, pos.z);
+
+            if (waitForAnyKeyToStart)
+            {
+                character.Rb.simulated = false; // 키 누르기 전까지 중력을 포함해 물리 시뮬레이션 자체를 정지
+
+                var renderer = character.GetComponentInChildren<SpriteRenderer>();
+                if (renderer != null)
+                {
+                    renderer.enabled = false; // 키 누르기 전까지 캐릭터를 아예 안 보이게
+                }
+            }
+        }
+
+        private void OnEnable()
+        {
+            ScrollManager.OnScrollChanged += HandleFirstScroll;
+        }
+
+        private void OnDisable()
+        {
+            ScrollManager.OnScrollChanged -= HandleFirstScroll;
         }
 
         private void Start()
         {
+            if (!waitForAnyKeyToStart)
+            {
+                BeginFall();
+            }
+        }
+
+        private void Update()
+        {
+            if (!hasStarted)
+            {
+                if (AnyKeyPressed())
+                {
+                    BeginFall();
+                }
+                return;
+            }
+
+            if (isFalling || isAwake) return;
+            if (!jumpAction.action.WasPressedThisFrame()) return;
+
+            wakeUpPresses++;
+
+            if (wakeUpPresses <= wiggleCount)
+            {
+                if (animator != null) animator.SetTrigger("Wiggle");
+                // TODO: 실제 꿈틀 연출(스프라이트 애니메이션 등)이 준비되면 여기서 같이 재생.
+            }
+            else
+            {
+                StartCoroutine(WakeUpRoutine());
+            }
+        }
+
+        private bool AnyKeyPressed()
+        {
+            if (Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame) return true;
+            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame) return true;
+            return false;
+        }
+
+        /// <summary>낙하를 실제로 시작한다. waitForAnyKeyToStart가 꺼져 있으면 Start()에서 바로 호출된다.</summary>
+        public void BeginFall()
+        {
+            if (hasStarted) return;
+            hasStarted = true;
+
+            character.Rb.simulated = true; // 대기 중 꺼뒀을 수 있으니 다시 켠다
+
+            var renderer = character.GetComponentInChildren<SpriteRenderer>();
+            if (renderer != null)
+            {
+                renderer.enabled = true; // 키를 눌렀으니 이제부터 보이게
+            }
+
             inputController.enabled = false; // 인트로 동안 일반 점프 조작 차단 (내부적으로 액션들도 Disable됨)
             jumpAction.action.Enable(); // 웨이크업 카운트를 위해 우리가 직접 켠다 (위 줄보다 반드시 뒤에 있어야 함)
 
@@ -72,10 +175,10 @@ namespace IceBop.JumpKing
             character.Rb.angularVelocity = fallSpinDegreesPerSecond;
 
             defaultLinearDamping = character.Rb.linearDamping;
-            character.Rb.linearDamping = fallLinearDamping; // 낙하 중에만 공기저항을 높여 너무 빨리 안 떨어지게
+            character.Rb.linearDamping = fallLinearDamping; // 낙하 중에만 공기저항을 조정
 
             defaultGravityScale = character.Rb.gravityScale;
-            character.Rb.gravityScale = defaultGravityScale * fallGravityMultiplier; // 낙하 속도를 배로 빠르게
+            character.Rb.gravityScale = defaultGravityScale * fallGravityMultiplier; // 낙하 속도 배율
 
             SetIgnoreAllPlatformsExceptFloor(true);
 
@@ -95,24 +198,6 @@ namespace IceBop.JumpKing
             character.Rb.linearDamping = defaultLinearDamping; // 공기저항 원상 복구
             character.Rb.gravityScale = defaultGravityScale; // 중력 배율 원상 복구
             character.transform.rotation = Quaternion.Euler(0f, 0f, 90f); // 누운 자세
-        }
-
-        private void Update()
-        {
-            if (isFalling || isAwake) return;
-            if (!jumpAction.action.WasPressedThisFrame()) return;
-
-            wakeUpPresses++;
-
-            if (wakeUpPresses <= wiggleCount)
-            {
-                if (animator != null) animator.SetTrigger("Wiggle");
-                // TODO: 실제 꿈틀 연출(스프라이트 애니메이션 등)이 준비되면 여기서 같이 재생.
-            }
-            else
-            {
-                StartCoroutine(WakeUpRoutine());
-            }
         }
 
         private IEnumerator WakeUpRoutine()
@@ -153,6 +238,17 @@ namespace IceBop.JumpKing
 
                 Physics2D.IgnoreCollision(characterCollider, col, ignore);
             }
+        }
+
+        /// <summary>카메라가 처음 스크롤(방 전환)되는 순간 1회만 실행되어 타이틀 로고 등을 숨긴다.</summary>
+        private void HandleFirstScroll()
+        {
+            if (hideOnFirstScroll != null)
+            {
+                hideOnFirstScroll.SetActive(false);
+            }
+
+            ScrollManager.OnScrollChanged -= HandleFirstScroll;
         }
     }
 }

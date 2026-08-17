@@ -5,12 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/BasketShakeFinishingStage2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/BasketShakeFinishingStage2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingFlowController2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingFlowController2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingMixingPot2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingMixingPot2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingRuntimeVisuals2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingRuntimeVisuals2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/FryerFinishingStage2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/FryerFinishingStage2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/InventoryCookingStation2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/InventoryCookingStation2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingIntroSequence.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingIntroSequence.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,7 +53,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Unity 에디터에 연결.Unity 에디터에 연결">
+  <component name="RunManager" selected="Attach to Unity Editor.Unity 에디터에 연결">
     <configuration name="유닛 테스트(배치 모드)" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.3.7f1\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath D:\GitHub\2_UNITIYGAME\IceBop -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />
