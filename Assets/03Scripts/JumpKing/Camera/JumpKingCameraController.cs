@@ -56,13 +56,32 @@ namespace IceBop.JumpKing
             int newRoomIndexY = RoomIndexOf(target.transform.position.y);
             if (newRoomIndexY == currentRoomIndexY) return;
 
+            int previousRoomIndexY = currentRoomIndexY;
             currentRoomIndexY = newRoomIndexY;
 
             if (scrollRoutine != null)
             {
                 StopCoroutine(scrollRoutine);
             }
-            scrollRoutine = StartCoroutine(ScrollTo(RoomCenterPosition(currentRoomIndexY)));
+
+            Vector3 destination = RoomCenterPosition(currentRoomIndexY);
+
+            // 한 번에 두 방 이상 건너뛰면(빠른 낙하 등) 애니메이션이 못 따라오므로 그냥 즉시 스냅한다.
+            // 인접한 한 방 이동일 때만 부드러운 스크롤 연출을 재생한다.
+            if (Mathf.Abs(currentRoomIndexY - previousRoomIndexY) > 1)
+            {
+                transform.position = destination;
+                ScrollManager.NotifyScrollChanged();
+
+                if (currentRoomIndexY == 0)
+                {
+                    ScrollManager.NotifyReturnedToStartRoom();
+                }
+            }
+            else
+            {
+                scrollRoutine = StartCoroutine(ScrollTo(destination));
+            }
         }
 
         private int RoomIndexOf(float worldY)
@@ -75,6 +94,9 @@ namespace IceBop.JumpKing
             float y = GridOriginY + (roomIndexY + 0.5f) * RoomWorldSize;
             return new Vector3(startRoomReference.x, y, transform.position.z);
         }
+
+        /// <summary>주어진 방 인덱스의 중앙 Y좌표. 인트로 연출 등에서 "N번째 방 위치"를 스폰 지점으로 쓸 때 사용.</summary>
+        public float GetRoomCenterY(int roomIndexY) => RoomCenterPosition(roomIndexY).y;
 
         private IEnumerator ScrollTo(Vector3 destination)
         {
