@@ -19,12 +19,14 @@ namespace IceBop.JumpKing
 
         public override bool CanActivate(JumpKingCharacter character, SkillRuntimeState state)
         {
+            if (state.charges <= 0) return false;
             if (character.State != JumpKingMoveState.Airborne) return false;
             return Physics2D.OverlapCircle(character.transform.position, anchorRange, platformLayerMask) != null;
         }
 
         public override void Activate(JumpKingCharacter character, SkillRuntimeState state)
         {
+            state.charges--; // 벽에 붙을 때마다 1회 소모
             character.SetAnchored(true, anchorDuration);
         }
     }

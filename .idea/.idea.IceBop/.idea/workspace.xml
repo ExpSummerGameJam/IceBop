@@ -4,16 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/MainCharacter/JumpKing.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/MainCharacter/JumpKing.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/Map/Grid.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/Map/Grid.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/02ScriptableObjects/Slippery.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/02ScriptableObjects/Slippery.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/02ScriptableObjects/skills/Skill_TongueAnchor.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/02ScriptableObjects/skills/Skill_TongueAnchor.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingCharacter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingCharacter.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Skills/SkillInventory.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Skills/SkillInventory.cs" afterDir="false" />
-    </list>
+    <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
