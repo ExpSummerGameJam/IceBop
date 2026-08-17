@@ -407,11 +407,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2681359913103394199, guid: cb63689bae72c0c43ac57053b73ae6f2, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.05
+      value: -10.47
       objectReference: {fileID: 0}
     - target: {fileID: 2681359913103394199, guid: cb63689bae72c0c43ac57053b73ae6f2, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 57.61
+      value: 20.52
       objectReference: {fileID: 0}
     - target: {fileID: 2681359913103394199, guid: cb63689bae72c0c43ac57053b73ae6f2, type: 3}
       propertyPath: m_LocalPosition.z
@@ -445,6 +445,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5721454849418951491, guid: cb63689bae72c0c43ac57053b73ae6f2, type: 3}
+      propertyPath: skillsInPriorityOrder.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5721454849418951491, guid: cb63689bae72c0c43ac57053b73ae6f2, type: 3}
+      propertyPath: 'skillsInPriorityOrder.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 4aa86daa0e30d39409b6a927b18bccbb, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -498,9 +506,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3134135537406429032, guid: 68757e81536e0454a96c9c32bfb7e251, type: 3}
+      propertyPath: m_SortingOrder
+      value: -10
+      objectReference: {fileID: 0}
     - target: {fileID: 3650458452508938841, guid: 68757e81536e0454a96c9c32bfb7e251, type: 3}
       propertyPath: m_Name
       value: Grid
+      objectReference: {fileID: 0}
+    - target: {fileID: 3732638989192660473, guid: 68757e81536e0454a96c9c32bfb7e251, type: 3}
+      propertyPath: m_SortingOrder
+      value: -10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8498437538950020848, guid: 68757e81536e0454a96c9c32bfb7e251, type: 3}
+      propertyPath: m_SortingOrder
+      value: -10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -34,9 +34,18 @@ namespace IceBop.JumpKing
         [Tooltip("비워두면 자식에서 자동으로 찾는다. 기본 스프라이트가 왼쪽을 보고 있다고 가정.")]
         [SerializeField] private SpriteRenderer spriteRenderer;
 
+        [Header("악셀 점프")]
+        [Tooltip("비워두면 GetComponent로 자동 참조.")]
+        [SerializeField] private SkillInventory skillInventory;
+        [Tooltip("공중에서 스페이스를 다시 눌렀을 때 이 스킬이 해금 + 사용 가능하면 공중 재차지를 허용한다.")]
+        [SerializeField] private AccelJumpSkillSO accelJumpSkill;
+
         private JumpKingCharacter character;
         private float chargeTimer;
         private bool isCharging;
+
+        /// <summary>지금 차지 중인 게 지상 점프가 아니라 악셀 점프(공중 재차지)인지.</summary>
+        private bool chargingIsAirJump;
 
         /// <summary>0보다 크면 "점프 입력이 대기 중"이라는 뜻. 매 프레임 감소하며, 0 이하가 되면 만료.</summary>
         private float jumpBufferTimer;
@@ -54,6 +63,10 @@ namespace IceBop.JumpKing
             if (spriteRenderer == null)
             {
                 spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            }
+            if (skillInventory == null)
+            {
+                skillInventory = GetComponent<SkillInventory>();
             }
         }
 
@@ -89,10 +102,18 @@ namespace IceBop.JumpKing
                 jumpBufferTimer -= Time.deltaTime;
                 // 버퍼가 풀리는 시점에 버튼을 이미 뗀 상태라면 시작하지 않는다.
                 // (그러면 WasReleasedThisFrame을 놓쳐서 차지가 끝없이 늘어나는 버그가 생김)
-                if (character.CanControlJump && jumpAction.action.IsPressed())
+                if (jumpAction.action.IsPressed())
                 {
-                    BeginCharge();
-                    jumpBufferTimer = 0f;
+                    if (character.CanControlJump)
+                    {
+                        BeginCharge(isAirJump: false);
+                        jumpBufferTimer = 0f;
+                    }
+                    else if (IsAirJumpAvailable())
+                    {
+                        BeginCharge(isAirJump: true);
+                        jumpBufferTimer = 0f;
+                    }
                 }
             }
 
@@ -129,18 +150,33 @@ namespace IceBop.JumpKing
             }
         }
 
-        private void BeginCharge()
+        private void BeginCharge(bool isAirJump)
         {
             isCharging = true;
+            chargingIsAirJump = isAirJump;
             chargeTimer = 0f;
             ChargeRatio01 = 0f;
             chargeHorizontal = 0f;
             // TODO: 차지 시작 연출을 위한 이벤트가 필요하면 여기서 발행 (JumpKingAnimationDriver가 구독)
         }
 
+        /// <summary>악셀 점프(공중 재차지)를 지금 시작할 수 있는지.</summary>
+        private bool IsAirJumpAvailable()
+        {
+            return character.State == JumpKingMoveState.Airborne &&
+                   skillInventory != null &&
+                   skillInventory.CanActivate(accelJumpSkill);
+        }
+
         private void ReleaseJump()
         {
             isCharging = false;
+
+            if (chargingIsAirJump)
+            {
+                skillInventory.TryActivate(accelJumpSkill); // "이번 공중에서 사용함" 표시
+            }
+
             Vector2 direction = ReadDirection();
             character.ExecuteJump(direction, ChargeRatio01);
             ChargeRatio01 = 0f;

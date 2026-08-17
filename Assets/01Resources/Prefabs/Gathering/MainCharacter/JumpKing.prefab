@@ -162,6 +162,8 @@ MonoBehaviour:
   jumpBufferSeconds: 0.15
   horizontalSensitivity: 0.3
   spriteRenderer: {fileID: 0}
+  skillInventory: {fileID: 0}
+  accelJumpSkill: {fileID: 11400000, guid: 531a167682a7e0b429990092fa3d712e, type: 2}
 --- !u!95 &4791875471180602917
 Animator:
   serializedVersion: 7
@@ -208,6 +210,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bcc652db016f48419144ea5d03012e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::IceBop.JumpKing.SkillInventory
+  flashFreezeSkill: {fileID: 11400000, guid: c8f9dd368b61d104cbd9e49146dd6a47, type: 2}
 --- !u!114 &5721454849418951491
 MonoBehaviour:
   m_ObjectHideFlags: 0

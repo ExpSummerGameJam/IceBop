@@ -79,7 +79,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -10
   m_MaskInteraction: 0
   m_Sprite: {fileID: -6191114874761505599, guid: c002f6aacf6cf5b439d74171a5636eb9, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -233,7 +233,7 @@ GameObject:
   - component: {fileID: 2683675758868221338}
   - component: {fileID: 5189495862427764072}
   - component: {fileID: 3788376821104953776}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WeakPlatform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -698,7 +698,7 @@ GameObject:
   - component: {fileID: 6470680004568397245}
   - component: {fileID: 6238192240887964115}
   - component: {fileID: 1443043192933240643}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: HardPlatform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -129083,7 +129083,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -10
   m_MaskInteraction: 0
   m_Sprite: {fileID: -6964565648693895049, guid: 93e102d130d7f9649b23765f0ad40c2f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -129108,7 +129108,7 @@ GameObject:
   - component: {fileID: 887094442882104300}
   - component: {fileID: 4755361053193313319}
   - component: {fileID: 2509195314276669173}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Slope
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -130238,7 +130238,7 @@ GameObject:
   - component: {fileID: 1979269200435819316}
   - component: {fileID: 6475913188699625488}
   - component: {fileID: 6760194213473599692}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Slippery
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -131236,7 +131236,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -10
   m_MaskInteraction: 0
   m_Sprite: {fileID: -974139966862538001, guid: cd619dc6008ae244aa512f8f4f3c12e3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

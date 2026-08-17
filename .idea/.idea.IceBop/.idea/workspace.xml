@@ -5,8 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/MainScenePrefab.prefab" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/MainScenePrefab.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/JKLScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage1_carrot_icicle_salty_ice.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage1_carrot_icicle_salty_ice.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage2_ice_strawberry_unicorn_horn_icicle.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage2_ice_strawberry_unicorn_horn_icicle.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage3_frozen_dinosaur_tail_eternal_snow.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage3_frozen_dinosaur_tail_eternal_snow.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/MainCharacter/JumpKing.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/MainCharacter/JumpKing.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/Map/Grid.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/Map/Grid.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingCharacter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingCharacter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingInputController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Core/JumpKingInputController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/SlipperyFieldBehaviour.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Ground/SlipperyFieldBehaviour.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Skills/AccelJumpSkillSO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Skills/AccelJumpSkillSO.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Skills/FlashFreezeSkillSO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Skills/FlashFreezeSkillSO.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Skills/SkillInventory.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Skills/SkillInventory.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Skills/TongueAnchorSkillSO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/JumpKing/Skills/TongueAnchorSkillSO.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
