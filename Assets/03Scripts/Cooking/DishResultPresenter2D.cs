@@ -18,6 +18,14 @@ public sealed class DishResultPresenter2D : MonoBehaviour
 
     public event Action Presented;
 
+    // If the finishing-stage GameObject gets deactivated mid-presentation (e.g. a new cook
+    // starts before this one finished presenting), the coroutine dies with it but the flag
+    // must still reset - otherwise a pooled/reused presenter would refuse to ever Play() again.
+    private void OnDisable()
+    {
+        presenting = false;
+    }
+
     public void Play(Camera camera, DishDefinition dish, IReadOnlyList<CookingIngredientEntry> ingredients, Action hideInteractiveVisuals)
     {
         if (presenting)
@@ -42,6 +50,7 @@ public sealed class DishResultPresenter2D : MonoBehaviour
         ShowDishResult(dish, ingredients);
         yield return MoveTo(offscreenPosition, startPosition, returnTravelDuration);
 
+        presenting = false;
         Presented?.Invoke();
     }
 
@@ -93,7 +102,7 @@ public sealed class DishResultPresenter2D : MonoBehaviour
         {
             GameObject labelObject = new("CompletedDishLabel");
             labelObject.transform.SetParent(transform, false);
-            labelObject.transform.localPosition = new Vector3(0f, -0.96f, 0f);
+            labelObject.transform.localPosition = new Vector3(0f, -0.55f, 0f);
             dishLabel = labelObject.AddComponent<TextMesh>();
             dishLabel.anchor = TextAnchor.MiddleCenter;
             dishLabel.alignment = TextAlignment.Center;

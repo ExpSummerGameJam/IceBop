@@ -19,6 +19,7 @@ public sealed class BasketShakeFinishingStage2D : MonoBehaviour, IDishFinishingS
 
     private readonly List<SpriteRenderer> ingredientRenderers = new();
 
+    private Coroutine dropInRoutine;
     private Transform basketRoot;
     private Transform progressBarRoot;
     private PreparationPointerTool2D basketHandle;
@@ -26,6 +27,7 @@ public sealed class BasketShakeFinishingStage2D : MonoBehaviour, IDishFinishingS
     private DishResultPresenter2D presenter;
     private AlternatingStrokeTracker strokeTracker;
     private Camera targetCamera;
+    private InventoryView2D inventoryView;
     private DishDefinition dish;
     private IReadOnlyList<CookingIngredientEntry> ingredients;
     private CookingMethodToolVisual2D toolVisual;
@@ -39,15 +41,20 @@ public sealed class BasketShakeFinishingStage2D : MonoBehaviour, IDishFinishingS
         Camera camera,
         IReadOnlyList<CookingIngredientEntry> newIngredients,
         DishDefinition newDish,
-        CookingMethodToolVisual2D newToolVisual)
+        CookingMethodToolVisual2D newToolVisual,
+        InventoryView2D newInventoryView)
     {
         targetCamera = camera;
+        inventoryView = newInventoryView;
         ingredients = newIngredients;
         dish = newDish;
         toolVisual = newToolVisual;
         strokeTracker = new AlternatingStrokeTracker(requiredShakes, minShakeDistance, verticalNoiseRatio, true);
+        interactionCompleted = false;
+        presentingResult = false;
 
         EnsureVisuals();
+        RebuildIngredientBits();
         ApplyProgressVisual();
     }
 
@@ -107,23 +114,12 @@ public sealed class BasketShakeFinishingStage2D : MonoBehaviour, IDishFinishingS
     private void EnsureVisuals()
     {
         if (basketRoot == null)
+            basketRoot = transform.Find("BasketBody");
+
+        if (basketRoot != null)
         {
-            GameObject root = new("BasketHandle");
-            root.transform.SetParent(transform, false);
-            basketRoot = root.transform;
-
-            CookingRuntimeVisuals2D.CreateBlock("BasketShadow", transform, new Vector3(0f, -0.32f, 0f), new Vector3(1.55f, 0.28f, 1f), new Color(0.1f, 0.09f, 0.08f, 0.4f), 34);
-            CookingRuntimeVisuals2D.CreateBlock("BasketBody", basketRoot, Vector3.zero, new Vector3(1.5f, 0.9f, 1f), new Color(0.62f, 0.42f, 0.22f, 1f), 36);
-            CookingRuntimeVisuals2D.CreateBlock("BasketRim", basketRoot, new Vector3(0f, 0.42f, 0f), new Vector3(1.62f, 0.16f, 1f), new Color(0.48f, 0.32f, 0.16f, 1f), 37);
-
-            BoxCollider2D collider = root.AddComponent<BoxCollider2D>();
-            collider.isTrigger = true;
-            collider.size = new Vector2(1.62f, 1.0f);
-
-            basketHandle = root.AddComponent<PreparationPointerTool2D>();
-            basketHandle.Configure(targetCamera != null ? targetCamera : Camera.main);
-
-            EnsureIngredientBits();
+            basketRoot.gameObject.SetActive(true);
+            EnsureBasketHandle();
         }
 
         if (progressBarRoot == null)
@@ -135,22 +131,73 @@ public sealed class BasketShakeFinishingStage2D : MonoBehaviour, IDishFinishingS
             CookingRuntimeVisuals2D.CreateBlock("BasketProgressTrack", progressBarRoot, new Vector3(0f, ProgressBarY, 0f), new Vector3(ProgressBarWidth, ProgressBarHeight, 1f), new Color(0.2f, 0.2f, 0.2f, 0.6f), 38);
             progressFillRenderer = CookingRuntimeVisuals2D.CreateBlock("BasketProgressFill", progressBarRoot, new Vector3(ProgressBarLeftX, ProgressBarY, 0f), new Vector3(0.02f, ProgressBarHeight, 1f), new Color(0.95f, 0.75f, 0.35f, 1f), 39);
         }
+
+        progressBarRoot.gameObject.SetActive(true);
     }
 
-    private void EnsureIngredientBits()
+    // The player grabs the whole hand-placed "BasketBody" (parent of the "PotWall" rim art)
+    // and shakes it - no separate procedural handle prop is built anymore.
+    private void EnsureBasketHandle()
     {
-        if (ingredientRenderers.Count > 0 || basketRoot == null || ingredients == null)
+        if (basketRoot == null)
             return;
+
+        // The hand-authored EdgeCollider2D on the child "PotWall" is a thin rim outline
+        // (edgeRadius 0), so OverlapPoint only registers a hit within a hair of the exact
+        // outline. Add a filled trigger collider on the parent "BasketBody" itself, sized to
+        // its sprite, so the whole visible basket is grabbable. PreparationPointerTool2D goes
+        // on the same object as its required Collider2D.
+        BoxCollider2D dragCollider = basketRoot.GetComponent<BoxCollider2D>();
+        if (dragCollider == null)
+            dragCollider = basketRoot.gameObject.AddComponent<BoxCollider2D>();
+
+        dragCollider.isTrigger = true;
+        SpriteRenderer bodyRenderer = basketRoot.GetComponent<SpriteRenderer>();
+        if (bodyRenderer != null && bodyRenderer.sprite != null)
+        {
+            dragCollider.size = bodyRenderer.sprite.bounds.size;
+            dragCollider.offset = bodyRenderer.sprite.bounds.center;
+        }
+
+        basketHandle = basketRoot.GetComponent<PreparationPointerTool2D>();
+        if (basketHandle == null)
+            basketHandle = basketRoot.gameObject.AddComponent<PreparationPointerTool2D>();
+
+        basketHandle.gameObject.SetActive(true);
+        basketHandle.Configure(targetCamera != null ? targetCamera : Camera.main, inventoryView);
+    }
+
+    private void RebuildIngredientBits()
+    {
+        if (dropInRoutine != null)
+        {
+            StopCoroutine(dropInRoutine);
+            dropInRoutine = null;
+        }
+
+        foreach (SpriteRenderer renderer in ingredientRenderers)
+        {
+            if (renderer != null)
+                Destroy(renderer.gameObject);
+        }
+
+        ingredientRenderers.Clear();
+
+        if (basketRoot == null || ingredients == null)
+            return;
+
+        List<Vector3> spawnPositions = new(ingredients.Count);
 
         for (int i = 0; i < ingredients.Count; i++)
         {
             CookingIngredientEntry entry = ingredients[i];
             GameObject bit = new($"BasketIngredient_{i + 1}_{entry.ingredientId}");
             bit.transform.SetParent(basketRoot, false);
+            bit.SetActive(false);
 
-            float spread = ingredients.Count <= 1 ? 0f : Mathf.Lerp(-0.5f, 0.5f, i / (float)(ingredients.Count - 1));
-            bit.transform.localPosition = new Vector3(spread, 0.18f, 0f);
-            bit.transform.localScale = Vector3.one * 0.3f;
+            // Spawn above the basket, slightly randomized so pieces dropped in sequence don't
+            // spawn stacked exactly on top of each other - physics then decides where each lands.
+            spawnPositions.Add(new Vector3(UnityEngine.Random.Range(-0.3f, 0.3f), 1.1f + i * 0.1f, 0f));
 
             SpriteRenderer renderer = bit.AddComponent<SpriteRenderer>();
             renderer.sprite = CookingRuntimeVisuals2D.GetIngredientSprite(entry);
@@ -159,6 +206,9 @@ public sealed class BasketShakeFinishingStage2D : MonoBehaviour, IDishFinishingS
 
             ingredientRenderers.Add(renderer);
         }
+
+        dropInRoutine = StartCoroutine(CookingRuntimeVisuals2D.DropInIngredientsPhysics(
+            ingredientRenderers, spawnPositions, 1.5f));
     }
 
     private void OnValidate()

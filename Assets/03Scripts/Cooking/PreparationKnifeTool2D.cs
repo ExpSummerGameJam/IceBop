@@ -5,6 +5,7 @@ using UnityEngine;
 public sealed class PreparationKnifeTool2D : MonoBehaviour
 {
     [SerializeField] private Camera targetCamera;
+    [SerializeField] private InventoryView2D inventoryView;
     [SerializeField] private Vector2 bladeLocalOffset = new(0.65f, 0f);
     [SerializeField] private int draggingSortingOrder = 50;
 
@@ -30,9 +31,10 @@ public sealed class PreparationKnifeTool2D : MonoBehaviour
     public bool HasPointerMovement =>
         IsDragging && (PointerWorldPosition - PreviousPointerWorldPosition).sqrMagnitude > 0.000001f;
 
-    public void Configure(Camera newTargetCamera, Vector2 newBladeLocalOffset)
+    public void Configure(Camera newTargetCamera, Vector2 newBladeLocalOffset, InventoryView2D newInventoryView = null)
     {
         targetCamera = newTargetCamera;
+        inventoryView = newInventoryView;
         bladeLocalOffset = newBladeLocalOffset;
         UpdateBladePosition();
         PreviousBladeWorldPosition = BladeWorldPosition;
@@ -164,6 +166,9 @@ public sealed class PreparationKnifeTool2D : MonoBehaviour
 
     private bool TryGetPointerWorldPosition(out Vector2 worldPosition)
     {
+        if (inventoryView != null)
+            return inventoryView.TryGetLargeViewPointerWorldPosition(out worldPosition);
+
         worldPosition = default;
 
         Camera camera = targetCamera != null ? targetCamera : Camera.main;

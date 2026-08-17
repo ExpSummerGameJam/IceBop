@@ -5,19 +5,29 @@ using UnityEngine;
 
 public sealed class CookingFlowController2D : MonoBehaviour
 {
-    [SerializeField] private Collider2D stageAreaCollider;
+    [SerializeField] private InventoryCookingStation2D cookingStation;
+    [SerializeField] private InventoryView2D inventoryView;
+    [SerializeField] private Transform stageRig;
     [SerializeField] private Vector3 preparationCenter = new(0f, 0.24f, 0f);
     [SerializeField] private Vector3 toolStartOffset = new(-1.35f, -1.62f, 0f);
+    [SerializeField] private float preparedIngredientHeightOffset = 0.6f;
     [SerializeField] private Vector2 boardSize = new(3.55f, 2.18f);
-    [SerializeField] private float preparedIngredientScaleMultiplier = 5f;
-    [SerializeField] private float stageCompleteDelay = 0.45f;
+    [SerializeField] private float preparedIngredientScaleMultiplier = 2.5f;
+    [SerializeField] private float stageCompleteDelay = 1f;
     [SerializeField] private CookingMethodToolVisual2D[] methodToolVisuals = new CookingMethodToolVisual2D[0];
 
     private static CookingFlowController2D instance;
 
     private Coroutine activeRoutine;
-    private GameObject activeStageRoot;
     private Action<CookingCraftResult> completionCallback;
+
+    private GameObject activePreparationBoard;
+    private GameObject activeStageLabel;
+    private GameObject activePreparationTool;
+    private GameObject activeIngredientSlot;
+    private IDishFinishingStage activeFinishingStage;
+
+    private bool loggedMissingStageRig;
 
     public static void StartCooking(IReadOnlyList<CookingIngredientEntry> ingredients, Action<DishDefinition> onCompleted)
     {
@@ -28,14 +38,6 @@ public sealed class CookingFlowController2D : MonoBehaviour
     {
         CookingFlowController2D controller = EnsureInstance();
         controller.BeginCooking(ingredients, onCompleted);
-    }
-
-    public void BindStageArea(Collider2D newStageAreaCollider)
-    {
-        stageAreaCollider = newStageAreaCollider;
-
-        if (stageAreaCollider != null)
-            stageAreaCollider.isTrigger = true;
     }
 
     private static CookingFlowController2D EnsureInstance()
@@ -74,12 +76,10 @@ public sealed class CookingFlowController2D : MonoBehaviour
 
     private void BeginCooking(IReadOnlyList<CookingIngredientEntry> ingredients, Action<CookingCraftResult> onCompleted)
     {
-        ResolveStageArea();
-
         if (activeRoutine != null)
             StopCoroutine(activeRoutine);
 
-        DestroyActiveStage();
+        DeactivateActiveStage();
         completionCallback = onCompleted;
         activeRoutine = StartCoroutine(CookingRoutine(new List<CookingIngredientEntry>(ingredients)));
     }
@@ -87,6 +87,13 @@ public sealed class CookingFlowController2D : MonoBehaviour
     private IEnumerator CookingRoutine(List<CookingIngredientEntry> ingredients)
     {
         if (ingredients == null || ingredients.Count == 0)
+        {
+            completionCallback?.Invoke(null);
+            activeRoutine = null;
+            yield break;
+        }
+
+        if (!ResolveStageRig())
         {
             completionCallback?.Invoke(null);
             activeRoutine = null;
@@ -103,8 +110,21 @@ public sealed class CookingFlowController2D : MonoBehaviour
             preparation.PreparationCompleted += _ => stageCompleted = true;
 
             yield return new WaitUntil(() => stageCompleted || preparation == null || preparation.IsPrepared);
+
+            // Carry the prepared look (cut piece, ground tint, ...) into the finishing stage
+            // instead of re-showing the raw ingredient - must read this before the slot gets
+            // reused/re-skinned for the next ingredient.
+            if (preparation != null)
+            {
+                if (preparation.ProcessedSprite != null)
+                    entry.ingredientSprite = preparation.ProcessedSprite;
+
+                if (preparation.ProcessedColor.HasValue)
+                    entry.ingredientColor = preparation.ProcessedColor.Value;
+            }
+
             yield return new WaitForSeconds(stageCompleteDelay);
-            DestroyActiveStage();
+            DeactivateActiveStage();
         }
 
         DishDefinition dish = ResolveDish(ingredients);
@@ -129,224 +149,190 @@ public sealed class CookingFlowController2D : MonoBehaviour
         int stageCount,
         Camera camera)
     {
-        activeStageRoot = new GameObject($"PreparationStage_{stageIndex + 1}_{entry.ingredientId}");
-
         CookingMethodToolVisual2D toolVisual = ResolveToolVisual(entry.preparationKind);
-        CreatePreparationBoard(toolVisual);
-
-        CreateStageLabel(stageIndex, stageCount, entry);
+        ActivatePreparationBoard(toolVisual);
+        ActivateStageLabel(stageIndex, stageCount, entry);
 
         return entry.preparationKind switch
         {
-            IngredientPreparationKind.DustWiping => CreateDustWipeStage(entry, camera, toolVisual),
-            IngredientPreparationKind.Grinding => CreateGrindingStage(entry, camera, toolVisual),
-            _ => CreateCuttingStage(entry, camera, toolVisual)
+            IngredientPreparationKind.DustWiping => ActivateDustWipeStage(entry, camera, toolVisual),
+            IngredientPreparationKind.Grinding => ActivateGrindingStage(entry, camera, toolVisual),
+            _ => ActivateCuttingStage(entry, camera, toolVisual)
         };
     }
 
-    private CuttableIngredient2D CreateCuttingStage(CookingIngredientEntry entry, Camera camera, CookingMethodToolVisual2D toolVisual)
+    private CuttableIngredient2D ActivateCuttingStage(CookingIngredientEntry entry, Camera camera, CookingMethodToolVisual2D toolVisual)
     {
-        PreparationKnifeTool2D knife = CreateKnife(camera, toolVisual);
-        GameObject ingredient = CreatePreparedIngredientObject(entry, "CuttingIngredient");
+        PreparationKnifeTool2D knife = ActivateKnife(camera, toolVisual);
+        GameObject ingredient = ActivateIngredientSlot("Cutting", entry);
 
-        CuttableIngredient2D cuttable = ingredient.AddComponent<CuttableIngredient2D>();
+        CuttableIngredient2D cuttable = ingredient.GetComponent<CuttableIngredient2D>();
         cuttable.BindKnife(knife);
         cuttable.RebuildGuides();
         return cuttable;
     }
 
-    private DustWipeIngredient2D CreateDustWipeStage(CookingIngredientEntry entry, Camera camera, CookingMethodToolVisual2D toolVisual)
+    private DustWipeIngredient2D ActivateDustWipeStage(CookingIngredientEntry entry, Camera camera, CookingMethodToolVisual2D toolVisual)
     {
-        PreparationPointerTool2D cloth = CreatePointerTool("Handkerchief", CookingRuntimeVisuals2D.GetClothSprite(), Vector3.one, camera, toolVisual);
-        GameObject ingredient = CreatePreparedIngredientObject(entry, "DustWipeIngredient");
+        PreparationPointerTool2D cloth = ActivatePointerTool("Cloth", camera, toolVisual, CookingRuntimeVisuals2D.GetClothSprite());
+        GameObject ingredient = ActivateIngredientSlot("DustWiping", entry);
 
-        DustWipeIngredient2D dustWipe = ingredient.AddComponent<DustWipeIngredient2D>();
+        DustWipeIngredient2D dustWipe = ingredient.GetComponent<DustWipeIngredient2D>();
         dustWipe.BindCloth(cloth);
+        dustWipe.Rearm();
         return dustWipe;
     }
 
-    private GrindableIngredient2D CreateGrindingStage(CookingIngredientEntry entry, Camera camera, CookingMethodToolVisual2D toolVisual)
+    private GrindableIngredient2D ActivateGrindingStage(CookingIngredientEntry entry, Camera camera, CookingMethodToolVisual2D toolVisual)
     {
-        PreparationPointerTool2D grinder = CreatePointerTool("Grinder", CookingRuntimeVisuals2D.GetKnife1Sprite(), new Vector3(0.66f, 0.66f, 1f), camera, toolVisual);
-        GameObject ingredient = CreatePreparedIngredientObject(entry, "GrindingIngredient");
+        // Matches the original placeholder choice: no dedicated grinder-tool sprite exists,
+        // so the knife1 sprite is reused for the grinder tool's look (GetGrinderSprite() is the
+        // ground-powder visual applied to the ingredient itself, not this tool).
+        PreparationPointerTool2D grinder = ActivatePointerTool("Grinder", camera, toolVisual, CookingRuntimeVisuals2D.GetKnife1Sprite());
+        GameObject ingredient = ActivateIngredientSlot("Grinding", entry);
 
-        GrindableIngredient2D grindable = ingredient.AddComponent<GrindableIngredient2D>();
+        GrindableIngredient2D grindable = ingredient.GetComponent<GrindableIngredient2D>();
         grindable.BindGrindingTool(grinder);
+        grindable.Rearm();
         return grindable;
     }
 
-    private GameObject CreatePreparedIngredientObject(CookingIngredientEntry entry, string name)
+    private GameObject ActivateIngredientSlot(string slotName, CookingIngredientEntry entry)
     {
-        GameObject ingredient = new($"{name}_{entry.ingredientId}");
-        ingredient.transform.SetParent(activeStageRoot.transform, false);
-        ingredient.transform.localPosition = GetStageCenter();
+        Transform slot = GetRigChild($"IngredientSlots/{slotName}");
+        if (slot == null)
+            return null;
+
+        activeIngredientSlot = slot.gameObject;
+        slot.gameObject.SetActive(true);
+        slot.position = GetStageCenter() + new Vector3(0f, preparedIngredientHeightOffset, 0f);
+
         Vector3 sourceScale = entry != null && entry.ingredientScale != Vector3.zero
             ? entry.ingredientScale
             : Vector3.one;
-        ingredient.transform.localScale = sourceScale * Mathf.Max(0.01f, preparedIngredientScaleMultiplier);
+        slot.localScale = sourceScale * Mathf.Max(0.01f, preparedIngredientScaleMultiplier);
 
-        SpriteRenderer renderer = ingredient.AddComponent<SpriteRenderer>();
-        renderer.sprite = CookingRuntimeVisuals2D.GetIngredientSprite(entry);
-        renderer.color = CookingRuntimeVisuals2D.GetIngredientColor(entry);
-        renderer.sortingOrder = 5;
-
-        BoxCollider2D collider = ingredient.AddComponent<BoxCollider2D>();
-        collider.isTrigger = true;
-        collider.size = renderer.sprite.bounds.size;
-        collider.offset = renderer.sprite.bounds.center;
-
-        return ingredient;
-    }
-
-    private GameObject CreatePreparationBoard(CookingMethodToolVisual2D toolVisual)
-    {
-        if (toolVisual != null && toolVisual.preparationBoardPrefab != null)
+        SpriteRenderer renderer = slot.GetComponent<SpriteRenderer>();
+        if (renderer != null)
         {
-            GameObject board = Instantiate(toolVisual.preparationBoardPrefab, activeStageRoot.transform, false);
-            board.name = "PreparationBoard";
-            board.transform.localPosition = GetStageCenter();
-
-            if (toolVisual.preparationBoardScale != Vector3.zero)
-                board.transform.localScale = toolVisual.preparationBoardScale;
-
-            ApplyPreparationBoardSprite(board, toolVisual.preparationBoardSprite);
-            return board;
+            renderer.sprite = CookingRuntimeVisuals2D.GetIngredientSprite(entry);
+            renderer.color = CookingRuntimeVisuals2D.GetIngredientColor(entry);
+            renderer.enabled = true;
         }
 
-        GameObject defaultBoard = CookingRuntimeVisuals2D.CreateBoard(GetStageCenter(), GetStageSize(), -1);
-        defaultBoard.transform.SetParent(activeStageRoot.transform, true);
-
-        if (toolVisual != null)
+        PolygonCollider2D collider = slot.GetComponent<PolygonCollider2D>();
+        if (collider != null)
         {
-            ApplyPreparationBoardSprite(defaultBoard, toolVisual.preparationBoardSprite);
-
-            if (toolVisual.preparationBoardScale != Vector3.zero)
-                defaultBoard.transform.localScale = toolVisual.preparationBoardScale;
+            collider.enabled = true;
+            CookingRuntimeVisuals2D.ApplySpriteFittedCollider(collider, renderer != null ? renderer.sprite : null);
         }
 
-        return defaultBoard;
+        return slot.gameObject;
     }
 
-    private static void ApplyPreparationBoardSprite(GameObject board, Sprite sprite)
+    private void ActivatePreparationBoard(CookingMethodToolVisual2D toolVisual)
     {
-        if (board == null || sprite == null)
+        Transform board = GetRigChild("PreparationBoard");
+        if (board == null)
             return;
 
-        SpriteRenderer renderer = board.GetComponent<SpriteRenderer>();
-        if (renderer == null)
-            renderer = board.AddComponent<SpriteRenderer>();
+        activePreparationBoard = board.gameObject;
+        board.gameObject.SetActive(true);
+        board.position = GetStageCenter();
 
-        renderer.sprite = sprite;
-        renderer.color = Color.white;
-        renderer.sortingOrder = -1;
+        // The board's BoxCollider2D is only there for touch/tap detection - it must never
+        // physically block ingredients (cut-off debris, dropped pieces, etc.), so force it to
+        // a trigger every time regardless of what's baked into the prefab.
+        BoxCollider2D boardCollider = board.GetComponent<BoxCollider2D>();
+        if (boardCollider != null)
+            boardCollider.isTrigger = true;
+
+        if (toolVisual != null && toolVisual.preparationBoardSprite != null)
+        {
+            SpriteRenderer renderer = board.GetComponent<SpriteRenderer>();
+            if (renderer != null)
+                renderer.sprite = toolVisual.preparationBoardSprite;
+        }
+
+        if (toolVisual != null && toolVisual.preparationBoardScale != Vector3.zero)
+            board.localScale = toolVisual.preparationBoardScale;
     }
 
-    private PreparationKnifeTool2D CreateKnife(Camera camera, CookingMethodToolVisual2D toolVisual)
+    private void ActivateStageLabel(int stageIndex, int stageCount, CookingIngredientEntry entry)
     {
+        Transform label = GetRigChild("StageLabel");
+        if (label == null)
+            return;
+
+        activeStageLabel = label.gameObject;
+        label.gameObject.SetActive(true);
+
+        Vector2 stageSize = GetStageSize();
+        label.position = GetStageCenter() + new Vector3(0f, stageSize.y * 0.5f + 0.46f, 0f);
+
+        TextMesh text = label.GetComponent<TextMesh>();
+        if (text != null)
+            text.text = $"{stageIndex + 1}/{stageCount} {GetPreparationActionLabel(entry.preparationKind)}";
+    }
+
+    private static string GetPreparationActionLabel(IngredientPreparationKind preparationKind)
+    {
+        return preparationKind switch
+        {
+            IngredientPreparationKind.Cutting => "썰어라!",
+            IngredientPreparationKind.DustWiping => "닦아라!",
+            IngredientPreparationKind.Grinding => "갈아라!",
+            _ => preparationKind.ToString()
+        };
+    }
+
+    private PreparationKnifeTool2D ActivateKnife(Camera camera, CookingMethodToolVisual2D toolVisual)
+    {
+        Transform knife = GetRigChild("Tools/Knife");
+        if (knife == null)
+            return null;
+
+        activePreparationTool = knife.gameObject;
+        knife.gameObject.SetActive(true);
+        knife.position = GetStageCenter() + toolStartOffset;
+
+        if (toolVisual != null && toolVisual.preparationToolScale != Vector3.zero)
+            knife.localScale = toolVisual.preparationToolScale;
+
         Sprite sprite = toolVisual != null && toolVisual.preparationToolSprite != null
             ? toolVisual.preparationToolSprite
             : CookingRuntimeVisuals2D.GetKnife1Sprite();
-
         Sprite activeSprite = toolVisual != null && toolVisual.preparationToolActiveSprite != null
             ? toolVisual.preparationToolActiveSprite
             : CookingRuntimeVisuals2D.GetKnife2Sprite();
 
-        GameObject knife = CreatePreparationToolObject(
-            "PreparationKnife",
-            toolVisual,
-            GetStageCenter() + toolStartOffset,
-            new Vector3(0.75f, 0.75f, 1f));
-
-        bool forceSprite = toolVisual == null || toolVisual.preparationToolPrefab == null || toolVisual.preparationToolSprite != null;
-        SpriteRenderer renderer = EnsureToolRenderer(knife, sprite, 30, forceSprite);
-
-        BoxCollider2D collider = knife.GetComponent<BoxCollider2D>();
-        if (collider == null)
-            collider = knife.AddComponent<BoxCollider2D>();
-
-        collider.isTrigger = true;
-        if (renderer.sprite != null)
-        {
-            collider.size = renderer.sprite.bounds.size;
-            collider.offset = renderer.sprite.bounds.center;
-        }
-
         PreparationKnifeTool2D tool = knife.GetComponent<PreparationKnifeTool2D>();
-        if (tool == null)
-            tool = knife.AddComponent<PreparationKnifeTool2D>();
-
-        tool.Configure(camera, new Vector2(0.92f, 0f));
+        tool.Configure(camera, new Vector2(0.92f, 0f), inventoryView);
         tool.ConfigureBladeSprites(sprite, activeSprite);
         return tool;
     }
 
-    private PreparationPointerTool2D CreatePointerTool(string name, Sprite fallbackSprite, Vector3 fallbackScale, Camera camera, CookingMethodToolVisual2D toolVisual)
+    private PreparationPointerTool2D ActivatePointerTool(string toolName, Camera camera, CookingMethodToolVisual2D toolVisual, Sprite fallbackSprite)
     {
-        Sprite sprite = toolVisual != null && toolVisual.preparationToolSprite != null
-            ? toolVisual.preparationToolSprite
-            : fallbackSprite;
+        Transform toolTransform = GetRigChild($"Tools/{toolName}");
+        if (toolTransform == null)
+            return null;
 
-        GameObject toolObject = CreatePreparationToolObject(
-            $"Preparation{name}",
-            toolVisual,
-            GetStageCenter() + toolStartOffset,
-            fallbackScale);
-
-        bool forceSprite = toolVisual == null || toolVisual.preparationToolPrefab == null || toolVisual.preparationToolSprite != null;
-        SpriteRenderer renderer = EnsureToolRenderer(toolObject, sprite, 30, forceSprite);
-
-        BoxCollider2D collider = toolObject.GetComponent<BoxCollider2D>();
-        if (collider == null)
-            collider = toolObject.AddComponent<BoxCollider2D>();
-
-        collider.isTrigger = true;
-        if (renderer.sprite != null)
-        {
-            collider.size = renderer.sprite.bounds.size;
-            collider.offset = renderer.sprite.bounds.center;
-        }
-
-        PreparationPointerTool2D tool = toolObject.GetComponent<PreparationPointerTool2D>();
-        if (tool == null)
-            tool = toolObject.AddComponent<PreparationPointerTool2D>();
-
-        tool.Configure(camera);
-        return tool;
-    }
-
-    private GameObject CreatePreparationToolObject(
-        string name,
-        CookingMethodToolVisual2D toolVisual,
-        Vector3 localPosition,
-        Vector3 fallbackScale)
-    {
-        GameObject toolObject = toolVisual != null && toolVisual.preparationToolPrefab != null
-            ? Instantiate(toolVisual.preparationToolPrefab, activeStageRoot.transform, false)
-            : new GameObject(name);
-
-        toolObject.name = name;
-        toolObject.transform.SetParent(activeStageRoot.transform, false);
-        toolObject.transform.localPosition = localPosition;
+        activePreparationTool = toolTransform.gameObject;
+        toolTransform.gameObject.SetActive(true);
+        toolTransform.position = GetStageCenter() + toolStartOffset;
 
         if (toolVisual != null && toolVisual.preparationToolScale != Vector3.zero)
-            toolObject.transform.localScale = toolVisual.preparationToolScale;
-        else if (toolVisual == null || toolVisual.preparationToolPrefab == null)
-            toolObject.transform.localScale = fallbackScale;
+            toolTransform.localScale = toolVisual.preparationToolScale;
 
-        return toolObject;
-    }
-
-    private static SpriteRenderer EnsureToolRenderer(GameObject toolObject, Sprite sprite, int sortingOrder, bool forceSprite)
-    {
-        SpriteRenderer renderer = toolObject.GetComponent<SpriteRenderer>();
-        if (renderer == null)
-            renderer = toolObject.AddComponent<SpriteRenderer>();
-
-        if (forceSprite || renderer.sprite == null)
+        Sprite sprite = toolVisual != null && toolVisual.preparationToolSprite != null ? toolVisual.preparationToolSprite : fallbackSprite;
+        SpriteRenderer renderer = toolTransform.GetComponent<SpriteRenderer>();
+        if (renderer != null)
             renderer.sprite = sprite;
 
-        renderer.sortingOrder = sortingOrder;
-        return renderer;
+        PreparationPointerTool2D tool = toolTransform.GetComponent<PreparationPointerTool2D>();
+        tool.Configure(camera, inventoryView);
+        return tool;
     }
 
     private IDishFinishingStage CreateFinishingStage(
@@ -355,42 +341,28 @@ public sealed class CookingFlowController2D : MonoBehaviour
         IngredientPreparationKind cookingMethod,
         Camera camera)
     {
-        activeStageRoot = new GameObject("FinalCookingStage");
-        activeStageRoot.transform.position = GetStageCenter();
-
         DishFinishingStageKind stageKind = dish != null ? dish.FinishingStageKind : DishFinishingStageKind.Stir;
-        IDishFinishingStage stage = stageKind switch
+        string childName = stageKind switch
         {
-            DishFinishingStageKind.BasketShake => (IDishFinishingStage)activeStageRoot.AddComponent<BasketShakeFinishingStage2D>(),
-            DishFinishingStageKind.FryerSaltSprinkle => activeStageRoot.AddComponent<FryerFinishingStage2D>(),
-            DishFinishingStageKind.FryerSaltSqueeze => activeStageRoot.AddComponent<FryerFinishingStage2D>(),
-            DishFinishingStageKind.SkewerAssembly => activeStageRoot.AddComponent<SkewerAssemblyFinishingStage2D>(),
-            DishFinishingStageKind.GuidedPlacement => activeStageRoot.AddComponent<GuidedPlacementFinishingStage2D>(),
-            _ => activeStageRoot.AddComponent<CookingMixingPot2D>(),
+            DishFinishingStageKind.BasketShake => "BasketShake",
+            DishFinishingStageKind.FryerSaltSprinkle => "Fryer",
+            DishFinishingStageKind.FryerSaltSqueeze => "Fryer",
+            DishFinishingStageKind.SkewerAssembly => "SkewerAssembly",
+            DishFinishingStageKind.GuidedPlacement => "GuidedPlacement",
+            _ => "Stir",
         };
 
-        stage.Configure(camera, ingredients, dish, ResolveToolVisual(cookingMethod));
+        Transform stageTransform = GetRigChild($"FinishingStages/{childName}");
+        if (stageTransform == null)
+            return null;
+
+        stageTransform.gameObject.SetActive(true);
+        stageTransform.position = GetStageCenter();
+
+        IDishFinishingStage stage = stageTransform.GetComponent<IDishFinishingStage>();
+        activeFinishingStage = stage;
+        stage.Configure(camera, ingredients, dish, ResolveToolVisual(cookingMethod), inventoryView);
         return stage;
-    }
-
-    private void CreateStageLabel(int stageIndex, int stageCount, CookingIngredientEntry entry)
-    {
-        GameObject labelObject = new("PreparationStageLabel");
-        labelObject.transform.SetParent(activeStageRoot.transform, false);
-        Vector2 stageSize = GetStageSize();
-        labelObject.transform.localPosition = GetStageCenter() + new Vector3(0f, stageSize.y * 0.5f + 0.46f, 0f);
-
-        TextMesh text = labelObject.AddComponent<TextMesh>();
-        text.text = $"{stageIndex + 1}/{stageCount} {entry.preparationKind}";
-        text.anchor = TextAnchor.MiddleCenter;
-        text.alignment = TextAlignment.Center;
-        text.fontSize = 34;
-        text.characterSize = 0.06f;
-        text.color = new Color(0.92f, 0.95f, 0.92f, 1f);
-
-        MeshRenderer renderer = labelObject.GetComponent<MeshRenderer>();
-        if (renderer != null)
-            renderer.sortingOrder = 35;
     }
 
     private DishDefinition ResolveDish(IReadOnlyList<CookingIngredientEntry> ingredients)
@@ -461,17 +433,37 @@ public sealed class CookingFlowController2D : MonoBehaviour
         return null;
     }
 
-    private void DestroyActiveStage()
+    private void DeactivateActiveStage()
     {
-        if (activeStageRoot == null)
-            return;
+        if (activePreparationBoard != null)
+            activePreparationBoard.SetActive(false);
 
-        Destroy(activeStageRoot);
-        activeStageRoot = null;
+        if (activeStageLabel != null)
+            activeStageLabel.SetActive(false);
+
+        if (activePreparationTool != null)
+            activePreparationTool.SetActive(false);
+
+        if (activeIngredientSlot != null)
+            activeIngredientSlot.SetActive(false);
+
+        if (activeFinishingStage is Component finishingComponent && finishingComponent != null)
+            finishingComponent.gameObject.SetActive(false);
+
+        activePreparationBoard = null;
+        activeStageLabel = null;
+        activePreparationTool = null;
+        activeIngredientSlot = null;
+        activeFinishingStage = null;
     }
 
-    private static Camera EnsureCamera()
+    private Camera EnsureCamera()
     {
+        ResolveInventoryView();
+
+        if (inventoryView != null && inventoryView.LargeCamera != null)
+            return inventoryView.LargeCamera;
+
         if (Camera.main != null)
             return Camera.main;
 
@@ -487,34 +479,65 @@ public sealed class CookingFlowController2D : MonoBehaviour
         return camera;
     }
 
+    private void ResolveInventoryView()
+    {
+        if (inventoryView != null)
+            return;
+
+        ResolveCookingStation();
+        inventoryView = cookingStation != null ? cookingStation.GetComponent<InventoryView2D>() : null;
+
+        if (inventoryView == null)
+            inventoryView = FindFirstObjectByType<InventoryView2D>();
+    }
+
     private Vector3 GetStageCenter()
     {
-        ResolveStageArea();
+        ResolveCookingStation();
 
-        if (stageAreaCollider != null && stageAreaCollider.enabled)
-            return stageAreaCollider.bounds.center;
+        if (cookingStation != null && cookingStation.HasPrepPot)
+            return cookingStation.PrepPotCenter;
 
         return preparationCenter;
     }
 
+    private void ResolveCookingStation()
+    {
+        if (cookingStation != null)
+            return;
+
+        cookingStation = FindFirstObjectByType<InventoryCookingStation2D>();
+    }
+
     private Vector2 GetStageSize()
     {
-        ResolveStageArea();
-
-        if (stageAreaCollider != null && stageAreaCollider.enabled)
-            return stageAreaCollider.bounds.size;
-
         return boardSize;
     }
 
-    private void ResolveStageArea()
+    private bool ResolveStageRig()
     {
-        if (stageAreaCollider != null)
-            return;
+        if (stageRig != null)
+            return true;
 
-        CookingStageArea2D stageArea = FindFirstObjectByType<CookingStageArea2D>();
-        if (stageArea != null)
-            stageAreaCollider = stageArea.AreaCollider;
+        stageRig = transform.Find("CookingStageRig");
+        if (stageRig != null)
+            return true;
+
+        if (!loggedMissingStageRig)
+        {
+            loggedMissingStageRig = true;
+            Debug.LogError(
+                "CookingFlowController2D needs a placed CookingStageRig prefab instance. " +
+                "Build one via IceBop/Build Cooking Stage Rig, then IceBop/Build Placed Inventory And Cooking Areas.",
+                this);
+        }
+
+        return false;
+    }
+
+    private Transform GetRigChild(string path)
+    {
+        return stageRig != null ? stageRig.Find(path) : null;
     }
 
     private void OnValidate()
@@ -522,6 +545,7 @@ public sealed class CookingFlowController2D : MonoBehaviour
         boardSize.x = Mathf.Max(0.5f, boardSize.x);
         boardSize.y = Mathf.Max(0.5f, boardSize.y);
         preparedIngredientScaleMultiplier = Mathf.Max(0.01f, preparedIngredientScaleMultiplier);
+        preparedIngredientHeightOffset = Mathf.Max(0f, preparedIngredientHeightOffset);
         stageCompleteDelay = Mathf.Max(0f, stageCompleteDelay);
     }
 }

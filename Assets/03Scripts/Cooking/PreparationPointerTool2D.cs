@@ -5,6 +5,7 @@ using UnityEngine;
 public sealed class PreparationPointerTool2D : MonoBehaviour
 {
     [SerializeField] private Camera targetCamera;
+    [SerializeField] private InventoryView2D inventoryView;
     [SerializeField] private int draggingSortingOrder = 50;
 
     private SpriteRenderer toolRenderer;
@@ -18,9 +19,10 @@ public sealed class PreparationPointerTool2D : MonoBehaviour
     public bool HasPointerMovement =>
         IsDragging && (PointerWorldPosition - PreviousPointerWorldPosition).sqrMagnitude > 0.000001f;
 
-    public void Configure(Camera newTargetCamera)
+    public void Configure(Camera newTargetCamera, InventoryView2D newInventoryView = null)
     {
         targetCamera = newTargetCamera;
+        inventoryView = newInventoryView;
         PointerWorldPosition = transform.position;
         PreviousPointerWorldPosition = PointerWorldPosition;
     }
@@ -107,6 +109,9 @@ public sealed class PreparationPointerTool2D : MonoBehaviour
 
     private bool TryGetPointerWorldPosition(out Vector2 worldPosition)
     {
+        if (inventoryView != null)
+            return inventoryView.TryGetLargeViewPointerWorldPosition(out worldPosition);
+
         worldPosition = default;
 
         Camera camera = targetCamera != null ? targetCamera : Camera.main;
