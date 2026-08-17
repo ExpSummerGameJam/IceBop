@@ -233,7 +233,7 @@ GameObject:
   - component: {fileID: 2683675758868221338}
   - component: {fileID: 5189495862427764072}
   - component: {fileID: 3788376821104953776}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: WeakPlatform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -129108,7 +129108,7 @@ GameObject:
   - component: {fileID: 887094442882104300}
   - component: {fileID: 4755361053193313319}
   - component: {fileID: 2509195314276669173}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: Slope
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -130238,7 +130238,7 @@ GameObject:
   - component: {fileID: 1979269200435819316}
   - component: {fileID: 6475913188699625488}
   - component: {fileID: 6760194213473599692}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: Slippery
   m_TagString: Untagged
   m_Icon: {fileID: 0}

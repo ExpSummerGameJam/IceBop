@@ -13,6 +13,11 @@ namespace IceBop.JumpKing
                  "(SlipperyFieldBehaviour.OnLand가 HasFlashFreeze를 조회).")]
         [SerializeField] private FlashFreezeSkillSO flashFreezeSkill;
 
+        [Header("디버그")]
+        [Tooltip("테스트용. 여기 넣어둔 스킬은 Play 시작하자마자 자동으로 해금된다 (Food 안 먹어도 됨). " +
+                 "테스트 끝나면 비워두는 걸 권장.")]
+        [SerializeField] private SkillSO[] debugUnlockOnStart;
+
         private readonly List<SkillSO> unlockedSkills = new List<SkillSO>();
         private readonly Dictionary<SkillSO, SkillRuntimeState> runtimeStates = new Dictionary<SkillSO, SkillRuntimeState>();
 
@@ -24,6 +29,11 @@ namespace IceBop.JumpKing
         private void Awake()
         {
             character = GetComponent<JumpKingCharacter>();
+
+            foreach (var skill in debugUnlockOnStart)
+            {
+                Unlock(skill);
+            }
         }
 
         private void OnEnable()

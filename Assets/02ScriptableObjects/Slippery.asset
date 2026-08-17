@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Slippery
   m_EditorClassIdentifier: Assembly-CSharp::IceBop.JumpKing.PlatformDataSO
   type: 2
-  slipperyDamping: 6
+  slipperyDamping: 1
   slideAcceleration: 9.8
   breakAfterHits: 2

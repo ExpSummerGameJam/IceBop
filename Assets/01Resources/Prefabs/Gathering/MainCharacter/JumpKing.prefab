@@ -117,7 +117,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::IceBop.JumpKing.JumpKingCharacter
   minJumpPower: 4
-  maxJumpPower: 20
+  maxJumpPower: 17
   bounciness: 0.3
   landingNormalThreshold: 0.5
 --- !u!114 &2341973922683549356
@@ -211,6 +211,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::IceBop.JumpKing.SkillInventory
   flashFreezeSkill: {fileID: 11400000, guid: c8f9dd368b61d104cbd9e49146dd6a47, type: 2}
+  debugUnlockOnStart: []
 --- !u!114 &5721454849418951491
 MonoBehaviour:
   m_ObjectHideFlags: 0

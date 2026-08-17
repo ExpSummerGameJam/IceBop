@@ -15,8 +15,8 @@ MonoBehaviour:
   skillName: TongueAnchor
   icon: {fileID: 0}
   description: 
-  anchorDuration: 1.5
-  anchorRange: 2
+  anchorDuration: 1.7
+  anchorRange: 1.5
   platformLayerMask:
     serializedVersion: 2
     m_Bits: 8

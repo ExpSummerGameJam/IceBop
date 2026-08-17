@@ -83,11 +83,20 @@ namespace IceBop.JumpKing
 
         public void EnterAirborne()
         {
+            // 이미 Airborne이었다면(=공중에서 재점프, 악셀 점프) "새로 공중에 떴다"는 신호가 아니므로
+            // OnAirborne을 다시 쏘지 않는다. 여기서 또 쏘면 AccelJumpSkillSO.OnAirborneEnter가
+            // usedThisAirtime을 즉시 false로 되돌려서 무제한 공중 재점프가 가능해지는 버그가 생긴다.
+            bool wasAlreadyAirborne = State == JumpKingMoveState.Airborne;
+
             State = JumpKingMoveState.Airborne;
             CurrentGround = null;
             CurrentSurface = null;
             Rb.gravityScale = defaultGravityScale; // 앵커로 중력을 꺼뒀을 수도 있으니 항상 복구
-            OnAirborne?.Invoke();
+
+            if (!wasAlreadyAirborne)
+            {
+                OnAirborne?.Invoke();
+            }
         }
 
         /// <summary>
