@@ -9,6 +9,7 @@ namespace IceBop.JumpKing
     {
         public bool usedThisAirtime;   // 악셀 점프: 공중에 뜬 뒤 1회 제한용
         public float cooldownTimer;    // 필요 시 재사용 쿨다운
-        public bool isActive;          // 텅 앵커처럼 지속시간이 있는 스킬의 활성 여부
+        public bool isActive;          // 지속시간이 있는 스킬의 활성 여부
+        public int charges;            // 음식으로 충전되고 사용할 때마다 소모되는 횟수 (텅 앵커/급속빙결 등)
     }
 }

@@ -91,6 +91,11 @@ namespace IceBop.JumpKing
 
             transform.position = destination;
             ScrollManager.NotifyScrollChanged();
+
+            if (currentRoomIndexY == 0)
+            {
+                ScrollManager.NotifyReturnedToStartRoom();
+            }
         }
     }
 }

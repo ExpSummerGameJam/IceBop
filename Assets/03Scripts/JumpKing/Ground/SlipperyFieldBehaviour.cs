@@ -12,7 +12,10 @@ namespace IceBop.JumpKing
 
         public void OnLand(JumpKingCharacter character, PlatformSurface surface, Vector2 contactPoint)
         {
-            // 하드 필드와 달리 착지 시 수평 속도를 0으로 만들지 않는다 (관성 유지).
+            // 하드 필드와 달리 기본적으로는 착지 시 수평 속도를 0으로 만들지 않는다 (관성 유지).
+            // 단, 급속빙결 충전 횟수가 남아있으면 하드 필드처럼 즉시 정지하고 1회 소모된다.
+            var inventory = character.GetComponent<SkillInventory>();
+            inventory?.TryActivateFlashFreeze();
         }
 
         public void OnPhysicsStep(JumpKingCharacter character, PlatformSurface surface)

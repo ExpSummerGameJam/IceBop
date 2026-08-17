@@ -3,31 +3,31 @@ using UnityEngine;
 namespace IceBop.JumpKing
 {
     /// <summary>
-    /// A. 텅 앵커 - 혀를 길게 늘려 잠시 벽에 고정된다.
-    /// 고정 중에는 바닥에 착지한 것처럼 점프 조작이 가능하다 (벽에 붙어서 점프하는 느낌).
+    /// A. 텅 앵커 - 혀를 늘려 잠시 몸을 공중에 고정시킨다.
+    /// 주변 anchorRange 안에 발판(타일)이 있을 때 Q(SkillInputController의 skillAction)를 누르면 즉시 고정되고,
+    /// 고정 중에는 바닥에 착지한 것처럼 점프 조작이 가능하다. anchorDuration이 지나면 자동으로 풀린다.
     /// </summary>
     [CreateAssetMenu(menuName = "JumpKing/Skills/Tongue Anchor", fileName = "Skill_TongueAnchor")]
     public class TongueAnchorSkillSO : SkillSO
     {
+        [Tooltip("고정이 자동으로 풀리기까지 걸리는 시간(초). 그 전에 점프하면 그 즉시 풀린다.")]
         [SerializeField] private float anchorDuration = 1.5f;
+        [Tooltip("이 범위 안에 발판이 있어야 고정을 시도할 수 있다.")]
         [SerializeField] private float anchorRange = 2f;
+        [Tooltip("사거리 판정에 사용할 레이어. 발판 콜라이더가 속한 레이어로 좁혀서 설정할 것.")]
+        [SerializeField] private LayerMask platformLayerMask = ~0;
 
         public override bool CanActivate(JumpKingCharacter character, SkillRuntimeState state)
         {
-            // TODO: 사거리(anchorRange) 내에 앵커 가능한 벽(Collider)이 있는지 체크 필요
-            return character.State == JumpKingMoveState.Airborne && !state.isActive;
+            if (state.charges <= 0) return false;
+            if (character.State != JumpKingMoveState.Airborne) return false;
+            return Physics2D.OverlapCircle(character.transform.position, anchorRange, platformLayerMask) != null;
         }
 
         public override void Activate(JumpKingCharacter character, SkillRuntimeState state)
         {
-            // TODO: 사거리 내 벽 탐색 -> 캐릭터를 벽에 붙임 -> character.SetAnchored(true)
-            // anchorDuration 경과, 또는 재점프 입력 시 character.SetAnchored(false) 로 해제
-            state.isActive = true;
-        }
-
-        public override void OnLanded(SkillRuntimeState state)
-        {
-            state.isActive = false;
+            state.charges--; // 벽에 붙을 때마다 1회 소모
+            character.SetAnchored(true, anchorDuration);
         }
     }
 }

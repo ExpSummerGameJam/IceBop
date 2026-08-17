@@ -13,7 +13,7 @@ namespace IceBop.JumpKing
             var inventory = other.GetComponent<SkillInventory>();
             if (inventory == null) return;
 
-            inventory.Unlock(unlockSkill);
+            inventory.AddCharges(unlockSkill);
             // TODO: 획득 연출/사운드 재생 후 Destroy(gameObject);
         }
     }

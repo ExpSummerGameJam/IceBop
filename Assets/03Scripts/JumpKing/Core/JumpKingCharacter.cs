@@ -25,11 +25,10 @@ namespace IceBop.JumpKing
         public PlatformSurface CurrentSurface { get; private set; }
         public IGroundBehaviour CurrentGround { get; private set; }
 
-        /// <summary>지금 점프 차지/발사 조작이 가능한 상태인지.</summary>
+        /// <summary>지금 점프 차지/발사 조작이 가능한 상태인지. 텅 앵커로 고정된 상태에서도 가능하다.</summary>
         public bool CanControlJump =>
-            State == JumpKingMoveState.Idle &&
-            CurrentGround != null &&
-            CurrentGround.AllowsJumpControl;
+            (State == JumpKingMoveState.Idle && CurrentGround != null && CurrentGround.AllowsJumpControl) ||
+            State == JumpKingMoveState.Anchored;
 
         /// <summary>착지 시 발생. 인자는 착지한 발판.</summary>
         public event Action<PlatformSurface> OnLanded;
@@ -37,9 +36,13 @@ namespace IceBop.JumpKing
         /// <summary>공중으로 진입할 때(점프 실행/낙하 시작) 발생.</summary>
         public event Action OnAirborne;
 
+        private float defaultGravityScale;
+        private float anchorTimer;
+
         private void Awake()
         {
             Rb = GetComponent<Rigidbody2D>();
+            defaultGravityScale = Rb.gravityScale;
             // 빠른 낙하/점프 속도에서 얇은 바닥 콜라이더를 그냥 통과(터널링)하는 걸 막기 위해
             // 인스펙터 설정과 무관하게 항상 연속 충돌 감지를 강제한다.
             Rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
@@ -53,6 +56,15 @@ namespace IceBop.JumpKing
             if (CurrentGround != null && State != JumpKingMoveState.Airborne)
             {
                 CurrentGround.OnPhysicsStep(this, CurrentSurface);
+            }
+
+            if (State == JumpKingMoveState.Anchored)
+            {
+                anchorTimer -= Time.fixedDeltaTime;
+                if (anchorTimer <= 0f)
+                {
+                    SetAnchored(false);
+                }
             }
         }
 
@@ -69,26 +81,45 @@ namespace IceBop.JumpKing
             EnterAirborne();
         }
 
-        /// <summary>악셀 점프 등 "공중에서의 추가 점프"를 위한 진입점.</summary>
-        public void ExecuteAirJump(Vector2 direction, float power)
-        {
-            // TODO: Rb.linearVelocity = direction.normalized * power;
-            // 호출 전 사용 가능 여부 확인은 SkillSO.CanActivate(AccelJumpSkillSO)에서 처리됨.
-        }
-
         public void EnterAirborne()
         {
+            // 이미 Airborne이었다면(=공중에서 재점프, 악셀 점프) "새로 공중에 떴다"는 신호가 아니므로
+            // OnAirborne을 다시 쏘지 않는다. 여기서 또 쏘면 AccelJumpSkillSO.OnAirborneEnter가
+            // usedThisAirtime을 즉시 false로 되돌려서 무제한 공중 재점프가 가능해지는 버그가 생긴다.
+            bool wasAlreadyAirborne = State == JumpKingMoveState.Airborne;
+
             State = JumpKingMoveState.Airborne;
             CurrentGround = null;
             CurrentSurface = null;
-            OnAirborne?.Invoke();
+            Rb.gravityScale = defaultGravityScale; // 앵커로 중력을 꺼뒀을 수도 있으니 항상 복구
+
+            if (!wasAlreadyAirborne)
+            {
+                OnAirborne?.Invoke();
+            }
         }
 
-        /// <summary>텅 앵커 스킬 등에서 벽에 고정시킬 때 사용.</summary>
-        public void SetAnchored(bool anchored)
+        /// <summary>
+        /// 텅 앵커 스킬에서 벽에 고정시킬 때 사용. anchored == true면 duration초 뒤 자동으로 풀린다
+        /// (그 전에 점프하면 ExecuteJump -> EnterAirborne이 먼저 상태를 Airborne으로 바꿔 자동 해제와 무관해진다).
+        /// </summary>
+        public void SetAnchored(bool anchored, float duration = 0f)
         {
-            // TODO: anchored == true  -> State = Anchored, 속도 0으로 고정, 위치를 벽면에 붙임
-            //       anchored == false -> Airborne으로 복귀 (재점프 입력 대기)
+            if (anchored)
+            {
+                State = JumpKingMoveState.Anchored;
+                Rb.linearVelocity = Vector2.zero;
+                Rb.gravityScale = 0f;
+                anchorTimer = duration;
+            }
+            else
+            {
+                Rb.gravityScale = defaultGravityScale;
+                if (State == JumpKingMoveState.Anchored)
+                {
+                    State = JumpKingMoveState.Airborne;
+                }
+            }
         }
 
         [Header("충돌 판정")]
