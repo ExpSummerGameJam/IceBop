@@ -60,6 +60,9 @@ public sealed class DishDefinition
     public int linkedAbilityId;
     public string linkedAbilityKey;
     public string abilityEffect;
+    public int anchorTongueCharges;
+    public int rapidFreezeCharges;
+    public int accelJumpCharges;
     public string memo;
 
     public bool HasCookingMethod => !string.IsNullOrWhiteSpace(cookingMethod);
