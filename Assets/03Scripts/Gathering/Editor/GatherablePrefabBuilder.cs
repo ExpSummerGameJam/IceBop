@@ -79,8 +79,8 @@ public static class GatherablePrefabBuilder
         trigger.isTrigger = true;
         trigger.radius = 0.9f;
 
-        GameObject available = CreateStateVisual(root.transform, "Available", gatherableId, false);
-        GameObject depleted = CreateStateVisual(root.transform, "Depleted", gatherableId, true);
+        GameObject available = CreateStateVisual(root.transform, "Available");
+        GameObject depleted = CreateStateVisual(root.transform, "Depleted");
         depleted.SetActive(false);
 
         GatherableObject gatherable = root.AddComponent<GatherableObject>();
@@ -94,20 +94,16 @@ public static class GatherablePrefabBuilder
         return root;
     }
 
-    private static GameObject CreateStateVisual(Transform parent, string name, int gatherableId, bool depleted)
+    private static GameObject CreateStateVisual(Transform parent, string name)
     {
         GameObject visual = new(name);
         visual.transform.SetParent(parent, false);
         visual.transform.localPosition = Vector3.zero;
         visual.transform.localRotation = Quaternion.identity;
-        visual.transform.localScale = depleted
-            ? new Vector3(0.55f, 0.35f, 1f)
-            : new Vector3(0.75f, 0.75f, 1f);
+        visual.transform.localScale = new Vector3(0.75f, 0.75f, 1f);
 
         SpriteRenderer renderer = visual.AddComponent<SpriteRenderer>();
-        renderer.color = depleted
-            ? new Color(0.28f, 0.27f, 0.25f, 1f)
-            : InventoryVisualUtility.ColorFromId(gatherableId);
+        renderer.color = Color.white;
         renderer.sortingOrder = 10;
 
         return visual;

@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9d4bf1dc227482f875ca28c501c4511, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gatherableIds: 1d0c00001e0c00001f0c0000810c0000820c0000830c0000840c0000850c0000860c0000
+  gatherableIds: 1d0c00001e0c00001f0c0000810c0000830c0000850c0000
   firstGatherablePosition: {x: -7, y: 1.4}
   gatherableSpacing: {x: 2, y: -1.8}
   gatherablesPerRow: 4

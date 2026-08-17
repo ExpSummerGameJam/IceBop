@@ -6,18 +6,29 @@
   <component name="ChangeListManager">
     <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/icesalad.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/icesalad.png.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/icesoup1.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/icesoup1.png.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/icesoup2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/icesoup2.png.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/JJData/Scripts/Processor/XlsxDataProcessor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JJData/Scripts/Processor/XlsxDataProcessor.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/JJData/Xlsx/CookingData.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/JJData/Xlsx/CookingData.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/JJData/Xlsx/DataBaseName.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/JJData/Xlsx/DataBaseName.xlsx.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/JJData/Xlsx/~$GatheringData.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/JJData/Xlsx/~$GatheringData.xlsx.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/BagInventoryTestScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/BagInventoryTestScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/CookingIntegrationTestScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/CookingIntegrationTestScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_carrot_icicle.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_carrot_icicle.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_carrot_icicle_empty.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_carrot_icicle_empty.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_frost_feather.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_frost_feather.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_frost_feather_empty.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_frost_feather_empty.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_frozen_dinosaur_tail.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_frozen_dinosaur_tail.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_frozen_dinosaur_tail_empty.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_frozen_dinosaur_tail_empty.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_frozen_frog.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_frozen_frog.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_frozen_frog_empty.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_frozen_frog_empty.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_ice_strawberry.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_ice_strawberry.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_ice_strawberry_empty.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_ice_strawberry_empty.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_octopus_icicle.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_octopus_icicle.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_octopus_icicle_empty.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Gathering/Gathering_octopus_icicle_empty.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage1_carrot_icicle_salty_ice.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage1_carrot_icicle_salty_ice.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage2_ice_strawberry_unicorn_horn_icicle.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage2_ice_strawberry_unicorn_horn_icicle.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage3_frozen_dinosaur_tail_eternal_snow.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/EnhancementMaterials/EnhancementGatherable_Stage3_frozen_dinosaur_tail_eternal_snow.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/UniqueMaterials/Gatherable_3101_frozen_frog.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/UniqueMaterials/Gatherable_3101_frozen_frog.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/UniqueMaterials/Gatherable_3102_octopus_icicle.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/UniqueMaterials/Gatherable_3102_octopus_icicle.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/UniqueMaterials/Gatherable_3103_frost_feather.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/UniqueMaterials/Gatherable_3103_frost_feather.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingIntegrationTestSceneBootstrap.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingIntegrationTestSceneBootstrap.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/BagInventoryTestSceneBootstrap.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/BagInventoryTestSceneBootstrap.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/Editor/GatherablePrefabBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/Editor/GatherablePrefabBuilder.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

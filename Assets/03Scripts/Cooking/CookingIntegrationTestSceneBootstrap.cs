@@ -9,9 +9,8 @@ public sealed class CookingIntegrationTestSceneBootstrap : MonoBehaviour
 
     [SerializeField] private int[] gatherableIds =
     {
-        3101, 3102, 3103, 3201,
-        3202, 3203, 3204, 3205,
-        3206
+        3101, 3102, 3103,
+        3201, 3203, 3205
     };
 
     [SerializeField] private int[] startingIngredientIds =
@@ -120,8 +119,8 @@ public sealed class CookingIntegrationTestSceneBootstrap : MonoBehaviour
         trigger.isTrigger = true;
         trigger.radius = 0.9f;
 
-        GameObject available = CreateGatherableStateVisual(root.transform, "Available", gatherableId, false);
-        GameObject depleted = CreateGatherableStateVisual(root.transform, "Depleted", gatherableId, true);
+        GameObject available = CreateGatherableStateVisual(root.transform, "Available");
+        GameObject depleted = CreateGatherableStateVisual(root.transform, "Depleted");
         depleted.SetActive(false);
 
         GatherableObject gatherable = root.AddComponent<GatherableObject>();
@@ -131,21 +130,25 @@ public sealed class CookingIntegrationTestSceneBootstrap : MonoBehaviour
             depleted,
             available.GetComponent<SpriteRenderer>(),
             depleted.GetComponent<SpriteRenderer>());
+
+        if (GatheringDataLookup.TryGetGatherable(gatherableId, out GatherableDefinition definition))
+        {
+            gatherable.ConfigureDropIngredients(
+                definition.DropMode,
+                definition.configuredDropIngredientIdA,
+                definition.configuredDropIngredientIdB);
+        }
     }
 
-    private static GameObject CreateGatherableStateVisual(Transform parent, string name, int id, bool depleted)
+    private static GameObject CreateGatherableStateVisual(Transform parent, string name)
     {
         GameObject visual = new(name);
         visual.transform.SetParent(parent, false);
-        visual.transform.localScale = depleted
-            ? new Vector3(0.55f, 0.35f, 1f)
-            : new Vector3(0.75f, 0.75f, 1f);
+        visual.transform.localScale = new Vector3(0.75f, 0.75f, 1f);
 
         SpriteRenderer renderer = visual.AddComponent<SpriteRenderer>();
         renderer.sprite = InventoryVisualUtility.WhiteSprite;
-        renderer.color = depleted
-            ? new Color(0.28f, 0.27f, 0.25f, 1f)
-            : InventoryVisualUtility.ColorFromId(id);
+        renderer.color = Color.white;
         renderer.sortingOrder = 10;
 
         return visual;
