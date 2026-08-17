@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public sealed class CookingFlowController2D : MonoBehaviour
@@ -280,7 +281,7 @@ public sealed class CookingFlowController2D : MonoBehaviour
         Vector2 stageSize = GetStageSize();
         label.position = GetStageCenter() + new Vector3(0f, stageSize.y * 0.5f + 0.46f, 0f);
 
-        TextMesh text = label.GetComponent<TextMesh>();
+        TMP_Text text = label.GetComponent<TMP_Text>();
         if (text != null)
             text.text = $"{stageIndex + 1}/{stageCount} {GetPreparationActionLabel(entry.preparationKind)}";
     }

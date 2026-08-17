@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 /// <summary>
@@ -9,12 +10,16 @@ using UnityEngine;
 /// </summary>
 public sealed class DishResultPresenter2D : MonoBehaviour
 {
+    private const string DishRendererChildPath = "DishResult/CompletedDish";
+    private const string DishLabelChildPath = "DishResult/CompletedDishLabel";
+
     [SerializeField] private float finishTravelDuration = 0.65f;
     [SerializeField] private float returnTravelDuration = 0.75f;
+    [SerializeField] private SpriteRenderer dishRenderer;
+    [SerializeField] private TMP_Text dishLabel;
 
-    private SpriteRenderer dishRenderer;
-    private TextMesh dishLabel;
     private bool presenting;
+    private bool loggedMissingVisuals;
 
     public event Action Presented;
 
@@ -84,40 +89,57 @@ public sealed class DishResultPresenter2D : MonoBehaviour
 
     private void ShowDishResult(DishDefinition dish, IReadOnlyList<CookingIngredientEntry> ingredients)
     {
-        if (dishRenderer == null)
-        {
-            GameObject dishObject = new("CompletedDish");
-            dishObject.transform.SetParent(transform, false);
-            dishObject.transform.localPosition = new Vector3(0f, 0.36f, 0f);
-            dishObject.transform.localScale = new Vector3(0.78f, 0.78f, 1f);
-            dishRenderer = dishObject.AddComponent<SpriteRenderer>();
-            dishRenderer.sortingOrder = 43;
-        }
+        ResolveVisuals();
 
-        dishRenderer.sprite = CookingRuntimeVisuals2D.GetDishSprite(dish, ingredients);
-        dishRenderer.color = Color.white;
-        dishRenderer.gameObject.SetActive(true);
+        if (dishRenderer != null)
+        {
+            dishRenderer.sprite = CookingRuntimeVisuals2D.GetDishSprite(dish, ingredients);
+            dishRenderer.color = Color.white;
+            dishRenderer.gameObject.SetActive(true);
+        }
 
         if (dishLabel == null)
-        {
-            GameObject labelObject = new("CompletedDishLabel");
-            labelObject.transform.SetParent(transform, false);
-            labelObject.transform.localPosition = new Vector3(0f, -0.55f, 0f);
-            dishLabel = labelObject.AddComponent<TextMesh>();
-            dishLabel.anchor = TextAnchor.MiddleCenter;
-            dishLabel.alignment = TextAlignment.Center;
-            dishLabel.fontSize = 34;
-            dishLabel.characterSize = 0.055f;
-            dishLabel.color = new Color(0.94f, 0.96f, 0.92f, 1f);
+            return;
 
-            MeshRenderer renderer = labelObject.GetComponent<MeshRenderer>();
-            if (renderer != null)
-                renderer.sortingOrder = 44;
-        }
-
+        dishLabel.gameObject.SetActive(true);
         dishLabel.text = dish != null && !string.IsNullOrWhiteSpace(dish.displayName)
             ? dish.displayName
             : "Completed Dish";
+    }
+
+    // Both visuals are placed objects under the finishing stage (built by
+    // CookingStagePrefabBuilder), not created here - so the artist can position/style them.
+    private void ResolveVisuals()
+    {
+        if (dishRenderer == null)
+        {
+            Transform dishTransform = transform.Find(DishRendererChildPath);
+            if (dishTransform != null)
+                dishRenderer = dishTransform.GetComponent<SpriteRenderer>();
+        }
+
+        if (dishLabel == null)
+        {
+            Transform labelTransform = transform.Find(DishLabelChildPath);
+            if (labelTransform != null)
+                dishLabel = labelTransform.GetComponent<TMP_Text>();
+        }
+
+        if (dishRenderer == null || dishLabel == null)
+            WarnMissingVisuals();
+    }
+
+    private void WarnMissingVisuals()
+    {
+        if (loggedMissingVisuals)
+            return;
+
+        loggedMissingVisuals = true;
+        Debug.LogError(
+            $"DishResultPresenter2D needs placed \"{DishRendererChildPath}\" (SpriteRenderer) and " +
+            $"\"{DishLabelChildPath}\" (TextMeshPro) objects under this finishing stage. " +
+            "Rebuild the rig via IceBop/Build Cooking Stage Rig.",
+            this);
     }
 
     private void OnValidate()

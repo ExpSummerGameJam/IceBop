@@ -296,6 +296,9 @@ public static class GatheringDataLookup
                 linkedAbilityId = GetFirstInt(row, "linkedAbilityId", "abilityId"),
                 linkedAbilityKey = GetFirstString(row, "linkedAbilityKey", "abilityKey", "ability"),
                 abilityEffect = GetString(row, "abilityEffect"),
+                anchorTongueCharges = GetInt(row, "anchorTongueCharges"),
+                rapidFreezeCharges = GetInt(row, "rapidFreezeCharges"),
+                accelJumpCharges = GetInt(row, "accelJumpCharges"),
                 memo = GetString(row, "memo")
             };
 
@@ -500,6 +503,9 @@ public static class GatheringDataLookup
                 linkedAbilityId = GetFirstRowInt(row, "linkedAbilityId", "abilityId"),
                 linkedAbilityKey = GetFirstRowString(row, "linkedAbilityKey", "abilityKey", "ability"),
                 abilityEffect = GetRowString(row, "abilityEffect"),
+                anchorTongueCharges = GetRowInt(row, "anchorTongueCharges"),
+                rapidFreezeCharges = GetRowInt(row, "rapidFreezeCharges"),
+                accelJumpCharges = GetRowInt(row, "accelJumpCharges"),
                 memo = GetRowString(row, "memo")
             };
 

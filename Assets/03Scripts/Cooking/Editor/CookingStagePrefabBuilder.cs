@@ -1,4 +1,5 @@
 using System.IO;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 
@@ -50,22 +51,28 @@ public static class CookingStagePrefabBuilder
 
     private static void BuildStageLabel(Transform parent)
     {
-        GameObject labelObject = new("StageLabel");
-        labelObject.transform.SetParent(parent, false);
-
-        TextMesh text = labelObject.AddComponent<TextMesh>();
-        text.text = string.Empty;
-        text.anchor = TextAnchor.MiddleCenter;
-        text.alignment = TextAlignment.Center;
-        text.fontSize = 34;
-        text.characterSize = 0.06f;
-        text.color = new Color(0.92f, 0.95f, 0.92f, 1f);
-
-        MeshRenderer renderer = labelObject.GetComponent<MeshRenderer>();
-        if (renderer != null)
-            renderer.sortingOrder = 35;
-
+        GameObject labelObject = BuildWorldText(parent, "StageLabel", 2.4f, new Color(0.92f, 0.95f, 0.92f, 1f), 35);
         labelObject.SetActive(false);
+    }
+
+    private static GameObject BuildWorldText(Transform parent, string name, float width, Color color, int sortingOrder)
+    {
+        GameObject textObject = new(name);
+        textObject.transform.SetParent(parent, false);
+
+        TextMeshPro text = textObject.AddComponent<TextMeshPro>();
+        text.text = string.Empty;
+        text.alignment = TextAlignmentOptions.Center;
+        text.enableAutoSizing = false;
+        text.fontSize = 2.6f;
+        text.color = color;
+
+        RectTransform rectTransform = text.rectTransform;
+        rectTransform.sizeDelta = new Vector2(width, 0.6f);
+        rectTransform.localPosition = Vector3.zero;
+
+        text.renderer.sortingOrder = sortingOrder;
+        return textObject;
     }
 
     private static void BuildTools(Transform parent)
@@ -162,7 +169,26 @@ public static class CookingStagePrefabBuilder
         GameObject stage = new(name);
         stage.transform.SetParent(parent, false);
         stage.AddComponent<T>();
+        BuildDishResultVisuals(stage.transform);
         stage.SetActive(false);
+    }
+
+    // The completed-dish sprite and its name label that DishResultPresenter2D drives - placed
+    // here rather than created at runtime so they can be positioned/styled in the prefab.
+    private static void BuildDishResultVisuals(Transform parent)
+    {
+        Transform resultRoot = FindOrCreateChild(parent, "DishResult");
+
+        GameObject dishObject = new("CompletedDish");
+        dishObject.transform.SetParent(resultRoot, false);
+        dishObject.transform.localPosition = new Vector3(0f, 0.36f, 0f);
+        dishObject.transform.localScale = new Vector3(0.78f, 0.78f, 1f);
+
+        SpriteRenderer dishRenderer = dishObject.AddComponent<SpriteRenderer>();
+        dishRenderer.sortingOrder = 43;
+
+        GameObject labelObject = BuildWorldText(resultRoot, "CompletedDishLabel", 3f, new Color(0.94f, 0.96f, 0.92f, 1f), 44);
+        labelObject.transform.localPosition = new Vector3(0f, -0.55f, 0f);
     }
 
     private static Transform FindOrCreateChild(Transform parent, string name)
