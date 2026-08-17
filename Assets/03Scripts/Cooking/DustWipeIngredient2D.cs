@@ -8,7 +8,7 @@ public sealed class DustWipeIngredient2D : IngredientPreparationBehaviour2D
     [SerializeField] private PreparationPointerTool2D clothTool;
     [SerializeField] private Transform dustRoot;
     [SerializeField] private int defaultDustCount = 8;
-    [SerializeField] private Vector2 dustPatchSize = new(0.18f, 0.12f);
+    [SerializeField] private Vector2 dustPatchSize = new(0.07f, 0.05f);
     [SerializeField] private float wipeRadius = 0.32f;
     [SerializeField] private Color dustColor = new(0.36f, 0.34f, 0.31f, 0.92f);
 
@@ -17,6 +17,44 @@ public sealed class DustWipeIngredient2D : IngredientPreparationBehaviour2D
     public void BindCloth(PreparationPointerTool2D newClothTool)
     {
         clothTool = newClothTool;
+    }
+
+    /// <summary>Resets this instance for reuse against a (possibly different) ingredient sprite - call after re-skinning the SpriteRenderer for a new cook. Safe even if Awake() hasn't run yet (e.g. a pooled slot activated for the first time).</summary>
+    public void Rearm()
+    {
+        ResetPreparationState();
+        ResolveRenderer();
+        EnsureDustRoot();
+        ClearDustPatches();
+        BuildDefaultDustPatches();
+    }
+
+    private void EnsureDustRoot()
+    {
+        if (dustRoot == null)
+        {
+            Transform existing = transform.Find("DustPatches");
+            if (existing != null)
+                dustRoot = existing;
+        }
+
+        if (dustRoot == null)
+        {
+            GameObject root = new("DustPatches");
+            root.transform.SetParent(transform, false);
+            dustRoot = root.transform;
+        }
+    }
+
+    private void ClearDustPatches()
+    {
+        if (dustRoot != null)
+        {
+            for (int i = dustRoot.childCount - 1; i >= 0; i--)
+                Destroy(dustRoot.GetChild(i).gameObject);
+        }
+
+        dustPatches.Clear();
     }
 
     private void Awake()
@@ -63,20 +101,7 @@ public sealed class DustWipeIngredient2D : IngredientPreparationBehaviour2D
 
     private void EnsureDustPatches()
     {
-        if (dustRoot == null)
-        {
-            Transform existing = transform.Find("DustPatches");
-            if (existing != null)
-                dustRoot = existing;
-        }
-
-        if (dustRoot == null)
-        {
-            GameObject root = new("DustPatches");
-            root.transform.SetParent(transform, false);
-            dustRoot = root.transform;
-        }
-
+        EnsureDustRoot();
         CollectDustPatches();
 
         if (dustPatches.Count == 0)

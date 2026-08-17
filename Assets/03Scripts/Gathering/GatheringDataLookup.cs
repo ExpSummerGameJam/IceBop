@@ -20,6 +20,7 @@ public static class GatheringDataLookup
     private static Dictionary<int, GatherableDefinition> gatherablesById;
     private static Dictionary<int, IngredientDefinition> ingredientsById;
     private static Dictionary<int, DishDefinition> dishesById;
+    private static Dictionary<string, IngredientCategoryDefinition> ingredientCategoriesByKey;
 
     public static bool TryGetGatherable(int gatherableId, out GatherableDefinition definition)
     {
@@ -58,6 +59,19 @@ public static class GatheringDataLookup
         return dishesById.TryGetValue(dishId, out definition);
     }
 
+    public static bool TryGetIngredientCategory(string categoryKey, out IngredientCategoryDefinition definition)
+    {
+        EnsureIngredientCategories();
+
+        if (string.IsNullOrWhiteSpace(categoryKey))
+        {
+            definition = null;
+            return false;
+        }
+
+        return ingredientCategoriesByKey.TryGetValue(categoryKey.Trim(), out definition);
+    }
+
     public static IReadOnlyCollection<GatherableDefinition> GetGatherables()
     {
         EnsureGatherables();
@@ -87,6 +101,7 @@ public static class GatheringDataLookup
         gatherablesById = null;
         ingredientsById = null;
         dishesById = null;
+        ingredientCategoriesByKey = null;
     }
 
     private static void EnsureGatherables()
@@ -131,6 +146,21 @@ public static class GatheringDataLookup
 
 #if UNITY_EDITOR
         LoadEditorXlsxDishes(dishesById);
+#endif
+    }
+
+    private static void EnsureIngredientCategories()
+    {
+        if (ingredientCategoriesByKey != null)
+            return;
+
+        ingredientCategoriesByKey = new Dictionary<string, IngredientCategoryDefinition>();
+
+        if (TryLoadGeneratedIngredientCategories(ingredientCategoriesByKey))
+            return;
+
+#if UNITY_EDITOR
+        LoadEditorXlsxIngredientCategories(ingredientCategoriesByKey);
 #endif
     }
 
@@ -193,13 +223,46 @@ public static class GatheringDataLookup
                 ingredientId = GetInt(row, "ingredientId"),
                 ingredientKey = GetString(row, "ingredientKey"),
                 displayName = GetString(row, "displayName"),
+                categoryKey = GetString(row, "categoryKey"),
                 preparationKind = GetString(row, "preparationKind"),
                 iconKey = GetString(row, "iconKey"),
-                worldDropForce = GetFloat(row, "worldDropForce", 1.75f)
+                worldDropForce = GetFloat(row, "worldDropForce", 1.75f),
+                description = GetString(row, "description")
             };
 
             if (definition.ingredientId > 0)
                 target[definition.ingredientId] = definition;
+        }
+
+        return target.Count > 0;
+    }
+
+    private static bool TryLoadGeneratedIngredientCategories(Dictionary<string, IngredientCategoryDefinition> target)
+    {
+        Type dataType = FindType("CookingData");
+        FieldInfo sheetField = dataType?.GetField("IngredientCategories", StaticFieldFlags);
+        if (sheetField == null)
+            return false;
+
+        IEnumerable rows = GetGeneratedRows(sheetField, "CookingDataDataParser", "SetXlsxData");
+        if (rows == null)
+            return false;
+
+        foreach (object row in rows)
+        {
+            if (row == null)
+                continue;
+
+            IngredientCategoryDefinition definition = new()
+            {
+                categoryKey = GetString(row, "categoryKey"),
+                displayName = GetString(row, "displayName"),
+                sortOrder = GetInt(row, "sortOrder"),
+                description = GetString(row, "description")
+            };
+
+            if (!string.IsNullOrWhiteSpace(definition.categoryKey))
+                target[definition.categoryKey.Trim()] = definition;
         }
 
         return target.Count > 0;
@@ -232,6 +295,7 @@ public static class GatheringDataLookup
                 finishingStageKind = GetString(row, "finishingStageKind"),
                 linkedAbilityId = GetFirstInt(row, "linkedAbilityId", "abilityId"),
                 linkedAbilityKey = GetFirstString(row, "linkedAbilityKey", "abilityKey", "ability"),
+                abilityEffect = GetString(row, "abilityEffect"),
                 memo = GetString(row, "memo")
             };
 
@@ -391,13 +455,32 @@ public static class GatheringDataLookup
                 ingredientId = GetRowInt(row, "ingredientId"),
                 ingredientKey = GetRowString(row, "ingredientKey"),
                 displayName = GetRowString(row, "displayName"),
+                categoryKey = GetRowString(row, "categoryKey"),
                 preparationKind = GetRowString(row, "preparationKind"),
                 iconKey = GetRowString(row, "iconKey"),
-                worldDropForce = GetRowFloat(row, "worldDropForce", 1.75f)
+                worldDropForce = GetRowFloat(row, "worldDropForce", 1.75f),
+                description = GetRowString(row, "description")
             };
 
             if (definition.ingredientId > 0)
                 target[definition.ingredientId] = definition;
+        }
+    }
+
+    private static void LoadEditorXlsxIngredientCategories(Dictionary<string, IngredientCategoryDefinition> target)
+    {
+        foreach (Dictionary<string, string> row in ReadXlsxRows("JJData/Xlsx/CookingData.xlsx", "IngredientCategories"))
+        {
+            IngredientCategoryDefinition definition = new()
+            {
+                categoryKey = GetRowString(row, "categoryKey"),
+                displayName = GetRowString(row, "displayName"),
+                sortOrder = GetRowInt(row, "sortOrder"),
+                description = GetRowString(row, "description")
+            };
+
+            if (!string.IsNullOrWhiteSpace(definition.categoryKey))
+                target[definition.categoryKey.Trim()] = definition;
         }
     }
 
@@ -416,6 +499,7 @@ public static class GatheringDataLookup
                 finishingStageKind = GetRowString(row, "finishingStageKind"),
                 linkedAbilityId = GetFirstRowInt(row, "linkedAbilityId", "abilityId"),
                 linkedAbilityKey = GetFirstRowString(row, "linkedAbilityKey", "abilityKey", "ability"),
+                abilityEffect = GetRowString(row, "abilityEffect"),
                 memo = GetRowString(row, "memo")
             };
 

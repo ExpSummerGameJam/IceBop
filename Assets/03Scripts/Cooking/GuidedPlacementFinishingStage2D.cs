@@ -8,18 +8,22 @@ public sealed class GuidedPlacementFinishingStage2D : MonoBehaviour, IDishFinish
     private sealed class PlacementItem
     {
         public CookingIngredientEntry ingredient;
+        public GameObject gameObject;
         public Transform transform;
         public SpriteRenderer renderer;
-        public BoxCollider2D collider;
+        public PolygonCollider2D collider;
 
+        public GameObject guideObject;
         public Transform guide;
         public SpriteRenderer guideRenderer;
 
         public Vector3 targetLocalPosition;
 
         public bool placed;
+        public bool active;
     }
 
+    [SerializeField] private int maxPoolSize = 4;
     [SerializeField] private float snapDistance = 0.35f;
     [SerializeField] private float ingredientScaleMultiplier = 0.55f;
     [SerializeField] private float guideAlpha = 0.3f;
@@ -33,6 +37,7 @@ public sealed class GuidedPlacementFinishingStage2D : MonoBehaviour, IDishFinish
     private readonly List<PlacementItem> placementItems = new();
 
     private Camera targetCamera;
+    private InventoryView2D inventoryView;
     private IReadOnlyList<CookingIngredientEntry> ingredients;
     private DishDefinition dish;
 
@@ -42,6 +47,7 @@ public sealed class GuidedPlacementFinishingStage2D : MonoBehaviour, IDishFinish
     private DishResultPresenter2D presenter;
 
     private int placedCount;
+    private int activeItemCount;
     private bool completed;
     private bool presentingResult;
 
@@ -52,13 +58,20 @@ public sealed class GuidedPlacementFinishingStage2D : MonoBehaviour, IDishFinish
         Camera camera,
         IReadOnlyList<CookingIngredientEntry> newIngredients,
         DishDefinition newDish,
-        CookingMethodToolVisual2D newToolVisual)
+        CookingMethodToolVisual2D newToolVisual,
+        InventoryView2D newInventoryView)
     {
         targetCamera = camera;
+        inventoryView = newInventoryView;
         ingredients = newIngredients;
         dish = newDish;
+        placedCount = 0;
+        completed = false;
+        presentingResult = false;
+        draggingItem = null;
 
         EnsureVisuals();
+        RearmItems();
     }
 
     private void Update()
@@ -86,12 +99,8 @@ public sealed class GuidedPlacementFinishingStage2D : MonoBehaviour, IDishFinish
         {
             PlacementItem item = placementItems[i];
 
-            if (item == null ||
-                item.placed ||
-                item.collider == null)
-            {
+            if (item == null || !item.active || item.placed || item.collider == null)
                 continue;
-            }
 
             if (!item.collider.OverlapPoint(pointerWorldPosition))
                 continue;
@@ -107,34 +116,21 @@ public sealed class GuidedPlacementFinishingStage2D : MonoBehaviour, IDishFinish
 
     private void UpdateDragging(Vector2 pointerWorldPosition)
     {
-        if (draggingItem == null ||
-            draggingItem.transform == null ||
-            interactionRoot == null)
+        if (draggingItem == null || draggingItem.transform == null || interactionRoot == null)
         {
             draggingItem = null;
             return;
         }
 
-        Vector3 localPosition =
-            interactionRoot.InverseTransformPoint(
-                new Vector3(
-                    pointerWorldPosition.x,
-                    pointerWorldPosition.y,
-                    interactionRoot.position.z
-                )
-            );
+        Vector3 localPosition = interactionRoot.InverseTransformPoint(
+            new Vector3(pointerWorldPosition.x, pointerWorldPosition.y, interactionRoot.position.z));
 
         localPosition.z = 0f;
-
         draggingItem.transform.localPosition = localPosition;
 
         float distance = Vector2.Distance(
             new Vector2(localPosition.x, localPosition.y),
-            new Vector2(
-                draggingItem.targetLocalPosition.x,
-                draggingItem.targetLocalPosition.y
-            )
-        );
+            new Vector2(draggingItem.targetLocalPosition.x, draggingItem.targetLocalPosition.y));
 
         if (distance <= snapDistance)
             PlaceDraggingItem();
@@ -160,10 +156,9 @@ public sealed class GuidedPlacementFinishingStage2D : MonoBehaviour, IDishFinish
             item.guideRenderer.gameObject.SetActive(false);
 
         draggingItem = null;
-
         placedCount++;
 
-        if (placedCount >= placementItems.Count)
+        if (placedCount >= activeItemCount)
             CompleteInteraction();
     }
 
@@ -189,12 +184,7 @@ public sealed class GuidedPlacementFinishingStage2D : MonoBehaviour, IDishFinish
             presenter.Presented += OnResultPresented;
         }
 
-        presenter.Play(
-            targetCamera,
-            dish,
-            ingredients,
-            HideInteractiveVisuals
-        );
+        presenter.Play(targetCamera, dish, ingredients, HideInteractiveVisuals);
     }
 
     private void OnResultPresented()
@@ -211,331 +201,201 @@ public sealed class GuidedPlacementFinishingStage2D : MonoBehaviour, IDishFinish
     private void EnsureVisuals()
     {
         if (interactionRoot != null)
+        {
+            interactionRoot.gameObject.SetActive(true);
             return;
+        }
 
         GameObject root = new("GuidedPlacementRoot");
         root.transform.SetParent(transform, false);
-
         interactionRoot = root.transform;
 
         CreateBowl();
 
-        if (ingredients == null)
-            return;
+        int poolSize = Mathf.Max(1, maxPoolSize);
+        for (int i = 0; i < poolSize; i++)
+            CreatePlacementItem(i);
+    }
 
-        int count = ingredients.Count;
+    // Reskins/repositions/activates as many pooled items as this cook's ingredient list needs
+    // (built once, to poolSize, by EnsureVisuals) and deactivates the rest, instead of
+    // rebuilding a variable-count hierarchy from scratch every cook.
+    private void RearmItems()
+    {
+        int count = ingredients != null ? Mathf.Min(ingredients.Count, placementItems.Count) : 0;
+        activeItemCount = count;
 
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < placementItems.Count; i++)
         {
-            CookingIngredientEntry entry = ingredients[i];
-
-            if (entry == null)
+            PlacementItem item = placementItems[i];
+            if (item == null)
                 continue;
 
-            Vector3 targetPosition =
-                CalculateTargetPosition(
-                    placementItems.Count,
-                    count
-                );
+            if (i >= count)
+            {
+                item.active = false;
+                item.placed = false;
+                if (item.gameObject != null)
+                    item.gameObject.SetActive(false);
+                if (item.guideObject != null)
+                    item.guideObject.SetActive(false);
+                continue;
+            }
 
-            Vector3 startPosition =
-                CalculateStartPosition(
-                    placementItems.Count,
-                    count
-                );
+            CookingIngredientEntry entry = ingredients[i];
+            item.ingredient = entry;
+            item.active = true;
+            item.placed = false;
 
-            CreatePlacementItem(
-                entry,
-                startPosition,
-                targetPosition,
-                placementItems.Count
-            );
+            Vector3 targetPosition = CalculateTargetPosition(i, count);
+            Vector3 startPosition = CalculateStartPosition(i, count);
+            item.targetLocalPosition = targetPosition;
+
+            Sprite sprite = CookingRuntimeVisuals2D.GetIngredientSprite(entry);
+            if (sprite == null)
+                sprite = InventoryVisualUtility.WhiteSprite;
+
+            Color ingredientColor = CookingRuntimeVisuals2D.GetIngredientColor(entry);
+            Vector3 sourceScale = entry != null && entry.ingredientScale != Vector3.zero ? entry.ingredientScale : Vector3.one;
+            Vector3 finalScale = sourceScale * Mathf.Max(0.01f, ingredientScaleMultiplier);
+
+            if (item.guideObject != null)
+                item.guideObject.SetActive(true);
+            if (item.guide != null)
+            {
+                item.guide.localPosition = targetPosition;
+                item.guide.localScale = finalScale;
+            }
+            if (item.guideRenderer != null)
+            {
+                item.guideRenderer.sprite = sprite;
+                item.guideRenderer.color = new Color(ingredientColor.r, ingredientColor.g, ingredientColor.b, guideAlpha);
+            }
+
+            if (item.gameObject != null)
+                item.gameObject.SetActive(true);
+            if (item.transform != null)
+            {
+                item.transform.localPosition = startPosition;
+                item.transform.localScale = finalScale;
+            }
+            if (item.renderer != null)
+            {
+                item.renderer.sprite = sprite;
+                item.renderer.color = ingredientColor;
+                item.renderer.sortingOrder = 50 + i;
+            }
+            if (item.collider != null)
+            {
+                item.collider.enabled = true;
+                CookingRuntimeVisuals2D.ApplySpriteFittedCollider(item.collider, sprite);
+            }
         }
     }
 
     private void CreateBowl()
     {
         CookingRuntimeVisuals2D.CreateBlock(
-            "BingsuBowlBack",
-            interactionRoot,
-            new Vector3(0f, -0.15f, 0f),
-            new Vector3(2.25f, 1.05f, 1f),
-            new Color(0.78f, 0.88f, 0.96f, 1f),
-            30
-        );
+            "BingsuBowlBack", interactionRoot, new Vector3(0f, -0.15f, 0f),
+            new Vector3(2.25f, 1.05f, 1f), new Color(0.78f, 0.88f, 0.96f, 1f), 30);
 
         CookingRuntimeVisuals2D.CreateBlock(
-            "BingsuBowlFront",
-            interactionRoot,
-            new Vector3(0f, -0.48f, 0f),
-            new Vector3(2.05f, 0.52f, 1f),
-            new Color(0.62f, 0.76f, 0.88f, 1f),
-            58
-        );
+            "BingsuBowlFront", interactionRoot, new Vector3(0f, -0.48f, 0f),
+            new Vector3(2.05f, 0.52f, 1f), new Color(0.62f, 0.76f, 0.88f, 1f), 58);
     }
 
-    private void CreatePlacementItem(
-        CookingIngredientEntry entry,
-        Vector3 startPosition,
-        Vector3 targetPosition,
-        int index)
+    private void CreatePlacementItem(int index)
     {
-        Sprite sprite =
-            CookingRuntimeVisuals2D.GetIngredientSprite(entry);
+        GameObject guideObject = new($"PlacementGuide_{index + 1}");
+        guideObject.transform.SetParent(interactionRoot, false);
 
-        if (sprite == null)
-            sprite = InventoryVisualUtility.WhiteSprite;
-
-        Color ingredientColor =
-            CookingRuntimeVisuals2D.GetIngredientColor(entry);
-
-        Vector3 sourceScale =
-            entry.ingredientScale != Vector3.zero
-                ? entry.ingredientScale
-                : Vector3.one;
-
-        Vector3 finalScale =
-            sourceScale *
-            Mathf.Max(0.01f, ingredientScaleMultiplier);
-
-        GameObject guideObject =
-            new($"PlacementGuide_{index + 1}_{entry.ingredientId}");
-
-        guideObject.transform.SetParent(
-            interactionRoot,
-            false
-        );
-
-        guideObject.transform.localPosition =
-            targetPosition;
-
-        guideObject.transform.localScale =
-            finalScale;
-
-        SpriteRenderer guideRenderer =
-            guideObject.AddComponent<SpriteRenderer>();
-
-        guideRenderer.sprite = sprite;
-
-        guideRenderer.color = new Color(
-            ingredientColor.r,
-            ingredientColor.g,
-            ingredientColor.b,
-            guideAlpha
-        );
-
+        SpriteRenderer guideRenderer = guideObject.AddComponent<SpriteRenderer>();
         guideRenderer.sortingOrder = 42;
+        guideObject.SetActive(false);
 
-        GameObject ingredientObject =
-            new($"PlacementIngredient_{index + 1}_{entry.ingredientId}");
+        GameObject ingredientObject = new($"PlacementIngredient_{index + 1}");
+        ingredientObject.transform.SetParent(interactionRoot, false);
 
-        ingredientObject.transform.SetParent(
-            interactionRoot,
-            false
-        );
+        SpriteRenderer renderer = ingredientObject.AddComponent<SpriteRenderer>();
 
-        ingredientObject.transform.localPosition =
-            startPosition;
-
-        ingredientObject.transform.localScale =
-            finalScale;
-
-        SpriteRenderer renderer =
-            ingredientObject.AddComponent<SpriteRenderer>();
-
-        renderer.sprite = sprite;
-        renderer.color = ingredientColor;
-        renderer.sortingOrder = 50 + index;
-
-        BoxCollider2D collider =
-            ingredientObject.AddComponent<BoxCollider2D>();
-
+        PolygonCollider2D collider = ingredientObject.AddComponent<PolygonCollider2D>();
         collider.isTrigger = true;
 
-        if (sprite != null)
+        ingredientObject.SetActive(false);
+
+        placementItems.Add(new PlacementItem
         {
-            collider.size = sprite.bounds.size;
-            collider.offset = sprite.bounds.center;
-        }
+            ingredient = null,
+            gameObject = ingredientObject,
+            transform = ingredientObject.transform,
+            renderer = renderer,
+            collider = collider,
 
-        PlacementItem item =
-            new PlacementItem
-            {
-                ingredient = entry,
-                transform = ingredientObject.transform,
-                renderer = renderer,
-                collider = collider,
+            guideObject = guideObject,
+            guide = guideObject.transform,
+            guideRenderer = guideRenderer,
 
-                guide = guideObject.transform,
-                guideRenderer = guideRenderer,
-
-                targetLocalPosition = targetPosition,
-                placed = false
-            };
-
-        placementItems.Add(item);
+            targetLocalPosition = Vector3.zero,
+            placed = false,
+            active = false
+        });
     }
 
-    private Vector3 CalculateTargetPosition(
-        int index,
-        int count)
+    private Vector3 CalculateTargetPosition(int index, int count)
     {
-        int columnCount =
-            Mathf.Clamp(
-                Mathf.CeilToInt(Mathf.Sqrt(count)),
-                1,
-                4
-            );
+        int columnCount = Mathf.Clamp(Mathf.CeilToInt(Mathf.Sqrt(count)), 1, 4);
+        int rowCount = Mathf.CeilToInt(count / (float)columnCount);
 
-        int rowCount =
-            Mathf.CeilToInt(
-                count / (float)columnCount
-            );
+        int column = index % columnCount;
+        int row = index / columnCount;
 
-        int column =
-            index % columnCount;
+        float totalWidth = (columnCount - 1) * targetHorizontalSpacing;
+        float x = column * targetHorizontalSpacing - totalWidth * 0.5f;
 
-        int row =
-            index / columnCount;
+        float totalHeight = (rowCount - 1) * targetVerticalSpacing;
+        float y = 0.28f + totalHeight * 0.5f - row * targetVerticalSpacing;
 
-        float totalWidth =
-            (columnCount - 1) *
-            targetHorizontalSpacing;
-
-        float x =
-            column *
-            targetHorizontalSpacing -
-            totalWidth *
-            0.5f;
-
-        float totalHeight =
-            (rowCount - 1) *
-            targetVerticalSpacing;
-
-        float y =
-            0.28f +
-            totalHeight *
-            0.5f -
-            row *
-            targetVerticalSpacing;
-
-        return new Vector3(
-            x,
-            y,
-            0f
-        );
+        return new Vector3(x, y, 0f);
     }
 
-    private Vector3 CalculateStartPosition(
-        int index,
-        int count)
+    private Vector3 CalculateStartPosition(int index, int count)
     {
         if (count <= 1)
-        {
-            return new Vector3(
-                0f,
-                startY,
-                0f
-            );
-        }
+            return new Vector3(0f, startY, 0f);
 
-        float normalized =
-            index /
-            (float)(count - 1);
+        float normalized = index / (float)(count - 1);
+        float x = Mathf.Lerp(-startHorizontalRange, startHorizontalRange, normalized);
+        float y = startY - (index % 2) * 0.18f;
 
-        float x =
-            Mathf.Lerp(
-                -startHorizontalRange,
-                startHorizontalRange,
-                normalized
-            );
-
-        float y =
-            startY -
-            (index % 2) * 0.18f;
-
-        return new Vector3(
-            x,
-            y,
-            0f
-        );
+        return new Vector3(x, y, 0f);
     }
 
-    private bool TryGetPointerWorldPosition(
-        out Vector2 worldPosition)
+    private bool TryGetPointerWorldPosition(out Vector2 worldPosition)
     {
+        if (inventoryView != null)
+            return inventoryView.TryGetLargeViewPointerWorldPosition(out worldPosition);
+
         worldPosition = default;
 
-        Camera camera =
-            targetCamera != null
-                ? targetCamera
-                : Camera.main;
-
+        Camera camera = targetCamera != null ? targetCamera : Camera.main;
         if (camera == null)
             return false;
 
-        Vector2 screenPosition =
-            GatheringInput.PointerScreenPosition();
-
-        float zDistance =
-            Mathf.Abs(
-                camera.transform.position.z -
-                transform.position.z
-            );
-
-        Vector3 result =
-            camera.ScreenToWorldPoint(
-                new Vector3(
-                    screenPosition.x,
-                    screenPosition.y,
-                    zDistance
-                )
-            );
-
-        worldPosition =
-            new Vector2(
-                result.x,
-                result.y
-            );
-
+        Vector2 screenPosition = GatheringInput.PointerScreenPosition();
+        float zDistance = Mathf.Abs(camera.transform.position.z - transform.position.z);
+        Vector3 result = camera.ScreenToWorldPoint(new Vector3(screenPosition.x, screenPosition.y, zDistance));
+        worldPosition = new Vector2(result.x, result.y);
         return true;
     }
 
     private void OnValidate()
     {
-        snapDistance =
-            Mathf.Max(
-                0.05f,
-                snapDistance
-            );
-
-        ingredientScaleMultiplier =
-            Mathf.Max(
-                0.01f,
-                ingredientScaleMultiplier
-            );
-
-        guideAlpha =
-            Mathf.Clamp01(
-                guideAlpha
-            );
-
-        targetHorizontalSpacing =
-            Mathf.Max(
-                0.1f,
-                targetHorizontalSpacing
-            );
-
-        targetVerticalSpacing =
-            Mathf.Max(
-                0.1f,
-                targetVerticalSpacing
-            );
-
-        startHorizontalRange =
-            Mathf.Max(
-                0.1f,
-                startHorizontalRange
-            );
+        maxPoolSize = Mathf.Max(1, maxPoolSize);
+        snapDistance = Mathf.Max(0.05f, snapDistance);
+        ingredientScaleMultiplier = Mathf.Max(0.01f, ingredientScaleMultiplier);
+        guideAlpha = Mathf.Clamp01(guideAlpha);
+        targetHorizontalSpacing = Mathf.Max(0.1f, targetHorizontalSpacing);
+        targetVerticalSpacing = Mathf.Max(0.1f, targetVerticalSpacing);
+        startHorizontalRange = Mathf.Max(0.1f, startHorizontalRange);
     }
 }

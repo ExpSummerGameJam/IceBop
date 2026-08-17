@@ -62,4 +62,11 @@ public sealed class AlternatingStrokeTracker
         currentStrokeDistance = 0f;
         completedStrokes = 0;
     }
+
+    /// <summary>Abandons the in-progress (not-yet-completed) stroke, e.g. when the pointer leaves the interactive area. Does not affect completed-stroke count.</summary>
+    public void AbandonCurrentStroke()
+    {
+        currentStrokeDirection = 0;
+        currentStrokeDistance = 0f;
+    }
 }

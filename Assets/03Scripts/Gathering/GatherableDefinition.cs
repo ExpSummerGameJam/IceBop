@@ -27,13 +27,24 @@ public sealed class IngredientDefinition
     public int ingredientId;
     public string ingredientKey;
     public string displayName;
+    public string categoryKey;
     public string preparationKind;
     public string iconKey;
     public float worldDropForce = 1.75f;
+    public string description;
 
     public float WorldDropForce => Mathf.Max(0f, worldDropForce);
 
     public IngredientPreparationKind PreparationKind => IngredientPreparationKindUtility.Parse(preparationKind, ingredientId);
+}
+
+[Serializable]
+public sealed class IngredientCategoryDefinition
+{
+    public string categoryKey;
+    public string displayName;
+    public int sortOrder;
+    public string description;
 }
 
 [Serializable]
@@ -48,6 +59,7 @@ public sealed class DishDefinition
     public string finishingStageKind;
     public int linkedAbilityId;
     public string linkedAbilityKey;
+    public string abilityEffect;
     public string memo;
 
     public bool HasCookingMethod => !string.IsNullOrWhiteSpace(cookingMethod);

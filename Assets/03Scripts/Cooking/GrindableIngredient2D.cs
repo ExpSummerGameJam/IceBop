@@ -17,7 +17,7 @@ public sealed class GrindableIngredient2D : IngredientPreparationBehaviour2D
     [SerializeField] private Vector2 groundLocalOffset = new(0f, -0.72f);
     [SerializeField] private Vector2 groundFinalScale = new(1.12f, 0.18f);
 
-    private BoxCollider2D ingredientCollider;
+    private PolygonCollider2D ingredientCollider;
     private Bounds sourceBounds;
     private float progress;
     private int currentStrokeDirection;
@@ -25,9 +25,39 @@ public sealed class GrindableIngredient2D : IngredientPreparationBehaviour2D
     private int grindStartSide;
     private float currentStrokeDistance;
 
+    public override Color? ProcessedColor => Color.Lerp(Color.white, groundColor, Mathf.Clamp01(progress) * 0.55f);
+
     public void BindGrindingTool(PreparationPointerTool2D newGrindingTool)
     {
         grindingTool = newGrindingTool;
+    }
+
+    /// <summary>Resets this instance for reuse against a (possibly different) ingredient sprite - call after re-skinning the SpriteRenderer for a new cook. Awake() only runs once per GameObject lifetime, so pooled reuse needs this instead.</summary>
+    public void Rearm()
+    {
+        ResetPreparationState();
+        ResolveComponents();
+
+        sourceBounds = ingredientRenderer != null && ingredientRenderer.sprite != null
+            ? ingredientRenderer.sprite.bounds
+            : new Bounds(Vector3.zero, new Vector3(3f, 2f, 0f));
+
+        progress = 0f;
+        currentStrokeDirection = 0;
+        lastCompletedStrokeDirection = 0;
+        grindStartSide = 0;
+        currentStrokeDistance = 0f;
+
+        if (ingredientRenderer != null)
+        {
+            ingredientRenderer.enabled = true;
+            ingredientRenderer.color = Color.white;
+        }
+
+        EnsureVisibleMask();
+        EnsureGroundVisual();
+        EnsurePowderParticles();
+        ApplyProgressVisuals();
     }
 
     private void Awake()
@@ -279,7 +309,7 @@ public sealed class GrindableIngredient2D : IngredientPreparationBehaviour2D
             ingredientRenderer = GetComponent<SpriteRenderer>();
 
         if (ingredientCollider == null)
-            ingredientCollider = GetComponent<BoxCollider2D>();
+            ingredientCollider = GetComponent<PolygonCollider2D>();
     }
 
     private void OnValidate()

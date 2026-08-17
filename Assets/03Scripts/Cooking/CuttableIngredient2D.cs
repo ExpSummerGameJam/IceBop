@@ -45,9 +45,9 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
     [SerializeField] private Color pendingLineColor = new(1f, 1f, 1f, 0.85f);
     [SerializeField] private Color filledLineColor = new(0.1f, 0.95f, 0.55f, 1f);
     [SerializeField] private bool hideGuidesWhenCompleted = true;
-    [SerializeField] private float cutPieceGravityScale = 1f;
-    [SerializeField] private float cutPieceImpulse = 1.2f;
-    [SerializeField] private float cutPieceTorque = 1.8f;
+    [SerializeField] private float cutPieceGravityScale = 0.8f;
+    [SerializeField] private float cutPieceImpulse = 0.5f;
+    [SerializeField] private float cutPieceTorque = 0.6f;
 
     private readonly List<List<SpriteRenderer>> guideDots = new();
     private readonly List<GameObject> generatedPieces = new();
@@ -58,9 +58,14 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
     private float mainSegmentMin;
     private float mainSegmentMax;
     private int cutPieceIndex;
-    private BoxCollider2D rootCollider;
+    private PolygonCollider2D rootCollider;
 
     public IReadOnlyList<CutLine> CutLines => cutLines;
+
+    public override Sprite ProcessedSprite =>
+        remainingRenderer != null && remainingRenderer.enabled && remainingRenderer.sprite != null
+            ? remainingRenderer.sprite
+            : sourceSprite;
 
     public void BindKnife(PreparationKnifeTool2D newKnife)
     {
@@ -70,6 +75,11 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
     public void RebuildGuides()
     {
         ResolveComponents();
+
+        // Force the default cut lines to be recomputed from whatever sprite is currently on
+        // ingredientRenderer - this instance may be a pooled slot being reused for a different
+        // ingredient than last time, so the previous cook's cut-line geometry can't be kept.
+        cutLines = Array.Empty<CutLine>();
         EnsureDefaultCutLines();
         InitializeSourceSprite();
         ResetCutLineProgress();
@@ -97,6 +107,16 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
         ResetMainSegment();
         BuildGuideVisuals();
         UpdateAllGuideColors();
+    }
+
+    // Cut-off debris pieces are parented to this slot's PARENT (IngredientSlots), not to this
+    // slot itself, so CookingFlowController2D deactivating just this slot's GameObject at the
+    // end of the prep stage doesn't touch them - left uncleaned, they'd keep sitting around
+    // (and colliding with) whatever the finishing stage spawns next. Clear them here instead,
+    // since OnDisable reliably fires when the slot is SetActive(false).
+    private void OnDisable()
+    {
+        ClearGeneratedPieces();
     }
 
     private void Update()
@@ -280,6 +300,77 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
 
         if (hideGuidesWhenCompleted && guideRoot != null)
             guideRoot.gameObject.SetActive(false);
+
+        ApplyPhysicsToRemainingPiece();
+    }
+
+    // Once every cut is done, the leftover center piece should scatter/tumble like the
+    // already-sliced-off debris pieces do, instead of sitting perfectly still.
+    private void ApplyPhysicsToRemainingPiece()
+    {
+        SpriteRenderer target = remainingRenderer != null && remainingRenderer.enabled
+            ? remainingRenderer
+            : ingredientRenderer;
+
+        if (target == null || target.sprite == null)
+            return;
+
+        GameObject pieceObject = target.gameObject;
+
+        PolygonCollider2D pieceCollider = pieceObject.GetComponent<PolygonCollider2D>();
+        if (pieceCollider == null)
+            pieceCollider = pieceObject.AddComponent<PolygonCollider2D>();
+
+        CookingRuntimeVisuals2D.ApplySpriteFittedCollider(pieceCollider, target.sprite);
+
+        Rigidbody2D rigidbody = pieceObject.GetComponent<Rigidbody2D>();
+        if (rigidbody == null)
+            rigidbody = pieceObject.AddComponent<Rigidbody2D>();
+
+        rigidbody.bodyType = RigidbodyType2D.Dynamic;
+        rigidbody.gravityScale = cutPieceGravityScale;
+        rigidbody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        rigidbody.linearDamping = 0.6f;
+        rigidbody.angularDamping = 0.5f;
+
+        Vector2 impulseDirection = new(UnityEngine.Random.Range(-0.4f, 0.4f), 0.5f);
+        rigidbody.AddForce(impulseDirection.normalized * cutPieceImpulse, ForceMode2D.Impulse);
+        rigidbody.AddTorque(UnityEngine.Random.Range(-cutPieceTorque, cutPieceTorque), ForceMode2D.Impulse);
+
+        IgnoreCollisionsWithKnifeAndPieces(pieceCollider);
+    }
+
+    // Cut-off pieces (and the final remaining piece) shouldn't physically bump into each
+    // other or the knife - they're purely a visual "scatter" effect, not a puzzle about
+    // pieces jostling each other, so every solid piece collider ignores every other one.
+    private void IgnoreCollisionsWithKnifeAndPieces(Collider2D newCollider)
+    {
+        if (newCollider == null)
+            return;
+
+        if (knife != null)
+        {
+            Collider2D knifeCollider = knife.GetComponent<Collider2D>();
+            if (knifeCollider != null)
+                Physics2D.IgnoreCollision(newCollider, knifeCollider, true);
+        }
+
+        foreach (GameObject piece in generatedPieces)
+        {
+            if (piece == null)
+                continue;
+
+            Collider2D pieceCollider = piece.GetComponent<Collider2D>();
+            if (pieceCollider != null && pieceCollider != newCollider)
+                Physics2D.IgnoreCollision(newCollider, pieceCollider, true);
+        }
+
+        if (remainingRenderer != null)
+        {
+            Collider2D remainingCollider = remainingRenderer.GetComponent<Collider2D>();
+            if (remainingCollider != null && remainingCollider != newCollider)
+                Physics2D.IgnoreCollision(newCollider, remainingCollider, true);
+        }
     }
 
     private void CreatePhysicsCutPiece(float pieceMin, float pieceMax)
@@ -301,16 +392,15 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
         renderer.sortingLayerID = ingredientRenderer.sortingLayerID;
         renderer.sortingOrder = ingredientRenderer.sortingOrder + 1;
 
-        BoxCollider2D pieceCollider = piece.AddComponent<BoxCollider2D>();
-        pieceCollider.size = pieceSprite.bounds.size;
-        pieceCollider.offset = pieceSprite.bounds.center;
+        PolygonCollider2D pieceCollider = piece.AddComponent<PolygonCollider2D>();
+        CookingRuntimeVisuals2D.ApplySpriteFittedCollider(pieceCollider, pieceSprite);
 
         Rigidbody2D rigidbody = piece.AddComponent<Rigidbody2D>();
         rigidbody.bodyType = RigidbodyType2D.Dynamic;
         rigidbody.gravityScale = cutPieceGravityScale;
         rigidbody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-        rigidbody.linearDamping = 0.15f;
-        rigidbody.angularDamping = 0.1f;
+        rigidbody.linearDamping = 0.6f;
+        rigidbody.angularDamping = 0.5f;
 
         Vector2 impulseDirection = verticalCuts
             ? new Vector2(Mathf.Sign(localCenter.x), 0.45f).normalized
@@ -321,6 +411,8 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
 
         rigidbody.AddForce(impulseDirection * cutPieceImpulse, ForceMode2D.Impulse);
         rigidbody.AddTorque(UnityEngine.Random.Range(-cutPieceTorque, cutPieceTorque), ForceMode2D.Impulse);
+
+        IgnoreCollisionsWithKnifeAndPieces(pieceCollider);
         generatedPieces.Add(piece);
     }
 
@@ -473,10 +565,23 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
             return;
 
         Vector3 localCenter = GetSegmentLocalCenter(mainSegmentMin, mainSegmentMax);
-        rootCollider.offset = localCenter;
-        rootCollider.size = verticalCuts
+        Vector2 size = verticalCuts
             ? new Vector2(Mathf.Max(0.01f, mainSegmentMax - mainSegmentMin), sourceBounds.size.y)
             : new Vector2(sourceBounds.size.x, Mathf.Max(0.01f, mainSegmentMax - mainSegmentMin));
+
+        // The remaining segment shrinks as it's cut, so this stays a plain rectangle around
+        // the current remaining range rather than the sprite's authored physics shape (which
+        // only describes the original, uncut ingredient).
+        Vector2 half = size * 0.5f;
+        Vector2 center = localCenter;
+        rootCollider.pathCount = 1;
+        rootCollider.SetPath(0, new[]
+        {
+            new Vector2(center.x - half.x, center.y - half.y),
+            new Vector2(center.x + half.x, center.y - half.y),
+            new Vector2(center.x + half.x, center.y + half.y),
+            new Vector2(center.x - half.x, center.y + half.y),
+        });
     }
 
     private bool AreAllLinesCompleted()
@@ -622,7 +727,7 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
             ingredientRenderer = GetComponent<SpriteRenderer>();
 
         if (rootCollider == null)
-            rootCollider = GetComponent<BoxCollider2D>();
+            rootCollider = GetComponent<PolygonCollider2D>();
     }
 
     private void ClearGeneratedPieces()

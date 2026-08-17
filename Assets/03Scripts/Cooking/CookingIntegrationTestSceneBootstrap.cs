@@ -3,7 +3,6 @@ using UnityEngine;
 public sealed class CookingIntegrationTestSceneBootstrap : MonoBehaviour
 {
     [SerializeField] private PhysicalInventory2D inventory;
-    [SerializeField] private CookingStageArea2D cookingStageArea;
     [SerializeField] private CookingFlowController2D cookingFlowController;
     [SerializeField] private WorldCookingArea2D worldCookingArea;
 
@@ -38,7 +37,6 @@ public sealed class CookingIntegrationTestSceneBootstrap : MonoBehaviour
         if (view != null)
             view.SetLargeViewOpen(openInventoryOnStart);
 
-        RequireCookingStageArea();
         EnsureCookingFlowController();
         CreateSceneLabel(camera);
     }
@@ -165,15 +163,6 @@ public sealed class CookingIntegrationTestSceneBootstrap : MonoBehaviour
             Debug.LogError("CookingIntegrationTestScene needs a placed PhysicalInventory2D prefab instance.");
 
         return inventory;
-    }
-
-    private void RequireCookingStageArea()
-    {
-        if (cookingStageArea == null)
-            cookingStageArea = FindFirstObjectByType<CookingStageArea2D>();
-
-        if (cookingStageArea == null)
-            Debug.LogError("CookingIntegrationTestScene needs a placed CookingStageArea2D object.");
     }
 
     private void SeedInventory(PhysicalInventory2D inventory, Vector3 overflowWorldPosition)

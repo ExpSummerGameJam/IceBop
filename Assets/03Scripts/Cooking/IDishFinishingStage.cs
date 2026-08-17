@@ -15,7 +15,7 @@ public interface IDishFinishingStage
     /// <summary>Raised once the completed-dish presentation animation has finished playing.</summary>
     event Action ResultPresented;
 
-    void Configure(Camera camera, IReadOnlyList<CookingIngredientEntry> ingredients, DishDefinition dish, CookingMethodToolVisual2D toolVisual);
+    void Configure(Camera camera, IReadOnlyList<CookingIngredientEntry> ingredients, DishDefinition dish, CookingMethodToolVisual2D toolVisual, InventoryView2D inventoryView);
 
     void PlayResultPresentation();
 }

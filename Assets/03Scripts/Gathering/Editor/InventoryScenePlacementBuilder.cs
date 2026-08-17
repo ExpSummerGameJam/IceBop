@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public static class InventoryScenePlacementBuilder
 {
     private const string InventoryPrefabPath = "Assets/01Resources/Prefabs/Gathering/PhysicalInventory2D.prefab";
+    private const string CookingStageRigPrefabPath = "Assets/01Resources/Prefabs/Cooking/CookingStageRig.prefab";
     private const string WhiteSquarePath = "Assets/01Resources/Sprites/Generated/WhiteSquare.png";
     private const string CookingIntegrationScenePath = "Assets/00Scenes/CookingIntegrationTestScene.unity";
     private const string BagInventoryScenePath = "Assets/00Scenes/BagInventoryTestScene.unity";
@@ -174,28 +175,37 @@ public static class InventoryScenePlacementBuilder
         if (controller == null)
             controller = new GameObject("CookingFlowController").AddComponent<CookingFlowController2D>();
 
-        CookingStageArea2D stageArea = Object.FindFirstObjectByType<CookingStageArea2D>();
-        if (stageArea == null)
+        Transform stageRig = controller.transform.Find("CookingStageRig");
+        if (stageRig == null)
         {
-            GameObject areaObject = new("CookingStageArea");
-            areaObject.transform.position = new Vector3(0f, 0.24f, 0f);
-            areaObject.transform.localScale = new Vector3(3.55f, 2.18f, 1f);
-            stageArea = areaObject.AddComponent<CookingStageArea2D>();
+            GameObject rigPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(CookingStageRigPrefabPath);
+            if (rigPrefab != null)
+            {
+                GameObject rigInstance = (GameObject)PrefabUtility.InstantiatePrefab(rigPrefab, controller.transform);
+                rigInstance.name = "CookingStageRig";
+                rigInstance.transform.localPosition = Vector3.zero;
+                rigInstance.transform.localRotation = Quaternion.identity;
+                rigInstance.transform.localScale = Vector3.one;
+                stageRig = rigInstance.transform;
+            }
+            else
+            {
+                Debug.LogWarning(
+                    $"InventoryScenePlacementBuilder: CookingStageRig prefab not found at {CookingStageRigPrefabPath}. " +
+                    "Run IceBop/Build Cooking Stage Rig first.");
+            }
         }
 
-        SpriteRenderer renderer = GetOrAddComponent<SpriteRenderer>(stageArea.gameObject);
-        renderer.enabled = true;
-        renderer.sprite = blockSprite;
-        renderer.color = new Color(0.24f, 0.52f, 0.72f, 0.18f);
-        renderer.sortingOrder = -6;
-
-        BoxCollider2D collider = GetOrAddComponent<BoxCollider2D>(stageArea.gameObject);
-        collider.isTrigger = true;
-        collider.size = Vector2.one;
-
-        SerializedObject stageAreaObject = new(stageArea);
-        stageAreaObject.FindProperty("cookingFlowController").objectReferenceValue = controller;
-        stageAreaObject.ApplyModifiedPropertiesWithoutUndo();
+        SerializedObject controllerObject = new(controller);
+        controllerObject.FindProperty("cookingStation").objectReferenceValue = inventory != null
+            ? inventory.GetComponent<InventoryCookingStation2D>()
+            : null;
+        controllerObject.FindProperty("inventoryView").objectReferenceValue = inventory != null
+            ? inventory.GetComponent<InventoryView2D>()
+            : null;
+        if (stageRig != null)
+            controllerObject.FindProperty("stageRig").objectReferenceValue = stageRig;
+        controllerObject.ApplyModifiedPropertiesWithoutUndo();
 
         WorldCookingArea2D worldCookingArea = Object.FindFirstObjectByType<WorldCookingArea2D>();
         if (worldCookingArea == null)
@@ -230,7 +240,6 @@ public static class InventoryScenePlacementBuilder
 
         SerializedObject bootstrapObject = new(bootstrap);
         bootstrapObject.FindProperty("inventory").objectReferenceValue = inventory;
-        bootstrapObject.FindProperty("cookingStageArea").objectReferenceValue = stageArea;
         bootstrapObject.FindProperty("cookingFlowController").objectReferenceValue = controller;
         bootstrapObject.FindProperty("worldCookingArea").objectReferenceValue = worldCookingArea;
         bootstrapObject.ApplyModifiedPropertiesWithoutUndo();
@@ -376,7 +385,6 @@ public static class InventoryScenePlacementBuilder
 
         ConfigureBlock(FindOrCreateChild(pot, "PotShadow"), new Vector3(0f, -0.09f, 0f), new Vector3(1.02f, 0.44f, 1f), blockSprite, new Color(0.16f, 0.15f, 0.14f, 1f), 34);
         ConfigureBlock(FindOrCreateChild(pot, "PotBody"), Vector3.zero, new Vector3(0.92f, 0.56f, 1f), blockSprite, new Color(0.26f, 0.29f, 0.31f, 1f), 35);
-        ConfigureBlock(FindOrCreateChild(pot, "PotLiquid"), new Vector3(0f, 0.09f, 0f), new Vector3(0.74f, 0.20f, 1f), blockSprite, new Color(0.66f, 0.42f, 0.20f, 1f), 36);
         ConfigureBlock(FindOrCreateChild(pot, "PotRim"), new Vector3(0f, 0.28f, 0f), new Vector3(1.04f, 0.16f, 1f), blockSprite, new Color(0.46f, 0.49f, 0.51f, 1f), 37);
 
         Transform button = FindOrCreateChild(root, "CookButton");
@@ -387,6 +395,10 @@ public static class InventoryScenePlacementBuilder
 
         ConfigureBlock(FindOrCreateChild(button, "ButtonBody"), Vector3.zero, new Vector3(0.86f, 0.28f, 1f), blockSprite, new Color(0.25f, 0.45f, 0.34f, 1f), 38);
         ConfigureText(FindOrCreateChild(button, "ButtonLabel"), "Cook", new Vector3(0f, -0.012f, 0f), 32, 0.032f, new Color(0.92f, 0.96f, 0.92f, 1f), 39);
+
+        // The brown liquid block is the stir minigame's own visual (CookingMixingPot2D builds
+        // its MixLiquid at runtime) - the idle prep pot should just be an empty pot.
+        DestroyChildIfExists(pot, "PotLiquid");
 
         DestroyChildIfExists(root, "QueuedIngredients");
         DestroyChildIfExists(root, "CountLabel");

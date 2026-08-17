@@ -22,9 +22,15 @@ public sealed class InventoryCookingStation2D : MonoBehaviour
     private SpriteRenderer cookButtonRenderer;
     private bool isCooking;
     private bool loggedMissingPlacedVisuals;
+    private bool hasPickedUpItemSinceViewOpened;
 
     public event Action<CookingCraftResult> CookingCompleted;
     public bool IsCooking => isCooking;
+    public IReadOnlyCollection<InventoryItem2D> ItemsOnPot => itemsOnPot;
+    public bool HasPrepPot => potRoot != null;
+    public Vector3 PrepPotCenter => potCollider != null
+        ? (Vector3)potCollider.bounds.center
+        : (potRoot != null ? potRoot.position : Vector3.zero);
     public bool IsPlayerInCookingArea
     {
         get
@@ -106,6 +112,7 @@ public sealed class InventoryCookingStation2D : MonoBehaviour
     {
         ResolveReferences();
         ResolveCookingArea();
+        UpdatePickedUpItemState();
         if (!EnsureVisuals())
             return;
 
@@ -255,12 +262,42 @@ public sealed class InventoryCookingStation2D : MonoBehaviour
             UpdateCookButtonVisual();
     }
 
+    // The pot shouldn't just pop up whenever the large inventory view is open - it should
+    // only appear once the player has actually clicked an ingredient to pick it up, and then
+    // stay available for the rest of that view session. Detected here directly rather than by
+    // reading InventoryDragController2D's drag state, which stays false whenever that
+    // controller hasn't been bound to the view.
+    private void UpdatePickedUpItemState()
+    {
+        if (inventoryView == null || !inventoryView.IsLargeViewOpen)
+        {
+            hasPickedUpItemSinceViewOpened = false;
+            return;
+        }
+
+        if (hasPickedUpItemSinceViewOpened || !GatheringInput.WasPrimaryPressed())
+            return;
+
+        if (!TryGetPointerWorldPosition(out Vector2 worldPosition))
+            return;
+
+        foreach (Collider2D hit in Physics2D.OverlapPointAll(worldPosition))
+        {
+            if (hit != null && hit.GetComponentInParent<InventoryItem2D>() != null)
+            {
+                hasPickedUpItemSinceViewOpened = true;
+                return;
+            }
+        }
+    }
+
     private void UpdateVisibility()
     {
         if (visualRoot == null)
             return;
 
-        bool visible = inventoryView != null && inventoryView.IsLargeViewOpen && !isCooking && CanUseCookingStation;
+        bool visible = inventoryView != null && inventoryView.IsLargeViewOpen && !isCooking && CanUseCookingStation &&
+                       (hasPickedUpItemSinceViewOpened || itemsOnPot.Count > 0);
         if (visualRoot.gameObject.activeSelf != visible)
             visualRoot.gameObject.SetActive(visible);
     }

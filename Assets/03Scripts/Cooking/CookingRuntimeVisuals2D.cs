@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,16 +9,125 @@ using UnityEditor;
 
 public static class CookingRuntimeVisuals2D
 {
+    private static readonly List<Vector2> physicsShapeBuffer = new();
+
+    // Matches InventoryItem2D's collider shape: a BoxCollider2D sized off sprite.bounds
+    // includes the sprite's transparent padding, so it's visibly bigger than the art and
+    // ingredients bump into each other/tools before they actually touch. Use the sprite's
+    // authored physics shape instead (falling back to a bounds rectangle only if the sprite
+    // has none, e.g. a runtime-sliced cut piece).
+    public static void ApplySpriteFittedCollider(PolygonCollider2D collider, Sprite sprite)
+    {
+        if (collider == null)
+            return;
+
+        if (sprite == null || sprite.bounds.size.x <= 0f || sprite.bounds.size.y <= 0f)
+        {
+            ApplyBoundsRectangleShape(collider, new Bounds(Vector3.zero, new Vector3(0.55f, 0.55f, 0f)));
+            return;
+        }
+
+        int shapeCount = sprite.GetPhysicsShapeCount();
+        if (shapeCount <= 0)
+        {
+            ApplyBoundsRectangleShape(collider, sprite.bounds);
+            return;
+        }
+
+        collider.pathCount = shapeCount;
+        for (int i = 0; i < shapeCount; i++)
+        {
+            sprite.GetPhysicsShape(i, physicsShapeBuffer);
+            collider.SetPath(i, physicsShapeBuffer);
+        }
+    }
+
+    private static void ApplyBoundsRectangleShape(PolygonCollider2D collider, Bounds bounds)
+    {
+        Vector2 min = bounds.min;
+        Vector2 max = bounds.max;
+
+        collider.pathCount = 1;
+        collider.SetPath(0, new[]
+        {
+            new Vector2(min.x, min.y),
+            new Vector2(max.x, min.y),
+            new Vector2(max.x, max.y),
+            new Vector2(min.x, max.y),
+        });
+    }
+
+    /// <summary>
+    /// Drops each ingredient bit in from above, one at a time (not all appearing at once
+    /// spread out), as a real Rigidbody2D so it falls/tumbles under physics instead of a
+    /// scripted position lerp - and stays physics-driven afterward (matches how cut-off
+    /// ingredient pieces already behave). Lands on whatever solid geometry the caller's
+    /// container already has (e.g. the pot/basket rim) - no separate invisible floor.
+    /// </summary>
+    public static IEnumerator DropInIngredientsPhysics(
+        IReadOnlyList<SpriteRenderer> renderers,
+        IReadOnlyList<Vector3> spawnLocalPositions,
+        float restScale,
+        float gravityScale = 1.2f,
+        float gapBetweenDrops = 0.2f)
+    {
+        List<Collider2D> spawnedColliders = new(renderers.Count);
+
+        for (int i = 0; i < renderers.Count; i++)
+        {
+            SpriteRenderer renderer = renderers[i];
+            if (renderer == null)
+                continue;
+
+            Transform bitTransform = renderer.transform;
+            bitTransform.localPosition = spawnLocalPositions[i];
+            bitTransform.localScale = Vector3.one * restScale;
+            renderer.gameObject.SetActive(true);
+
+            PolygonCollider2D collider = renderer.GetComponent<PolygonCollider2D>();
+            if (collider == null)
+                collider = renderer.gameObject.AddComponent<PolygonCollider2D>();
+
+            ApplySpriteFittedCollider(collider, renderer.sprite);
+
+            foreach (Collider2D other in spawnedColliders)
+                Physics2D.IgnoreCollision(collider, other, true);
+            spawnedColliders.Add(collider);
+
+            Rigidbody2D rigidbody = renderer.GetComponent<Rigidbody2D>();
+            if (rigidbody == null)
+                rigidbody = renderer.gameObject.AddComponent<Rigidbody2D>();
+
+            rigidbody.bodyType = RigidbodyType2D.Dynamic;
+            rigidbody.gravityScale = gravityScale;
+            rigidbody.linearVelocity = Vector2.zero;
+            rigidbody.angularVelocity = 0f;
+            rigidbody.linearDamping = 1.2f;
+            rigidbody.angularDamping = 0.8f;
+            rigidbody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
+            rigidbody.AddTorque(UnityEngine.Random.Range(-30f, 30f), ForceMode2D.Impulse);
+            rigidbody.AddForce(new Vector2(UnityEngine.Random.Range(-0.08f, 0.08f), 0f), ForceMode2D.Impulse);
+
+            if (i < renderers.Count - 1)
+                yield return new WaitForSeconds(gapBetweenDrops);
+        }
+    }
+
     private const string HandkerchiefResourcePath = "Atlas/Pot/handkerchief";
     private const string CutboardResourcePath = "Atlas/Pot/cutboard";
     private const string Knife1ResourcePath = "Atlas/Pot/knife1";
     private const string Knife2ResourcePath = "Atlas/Pot/knife2";
+    private const string StrawberryIceResourcePath = "Atlas/Ingredient/ingredient_ice_strawberry";
+    private const string SaltyIceResourcePath = "Atlas/Ingredient/ingredient_salty_ice";
 
 #if UNITY_EDITOR
     private const string HandkerchiefAssetPath = "Assets/01Resources/Atlas/Pot/handkerchief.png";
     private const string CutboardAssetPath = "Assets/01Resources/Atlas/Pot/cutboard.png";
     private const string Knife1AssetPath = "Assets/01Resources/Atlas/Pot/knife1.png";
     private const string Knife2AssetPath = "Assets/01Resources/Atlas/Pot/knife2.png";
+    private const string StrawberryIceAssetPath = "Assets/01Resources/Atlas/Ingredient/ingredient_ice_strawberry.png";
+    private const string SaltyIceAssetPath = "Assets/01Resources/Atlas/Ingredient/ingredient_salty_ice.png";
 #endif
 
     private static Sprite knifeSprite;
@@ -26,6 +137,8 @@ public static class CookingRuntimeVisuals2D
     private static Sprite cutboardSprite;
     private static Sprite grinderSprite;
     private static Sprite ladleSprite;
+    private static Sprite strawberryIceSprite;
+    private static Sprite saltyIceSprite;
 
     public static Sprite GetIngredientSprite(CookingIngredientEntry entry)
     {
@@ -124,6 +237,38 @@ public static class CookingRuntimeVisuals2D
         return cutboardSprite;
     }
 
+    public static Sprite GetStrawberryIceSprite()
+    {
+        if (strawberryIceSprite == null)
+        {
+            strawberryIceSprite = LoadSprite(StrawberryIceResourcePath,
+#if UNITY_EDITOR
+                StrawberryIceAssetPath,
+#else
+                null,
+#endif
+                "ingredient_ice_strawberry") ?? InventoryVisualUtility.WhiteSprite;
+        }
+
+        return strawberryIceSprite;
+    }
+
+    public static Sprite GetSaltyIceSprite()
+    {
+        if (saltyIceSprite == null)
+        {
+            saltyIceSprite = LoadSprite(SaltyIceResourcePath,
+#if UNITY_EDITOR
+                SaltyIceAssetPath,
+#else
+                null,
+#endif
+                "ingredient_salty_ice") ?? InventoryVisualUtility.WhiteSprite;
+        }
+
+        return saltyIceSprite;
+    }
+
     public static Sprite GetGrinderSprite()
     {
         if (grinderSprite == null)
@@ -140,14 +285,18 @@ public static class CookingRuntimeVisuals2D
         return ladleSprite;
     }
 
+    private static readonly Dictionary<int, Sprite> dishSpriteCacheById = new();
+    private static readonly Dictionary<int, Sprite> dishSpriteCacheByColor = new();
+
     public static Sprite GetDishSprite(DishDefinition dish, IReadOnlyList<CookingIngredientEntry> ingredients)
     {
-        if (dish != null && !string.IsNullOrWhiteSpace(dish.dishSpriteResourcePath))
-        {
-            Sprite loaded = InventoryVisualUtility.GetFoodSprite(dish.dishSpriteResourcePath);
-            if (loaded != null)
-                return loaded;
-        }
+        Sprite dishSprite = GetDishSpriteFromFoodAtlas(dish);
+        if (dishSprite != null)
+            return dishSprite;
+
+        int dishId = dish != null ? dish.dishId : 0;
+        if (dishId > 0 && dishSpriteCacheById.TryGetValue(dishId, out Sprite cachedById))
+            return cachedById;
 
         Color color = new(0.95f, 0.78f, 0.36f, 1f);
         if (ingredients != null && ingredients.Count > 0)
@@ -161,7 +310,74 @@ public static class CookingRuntimeVisuals2D
             color = Color.Lerp(color, Color.white, 0.2f);
         }
 
-        return CreateDishSprite("RuntimeDish", color);
+        // No stable dish id (e.g. an unrecognized "mixed dish") - cache by color so repeated
+        // cooks of the same ingredient combo reuse one runtime sprite instead of leaking a new
+        // Texture2D/Sprite (HideAndDontSave) every single cook now that stages are pooled/reused.
+        int colorKey = ColorToKey(color);
+        if (dishId <= 0 && dishSpriteCacheByColor.TryGetValue(colorKey, out Sprite cachedByColor))
+            return cachedByColor;
+
+        Sprite sprite = CreateDishSprite("RuntimeDish", color);
+
+        if (dishId > 0)
+            dishSpriteCacheById[dishId] = sprite;
+        else
+            dishSpriteCacheByColor[colorKey] = sprite;
+
+        return sprite;
+    }
+
+    // SpriteAtlas.GetSprite() (what InventoryVisualUtility.GetFoodSprite uses) only returns
+    // sprites once the atlas has actually been packed, which isn't reliable in-Editor - so
+    // fall back to loading the individual Food_* file directly out of Atlas/Food, the same
+    // robust Resources/AssetDatabase pattern already used for the knife/cloth/cutboard sprites.
+    private static Sprite GetDishSpriteFromFoodAtlas(DishDefinition dish)
+    {
+        if (dish == null)
+            return null;
+
+        if (!string.IsNullOrWhiteSpace(dish.dishSpriteResourcePath))
+        {
+            Sprite loaded = InventoryVisualUtility.GetFoodSprite(dish.dishSpriteResourcePath);
+            if (loaded != null)
+                return loaded;
+
+            Sprite direct = LoadDishFileSprite(dish.dishSpriteResourcePath);
+            if (direct != null)
+                return direct;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dish.dishKey))
+        {
+            string fileName = dish.dishKey.StartsWith("Food_", StringComparison.OrdinalIgnoreCase)
+                ? dish.dishKey
+                : $"Food_{dish.dishKey}";
+
+            Sprite direct = LoadDishFileSprite(fileName);
+            if (direct != null)
+                return direct;
+        }
+
+        return null;
+    }
+
+    private static Sprite LoadDishFileSprite(string fileName)
+    {
+        return LoadSprite($"Atlas/Food/{fileName}",
+#if UNITY_EDITOR
+            $"Assets/01Resources/Atlas/Food/{fileName}.png",
+#else
+            null,
+#endif
+            fileName);
+    }
+
+    private static int ColorToKey(Color color)
+    {
+        int r = Mathf.RoundToInt(color.r * 255f);
+        int g = Mathf.RoundToInt(color.g * 255f);
+        int b = Mathf.RoundToInt(color.b * 255f);
+        return (r << 16) | (g << 8) | b;
     }
 
     public static GameObject CreateBoard(Vector3 position, Vector2 size, int sortingOrder)
