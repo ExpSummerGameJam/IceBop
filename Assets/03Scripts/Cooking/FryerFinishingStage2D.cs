@@ -371,7 +371,7 @@ public sealed class FryerFinishingStage2D : MonoBehaviour, IDishFinishingStage
 
             // Spawn above the basket, slightly randomized so pieces dropped in sequence don't
             // spawn stacked exactly on top of each other - physics then decides where each lands.
-            spawnPositions.Add(new Vector3(UnityEngine.Random.Range(-0.3f, 0.3f), 1.1f + i * 0.1f, 0f));
+            spawnPositions.Add(new Vector3(UnityEngine.Random.Range(-0.3f, 0.3f), 0.45f + i * 0.05f, 0f));
 
             SpriteRenderer renderer = bit.AddComponent<SpriteRenderer>();
             renderer.sprite = CookingRuntimeVisuals2D.GetIngredientSprite(entry);

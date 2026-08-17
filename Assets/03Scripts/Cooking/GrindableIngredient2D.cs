@@ -36,6 +36,11 @@ public sealed class GrindableIngredient2D : IngredientPreparationBehaviour2D
     public void Rearm()
     {
         ResetPreparationState();
+
+        // Fitting the slot's collider to this cook's sprite can replace the component, and in
+        // play mode the old one only reads as null at end of frame - so drop the cached
+        // reference and let ResolveComponents pick up the current one.
+        ingredientCollider = null;
         ResolveComponents();
 
         sourceBounds = ingredientRenderer != null && ingredientRenderer.sprite != null

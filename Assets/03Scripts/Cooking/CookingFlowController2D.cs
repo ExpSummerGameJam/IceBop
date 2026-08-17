@@ -137,6 +137,15 @@ public sealed class CookingFlowController2D : MonoBehaviour
 
         yield return new WaitUntil(() => dishPresented);
 
+        // Hold on the finished dish until the player clicks it away. The completion callback
+        // is what lets the station go idle again (and its pot reappear), so firing it right
+        // after the presentation would snap straight into "ready for the next cook" while the
+        // player is still looking at what they just made.
+        yield return null;
+        yield return new WaitUntil(GatheringInput.WasPrimaryPressed);
+
+        DeactivateActiveStage();
+
         CookingCraftResult result = CookingCraftResult.Create(dish, ingredients, cookingMethod);
         CookingSystem.NotifyDishCrafted(result);
         completionCallback?.Invoke(result);
@@ -220,11 +229,12 @@ public sealed class CookingFlowController2D : MonoBehaviour
             renderer.enabled = true;
         }
 
-        PolygonCollider2D collider = slot.GetComponent<PolygonCollider2D>();
+        PolygonCollider2D collider = CookingRuntimeVisuals2D.ApplySpriteFittedCollider(
+            slot.gameObject, renderer != null ? renderer.sprite : null);
         if (collider != null)
         {
             collider.enabled = true;
-            CookingRuntimeVisuals2D.ApplySpriteFittedCollider(collider, renderer != null ? renderer.sprite : null);
+            collider.isTrigger = true;
         }
 
         return slot.gameObject;

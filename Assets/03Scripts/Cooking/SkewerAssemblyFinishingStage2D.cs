@@ -320,10 +320,11 @@ public sealed class SkewerAssemblyFinishingStage2D : MonoBehaviour, IDishFinishi
                 piece.renderer.sortingOrder = 50 + i;
             }
 
+            piece.collider = CookingRuntimeVisuals2D.ApplySpriteFittedCollider(piece.transform.gameObject, sprite);
             if (piece.collider != null)
             {
                 piece.collider.enabled = true;
-                CookingRuntimeVisuals2D.ApplySpriteFittedCollider(piece.collider, sprite);
+                piece.collider.isTrigger = true;
             }
         }
     }

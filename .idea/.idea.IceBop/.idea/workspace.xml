@@ -5,53 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="32b49fc1-0a92-41ac-bb2b-46d5822659b6" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.IceBop/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/BagInventoryTestScene.unity" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/BagInventoryTestScene.unity.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/CookingIntegrationTestScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/00Scenes/CookingIntegrationTestScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/IngredientPreparationTestScene.unity" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/00Scenes/IngredientPreparationTestScene.unity.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/Food_bburinkle_tyranno_skewer.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/Food_bburinkle_tyranno_skewer.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/Food_frog_salad.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/Food_frog_salad.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/Food_icesoup1.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/Food_icesoup1.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/Food_icesoup2.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/Food_icesoup2.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/Food_icicle_fry.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/Food_icicle_fry.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/Food_pure_bingsu.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/Food_pure_bingsu.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/Food_sweet_spicy_icicle_fry.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/Food_sweet_spicy_icicle_fry.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/failure_mother.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Food/failure_mother.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/cutboard.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/cutboard.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/handkerchief.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/handkerchief.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/knife1.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/knife1.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/knife2.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Atlas/Pot/knife2.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Font/DungGeunMo SDF.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Font/DungGeunMo SDF.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/CookingArea.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/CookingArea.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/PhysicalInventory2D.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Prefabs/Gathering/PhysicalInventory2D.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/UI/Btn.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/UI/Btn.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/01Resources/Sprites/UI/Info.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/01Resources/Sprites/UI/Info.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/AlternatingStrokeTracker.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/AlternatingStrokeTracker.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/BasketShakeFinishingStage2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/BasketShakeFinishingStage2D.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingFlowController2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingFlowController2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingIntegrationTestSceneBootstrap.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingIntegrationTestSceneBootstrap.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingMixingPot2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingMixingPot2D.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingRuntimeVisuals2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingRuntimeVisuals2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingStageArea2D.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CookingStageArea2D.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CuttableIngredient2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/CuttableIngredient2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/DishResultPresenter2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/DishResultPresenter2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/DustWipeIngredient2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/DustWipeIngredient2D.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/FryerFinishingStage2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/FryerFinishingStage2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/GrindableIngredient2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/GrindableIngredient2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/GuidedPlacementFinishingStage2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/GuidedPlacementFinishingStage2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/IDishFinishingStage.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/IDishFinishingStage.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/IngredientPreparationBehaviour2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/IngredientPreparationBehaviour2D.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/InventoryCookingStation2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/InventoryCookingStation2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/PreparationKnifeTool2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/PreparationKnifeTool2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/PreparationPointerTool2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/PreparationPointerTool2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Cooking/SkewerAssemblyFinishingStage2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Cooking/SkewerAssemblyFinishingStage2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/Editor/InventoryScenePlacementBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/Editor/InventoryScenePlacementBuilder.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatherableDefinition.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatherableDefinition.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatheringDataLookup.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/03Scripts/Gathering/GatheringDataLookup.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/04Prefab/UI/PauseSettingsMenuRuntime.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/04Prefab/UI/PauseSettingsMenuRuntime.prefab" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

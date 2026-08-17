@@ -385,7 +385,6 @@ public static class InventoryScenePlacementBuilder
 
         ConfigureBlock(FindOrCreateChild(pot, "PotShadow"), new Vector3(0f, -0.09f, 0f), new Vector3(1.02f, 0.44f, 1f), blockSprite, new Color(0.16f, 0.15f, 0.14f, 1f), 34);
         ConfigureBlock(FindOrCreateChild(pot, "PotBody"), Vector3.zero, new Vector3(0.92f, 0.56f, 1f), blockSprite, new Color(0.26f, 0.29f, 0.31f, 1f), 35);
-        ConfigureBlock(FindOrCreateChild(pot, "PotRim"), new Vector3(0f, 0.28f, 0f), new Vector3(1.04f, 0.16f, 1f), blockSprite, new Color(0.46f, 0.49f, 0.51f, 1f), 37);
 
         Transform button = FindOrCreateChild(root, "CookButton");
         ConfigureTransform(button, new Vector3(1.38f, -1.57f, 0f), Vector3.one);
@@ -396,9 +395,10 @@ public static class InventoryScenePlacementBuilder
         ConfigureBlock(FindOrCreateChild(button, "ButtonBody"), Vector3.zero, new Vector3(0.86f, 0.28f, 1f), blockSprite, new Color(0.25f, 0.45f, 0.34f, 1f), 38);
         ConfigureText(FindOrCreateChild(button, "ButtonLabel"), "Cook", new Vector3(0f, -0.012f, 0f), 32, 0.032f, new Color(0.92f, 0.96f, 0.92f, 1f), 39);
 
-        // The brown liquid block is the stir minigame's own visual (CookingMixingPot2D builds
-        // its MixLiquid at runtime) - the idle prep pot should just be an empty pot.
+        // The rim/liquid blocks are leftovers from the placeholder pot art - the pot sprite
+        // covers both now, and the stir minigame builds its own MixLiquid at runtime.
         DestroyChildIfExists(pot, "PotLiquid");
+        DestroyChildIfExists(pot, "PotRim");
 
         DestroyChildIfExists(root, "QueuedIngredients");
         DestroyChildIfExists(root, "CountLabel");

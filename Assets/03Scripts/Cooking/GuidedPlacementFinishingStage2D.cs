@@ -285,10 +285,11 @@ public sealed class GuidedPlacementFinishingStage2D : MonoBehaviour, IDishFinish
                 item.renderer.color = ingredientColor;
                 item.renderer.sortingOrder = 50 + i;
             }
+            item.collider = CookingRuntimeVisuals2D.ApplySpriteFittedCollider(item.gameObject, sprite);
             if (item.collider != null)
             {
                 item.collider.enabled = true;
-                CookingRuntimeVisuals2D.ApplySpriteFittedCollider(item.collider, sprite);
+                item.collider.isTrigger = true;
             }
         }
     }

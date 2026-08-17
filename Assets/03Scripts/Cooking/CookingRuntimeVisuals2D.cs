@@ -11,35 +11,60 @@ public static class CookingRuntimeVisuals2D
 {
     private static readonly List<Vector2> physicsShapeBuffer = new();
 
-    // Matches InventoryItem2D's collider shape: a BoxCollider2D sized off sprite.bounds
-    // includes the sprite's transparent padding, so it's visibly bigger than the art and
-    // ingredients bump into each other/tools before they actually touch. Use the sprite's
-    // authored physics shape instead (falling back to a bounds rectangle only if the sprite
-    // has none, e.g. a runtime-sliced cut piece).
-    public static void ApplySpriteFittedCollider(PolygonCollider2D collider, Sprite sprite)
+    /// <summary>
+    /// Shapes <paramref name="target"/>'s PolygonCollider2D to the sprite's artwork outline
+    /// rather than its padded bounding box, and returns it (adding one if needed).
+    /// </summary>
+    /// <remarks>
+    /// Two paths, because most of our sprites have no physics shape authored in the Sprite
+    /// Editor - GetPhysicsShapeCount() returns 0 for those, and shaping from sprite.bounds
+    /// just reproduces the old oversized rectangle. Unity does auto-generate a tight outline,
+    /// but only when the PolygonCollider2D is first added, so for those sprites the collider
+    /// is recreated to force regeneration against whatever sprite the renderer holds now.
+    /// The target's SpriteRenderer must already show <paramref name="sprite"/> when called.
+    /// </remarks>
+    public static PolygonCollider2D ApplySpriteFittedCollider(GameObject target, Sprite sprite)
     {
-        if (collider == null)
-            return;
+        if (target == null)
+            return null;
 
-        if (sprite == null || sprite.bounds.size.x <= 0f || sprite.bounds.size.y <= 0f)
+        PolygonCollider2D existing = target.GetComponent<PolygonCollider2D>();
+
+        int shapeCount = sprite != null ? sprite.GetPhysicsShapeCount() : 0;
+        if (shapeCount > 0)
         {
-            ApplyBoundsRectangleShape(collider, new Bounds(Vector3.zero, new Vector3(0.55f, 0.55f, 0f)));
-            return;
+            PolygonCollider2D collider = existing != null ? existing : target.AddComponent<PolygonCollider2D>();
+            collider.pathCount = shapeCount;
+            for (int i = 0; i < shapeCount; i++)
+            {
+                sprite.GetPhysicsShape(i, physicsShapeBuffer);
+                collider.SetPath(i, physicsShapeBuffer);
+            }
+
+            return collider;
         }
 
-        int shapeCount = sprite.GetPhysicsShapeCount();
-        if (shapeCount <= 0)
+        bool isTrigger = existing != null && existing.isTrigger;
+        bool wasEnabled = existing == null || existing.enabled;
+
+        if (existing != null)
         {
-            ApplyBoundsRectangleShape(collider, sprite.bounds);
-            return;
+            if (Application.isPlaying)
+                UnityEngine.Object.Destroy(existing);
+            else
+                UnityEngine.Object.DestroyImmediate(existing);
         }
 
-        collider.pathCount = shapeCount;
-        for (int i = 0; i < shapeCount; i++)
-        {
-            sprite.GetPhysicsShape(i, physicsShapeBuffer);
-            collider.SetPath(i, physicsShapeBuffer);
-        }
+        PolygonCollider2D rebuilt = target.AddComponent<PolygonCollider2D>();
+        rebuilt.isTrigger = isTrigger;
+        rebuilt.enabled = wasEnabled;
+
+        // Nothing to auto-generate from (no sprite at all) - keep a small square so the
+        // object still has some pickable/collidable footprint.
+        if (sprite == null)
+            ApplyBoundsRectangleShape(rebuilt, new Bounds(Vector3.zero, new Vector3(0.55f, 0.55f, 0f)));
+
+        return rebuilt;
     }
 
     private static void ApplyBoundsRectangleShape(PolygonCollider2D collider, Bounds bounds)
@@ -69,7 +94,7 @@ public static class CookingRuntimeVisuals2D
         IReadOnlyList<Vector3> spawnLocalPositions,
         float restScale,
         float gravityScale = 1.2f,
-        float gapBetweenDrops = 0.2f)
+        float gapBetweenDrops = 0.5f)
     {
         List<Collider2D> spawnedColliders = new(renderers.Count);
 
@@ -84,11 +109,7 @@ public static class CookingRuntimeVisuals2D
             bitTransform.localScale = Vector3.one * restScale;
             renderer.gameObject.SetActive(true);
 
-            PolygonCollider2D collider = renderer.GetComponent<PolygonCollider2D>();
-            if (collider == null)
-                collider = renderer.gameObject.AddComponent<PolygonCollider2D>();
-
-            ApplySpriteFittedCollider(collider, renderer.sprite);
+            PolygonCollider2D collider = ApplySpriteFittedCollider(renderer.gameObject, renderer.sprite);
 
             foreach (Collider2D other in spawnedColliders)
                 Physics2D.IgnoreCollision(collider, other, true);

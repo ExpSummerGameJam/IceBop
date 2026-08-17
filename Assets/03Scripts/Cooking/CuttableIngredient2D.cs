@@ -74,6 +74,11 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
 
     public void RebuildGuides()
     {
+        // Drop the cached collider first: fitting the slot's collider to a new sprite can
+        // replace the component outright, and in play mode the old one doesn't read as null
+        // until end of frame - so without this, ResolveComponents would keep the doomed
+        // collider and every cut-progress reshape this cook would go nowhere.
+        rootCollider = null;
         ResolveComponents();
 
         // Force the default cut lines to be recomputed from whatever sprite is currently on
@@ -317,11 +322,7 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
 
         GameObject pieceObject = target.gameObject;
 
-        PolygonCollider2D pieceCollider = pieceObject.GetComponent<PolygonCollider2D>();
-        if (pieceCollider == null)
-            pieceCollider = pieceObject.AddComponent<PolygonCollider2D>();
-
-        CookingRuntimeVisuals2D.ApplySpriteFittedCollider(pieceCollider, target.sprite);
+        PolygonCollider2D pieceCollider = CookingRuntimeVisuals2D.ApplySpriteFittedCollider(pieceObject, target.sprite);
 
         Rigidbody2D rigidbody = pieceObject.GetComponent<Rigidbody2D>();
         if (rigidbody == null)
@@ -392,8 +393,7 @@ public sealed class CuttableIngredient2D : IngredientPreparationBehaviour2D
         renderer.sortingLayerID = ingredientRenderer.sortingLayerID;
         renderer.sortingOrder = ingredientRenderer.sortingOrder + 1;
 
-        PolygonCollider2D pieceCollider = piece.AddComponent<PolygonCollider2D>();
-        CookingRuntimeVisuals2D.ApplySpriteFittedCollider(pieceCollider, pieceSprite);
+        PolygonCollider2D pieceCollider = CookingRuntimeVisuals2D.ApplySpriteFittedCollider(piece, pieceSprite);
 
         Rigidbody2D rigidbody = piece.AddComponent<Rigidbody2D>();
         rigidbody.bodyType = RigidbodyType2D.Dynamic;

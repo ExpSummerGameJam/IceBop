@@ -22,7 +22,6 @@ public sealed class InventoryCookingStation2D : MonoBehaviour
     private SpriteRenderer cookButtonRenderer;
     private bool isCooking;
     private bool loggedMissingPlacedVisuals;
-    private bool hasPickedUpItemSinceViewOpened;
 
     public event Action<CookingCraftResult> CookingCompleted;
     public bool IsCooking => isCooking;
@@ -112,7 +111,6 @@ public sealed class InventoryCookingStation2D : MonoBehaviour
     {
         ResolveReferences();
         ResolveCookingArea();
-        UpdatePickedUpItemState();
         if (!EnsureVisuals())
             return;
 
@@ -262,42 +260,14 @@ public sealed class InventoryCookingStation2D : MonoBehaviour
             UpdateCookButtonVisual();
     }
 
-    // The pot shouldn't just pop up whenever the large inventory view is open - it should
-    // only appear once the player has actually clicked an ingredient to pick it up, and then
-    // stay available for the rest of that view session. Detected here directly rather than by
-    // reading InventoryDragController2D's drag state, which stays false whenever that
-    // controller hasn't been bound to the view.
-    private void UpdatePickedUpItemState()
-    {
-        if (inventoryView == null || !inventoryView.IsLargeViewOpen)
-        {
-            hasPickedUpItemSinceViewOpened = false;
-            return;
-        }
-
-        if (hasPickedUpItemSinceViewOpened || !GatheringInput.WasPrimaryPressed())
-            return;
-
-        if (!TryGetPointerWorldPosition(out Vector2 worldPosition))
-            return;
-
-        foreach (Collider2D hit in Physics2D.OverlapPointAll(worldPosition))
-        {
-            if (hit != null && hit.GetComponentInParent<InventoryItem2D>() != null)
-            {
-                hasPickedUpItemSinceViewOpened = true;
-                return;
-            }
-        }
-    }
-
     private void UpdateVisibility()
     {
         if (visualRoot == null)
             return;
 
-        bool visible = inventoryView != null && inventoryView.IsLargeViewOpen && !isCooking && CanUseCookingStation &&
-                       (hasPickedUpItemSinceViewOpened || itemsOnPot.Count > 0);
+        // isCooking stays true until the player clicks the finished dish away, so this also
+        // covers "hide the pot while a completed dish is still being shown".
+        bool visible = inventoryView != null && inventoryView.IsLargeViewOpen && !isCooking && CanUseCookingStation;
         if (visualRoot.gameObject.activeSelf != visible)
             visualRoot.gameObject.SetActive(visible);
     }
